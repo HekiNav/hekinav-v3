@@ -1,6 +1,6 @@
-import { PropsWithChildren, PropsWithoutRef} from "react";
+import { PropsWithChildren, HTMLAttributes, PropsWithoutRef} from "react";
 
-export interface IconProps extends PropsWithChildren, PropsWithoutRef {
+export interface IconProps extends PropsWithChildren, PropsWithoutRef<HTMLAttributes<HTMLDivElement>> {
     boxed?: boolean
     small?: boolean
 }
