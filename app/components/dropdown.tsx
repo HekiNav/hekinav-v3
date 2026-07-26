@@ -3,7 +3,7 @@
 'use client'
 import React, { ReactNode, useState } from 'react';
 import Icon from './icon';
-import { faCaretDown, faCaretUp } from '@fortawesome/free-solid-svg-icons';
+import { ArrowDropDown, ArrowDropUp } from '@material-symbols-svg/react';
 
 export interface DropdownProps<T extends string | number> extends React.HTMLAttributes<HTMLDivElement> {
     items: DropdownItem<T>[],
@@ -45,7 +45,7 @@ export default function Dropdown<T extends string | number>(props: DropdownProps
                 onClick={toggleDropdown}
             >
                 {selectedLanguage.content}
-                <Icon className="ml-1" icon={top ? faCaretUp : faCaretDown}></Icon>
+                <Icon className="ml-1">{top ? <ArrowDropDown/> : <ArrowDropUp/>}</Icon>
             </button>
 
             {isOpen && (

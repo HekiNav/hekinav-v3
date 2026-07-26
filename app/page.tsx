@@ -1,14 +1,17 @@
 "use client"
 import { Map } from '@vis.gl/react-maplibre';
-//import Image from "next/image"
-import 'maplibre-gl/dist/maplibre-gl.css'; // See notes below
+
+import 'maplibre-gl/dist/maplibre-gl.css';
+
+import InputField from './components/inputfield';
 
 export default function Home() {
   return (
     <main className="w-full h-full flex md:flex-row">
       <div className="absolute bottom-0 left-5 right-5 h-40 z-100 bg-white rounded-t-2xl shadow-[0_0_10px_#0008] p-4
        md:static md:h-full md:w-160 md:rounded-none">
-          <h1 className='text-black'><img src="/logo_full.svg" alt="Hekinav Logo" /> Routing</h1>
+          <h1 className='text-black'><img src="/logo_full.svg" alt="Hekinav Logo" /></h1>
+          <InputField  icon={}></InputField>
       </div>
       <Map
         initialViewState={{
