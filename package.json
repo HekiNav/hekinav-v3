@@ -13,7 +13,10 @@
     "deploy:vinext": "vinext-cloudflare deploy --config dist/server/wrangler.json"
   },
   "dependencies": {
+    "@material-symbols-svg/react": "^0.12.0",
     "@vinext/cloudflare": "^1.0.0-beta.2",
+    "@vis.gl/react-maplibre": "^8.1.1",
+    "maplibre-gl": "^5.24.0",
     "next": "16.2.10",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
@@ -36,5 +39,11 @@
     "vite": "^8.1.5",
     "wrangler": "^4.112.0"
   },
-  "type": "module"
+  "type": "module",
+  "allowScripts": {
+    "esbuild@0.28.1": true,
+    "sharp@0.34.5": true,
+    "unrs-resolver@1.12.2": true,
+    "workerd@1.20260714.1": true
+  }
 }
