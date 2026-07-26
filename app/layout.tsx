@@ -9,7 +9,7 @@ const hostGrotesk = Host_Grotesk({
 
 
 export const metadata: Metadata = {
-  title: "Hekinav Routing",
+  title: "Hekinav Routing"
   description: "Hekinav Routing",
 };
 
