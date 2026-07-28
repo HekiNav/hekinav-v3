@@ -1,0 +1,2 @@
+# Digitransit API key. Get one at https://digitransit.fi/en/developers/api-registration/
+DIGITRANSIT_KEY=<YOUR_KEY_HERE>

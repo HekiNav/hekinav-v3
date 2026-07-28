@@ -1,33 +1,33 @@
 "use client"
 import IconItem from "./iconitem";
-import { ChangeEvent, useState } from "react"
+import { ChangeEvent, HTMLAttributes, InputHTMLAttributes, ReactElement, useState } from "react"
 import { IconProps } from "./icon";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface Suggestion<T = any> {
-    icon: IconProps,
+    icon: ReactElement,
     text: string,
     desc?: string,
     id: string,
     properties?: T
 }
 
-export interface InputFieldProps {
-    icon: IconProps,
+export interface InputFieldProps extends HTMLAttributes<HTMLDivElement> {
+    icon: ReactElement,
     suggestionFunction?: (text: string) => Promise<Array<Suggestion>>,
-    onValueSet: <T = string | Suggestion>(name: string, value: T) => void,
+    onValueSet: <T extends Suggestion | string>(name: string, value: T) => void,
     onlySuggestions?: boolean,
     placeholder?: string,
     name: string,
     initialValue?: string
 }
-export default function InputField({ icon, suggestionFunction, onValueSet, name, onlySuggestions = true, placeholder, initialValue = "" }: InputFieldProps) {
+export default function InputField({ icon, suggestionFunction, onValueSet, name, onlySuggestions = true, placeholder, initialValue = "", className, ...props }: InputFieldProps) {
     const [focus, setFocus] = useState(false)
     const [value, setValue] = useState(initialValue)
     const [suggestions, setSuggestions] = useState(new Array<Suggestion>())
     function onChange(e: ChangeEvent<HTMLInputElement>) {
         setValue(e.target.value)
-        if (suggestionFunction && value.length) {
+        if (suggestionFunction) {
             suggestionFunction(e.target.value).then(suggestions => {
                 setSuggestions(suggestions)
             })
@@ -41,8 +41,8 @@ export default function InputField({ icon, suggestionFunction, onValueSet, name,
         setSuggestions([])
     }
     return (
-        <div className={`border-2 border-box p-2 w-full relative ${focus && "border-blue-500"}`}>
-            <IconItem icon={icon}>
+        <div className={`border-3 border-box p-2 w-full rounded-xl relative ${focus && "border-green"} ${className}`} {...props}>
+            <IconItem icon={{children: icon}}>
                 <input
                     value={value}
                     onChange={onChange}
@@ -62,14 +62,14 @@ export default function InputField({ icon, suggestionFunction, onValueSet, name,
                         e.preventDefault()
                         setSuggestions([])
                     }}
-                    type="text" className="outline-0 grow w-1" placeholder={placeholder} />
+                    type="text" className="outline-0 grow w-1 font-a" placeholder={placeholder} />
             </IconItem>
-            <hr hidden={suggestions.length == 0} className={`border-1 m-1 ${focus && "border-blue-500"}`} />
-            <div className="absolute z-100 border-2 bg-white border-t-0 p-2 border-blue-500" style={{ right: "calc(var(--spacing) * -0.5)", left: "calc(var(--spacing) * -0.5)" }} hidden={suggestions.length == 0}>
+            <hr hidden={suggestions.length == 0} className={`border-1 m-1 ${focus && "border-green"}`} />
+            <div className="rounded-b-xl absolute z-100 border-3 bg-white border-t-0 p-2 border-green" style={{ right: "calc(var(--spacing) * -0.6)", left: "calc(var(--spacing) * -0.6)" }} hidden={suggestions.length == 0}>
                 {suggestions.map((s: Suggestion, i) => {
                     return (
                         <div key={`search-suggestion-${i}`} onMouseDown={() => suggestionSelected(s)}>
-                            <IconItem icon={s.icon} >
+                            <IconItem icon={{children: s.icon}} >
                                 <div className="flex flex-col">
                                     {s.text}
                                     <div hidden={!s.desc} className="text-xs text text-gray-500">{s.desc}</div>
