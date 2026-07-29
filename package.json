@@ -22,6 +22,7 @@
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "react-hot-toast": "^2.6.0",
+    "react-loading-skeleton": "^3.5.0",
     "react-server-dom-webpack": "^19.2.7",
     "vinext": "^1.0.0-beta.2"
   },
@@ -46,6 +47,6 @@
     "esbuild@0.28.1": true,
     "sharp@0.34.5": true,
     "unrs-resolver@1.12.2": true,
-    "workerd@1.20260714.1": true
+    "workerd@1.20260722.1": true
   }
 }

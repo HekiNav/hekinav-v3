@@ -1,7 +1,7 @@
 "use client"
 import IconItem from "./iconitem";
-import { ChangeEvent, HTMLAttributes, InputHTMLAttributes, ReactElement, useState } from "react"
-import { IconProps } from "./icon";
+import { ChangeEvent, HTMLAttributes, ReactElement, useState } from "react"
+import Skeleton from "react-loading-skeleton";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface Suggestion<T = any> {
@@ -24,12 +24,14 @@ export interface InputFieldProps extends HTMLAttributes<HTMLDivElement> {
 export default function InputField({ icon, suggestionFunction, onValueSet, name, onlySuggestions = true, placeholder, initialValue = "", className, ...props }: InputFieldProps) {
     const [focus, setFocus] = useState(false)
     const [value, setValue] = useState(initialValue)
-    const [suggestions, setSuggestions] = useState(new Array<Suggestion>())
+    const [suggestions, setSuggestions] = useState(new Array<Suggestion | "skeleton">())
     function onChange(e: ChangeEvent<HTMLInputElement>) {
         setValue(e.target.value)
         if (suggestionFunction) {
+            setSuggestions(["skeleton", "skeleton"])
             suggestionFunction(e.target.value).then(suggestions => {
-                setSuggestions(suggestions)
+                console.log(suggestions)
+                setSuggestions(["skeleton", "skeleton"])
             })
         }
         if (!onlySuggestions) onValueSet<string>(name, value)
@@ -42,7 +44,7 @@ export default function InputField({ icon, suggestionFunction, onValueSet, name,
     }
     return (
         <div className={`border-3 border-box p-2 w-full rounded-xl relative ${focus && "border-green"} ${className}`} {...props}>
-            <IconItem icon={{children: icon}}>
+            <IconItem icon={{ children: icon }}>
                 <input
                     value={value}
                     onChange={onChange}
@@ -66,13 +68,14 @@ export default function InputField({ icon, suggestionFunction, onValueSet, name,
             </IconItem>
             <hr hidden={suggestions.length == 0} className={`border-1 m-1 ${focus && "border-green"}`} />
             <div className="rounded-b-xl absolute z-100 border-3 bg-white border-t-0 p-2 border-green" style={{ right: "calc(var(--spacing) * -0.6)", left: "calc(var(--spacing) * -0.6)" }} hidden={suggestions.length == 0}>
-                {suggestions.map((s: Suggestion, i) => {
+                {suggestions.map((s: Suggestion | "skeleton", i) => {
+                    const sk = s == "skeleton"
                     return (
-                        <div key={`search-suggestion-${i}`} onMouseDown={() => suggestionSelected(s)}>
-                            <IconItem icon={{children: s.icon}} >
+                        <div key={`search-suggestion-${i}`} onMouseDown={() => !sk && suggestionSelected(s)}>
+                            <IconItem icon={{ children: sk ? "" : s.icon }} >
                                 <div className="flex flex-col">
-                                    {s.text}
-                                    <div hidden={!s.desc} className="text-xs text text-gray-500">{s.desc}</div>
+                                    {sk ? <Skeleton inline width={Math.floor(Math.random() * 200) + 20} /> : s.text}
+                                    <div hidden={!sk && !s.desc} className="text-xs text text-gray-500">{sk ? <Skeleton inline width={Math.floor(Math.random() * 200) + 20} /> : s.desc}</div>
                                 </div>
                             </IconItem>
                         </div>

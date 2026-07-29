@@ -44,7 +44,6 @@ async function placeSearch(text: string): Promise<PlaceSuggestion[]> {
     }]
   } else {
     const result = await search(text)
-    console.log("jsjs")
     return result
   }
 }
