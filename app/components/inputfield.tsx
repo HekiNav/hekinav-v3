@@ -28,10 +28,13 @@ export default function InputField({ icon, suggestionFunction, onValueSet, name,
     function onChange(e: ChangeEvent<HTMLInputElement>) {
         setValue(e.target.value)
         if (suggestionFunction) {
-            setSuggestions(["skeleton", "skeleton"])
+            setTimeout(() => {
+                setSuggestions(["skeleton", "skeleton", "skeleton", "skeleton", "skeleton", "skeleton", "skeleton", "skeleton", "skeleton", "skeleton"])
+            }, 0)
             suggestionFunction(e.target.value).then(suggestions => {
-                console.log(suggestions)
-                setSuggestions(["skeleton", "skeleton"])
+                setTimeout(() => {
+                    setSuggestions(suggestions)
+                }, 1)
             })
         }
         if (!onlySuggestions) onValueSet<string>(name, value)
@@ -72,7 +75,7 @@ export default function InputField({ icon, suggestionFunction, onValueSet, name,
                     const sk = s == "skeleton"
                     return (
                         <div key={`search-suggestion-${i}`} onMouseDown={() => !sk && suggestionSelected(s)}>
-                            <IconItem icon={{ children: sk ? "" : s.icon }} >
+                            <IconItem icon={{ children: sk ? <Skeleton inline width={16} /> : s.icon }} >
                                 <div className="flex flex-col">
                                     {sk ? <Skeleton inline width={Math.floor(Math.random() * 200) + 20} /> : s.text}
                                     <div hidden={!sk && !s.desc} className="text-xs text text-gray-500">{sk ? <Skeleton inline width={Math.floor(Math.random() * 200) + 20} /> : s.desc}</div>
