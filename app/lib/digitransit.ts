@@ -7,13 +7,24 @@ export interface AutoCompleteFeatProps {
     name: string
     postalcode: string
     postalcode_gid: string
-    confidence: string
+    confidence: number
     accuracy: string
     region: string
     region_gid: string
     localadmin: string
     localadmin_gid: string
+    locality: string
+    locality_gid: string
     label: string
+    neighbourhood: string
+    neighbourhood_gid: string
+    addendum?: {
+        GTFS: {
+            code?: string
+            modes?: ("BUS" | "RAIL" | "BUS-EXPRESS" | "SUBWAY" | "SPEEDTRAM" | "TRAM" | "FERRY" | "AIRPLANE")[],
+            platform?: string
+        }
+    }
 }
 
 export interface AutoCompleteResponse {

@@ -1,7 +1,9 @@
+"use client"
 import type { Metadata } from "next";
 import { Host_Grotesk } from "next/font/google";
 import "./globals.css";
 import "react-loading-skeleton/dist/skeleton.css";
+import { MapProvider } from "@vis.gl/react-maplibre";
 
 const hostGrotesk = Host_Grotesk({
   variable: "--font-a",
@@ -24,7 +26,9 @@ export default function RootLayout({
       lang="en"
       className={`${hostGrotesk.variable} h-screen antialiased`}
     >
-      <body className="h-screen flex flex-col overflow-hidden">{children}</body>
+      <MapProvider>
+        <body className="h-screen flex flex-col overflow-hidden">{children}</body>
+      </MapProvider>
     </html>
   );
 }

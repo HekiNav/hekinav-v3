@@ -70,7 +70,7 @@ export default function InputField({ icon, suggestionFunction, onValueSet, name,
                     type="text" className="outline-0 grow w-1 font-a" placeholder={placeholder} />
             </IconItem>
             <hr hidden={suggestions.length == 0} className={`border-1 m-1 ${focus && "border-green"}`} />
-            <div className="rounded-b-xl absolute z-100 border-3 bg-white border-t-0 p-2 border-green" style={{ right: "calc(var(--spacing) * -0.6)", left: "calc(var(--spacing) * -0.6)" }} hidden={suggestions.length == 0}>
+            <div className="rounded-b-xl absolute z-100 border-3 bg-white border-t-0 p-2 border-green max-h-110 overflow-scroll" style={{ right: "calc(var(--spacing) * -0.7)", left: "calc(var(--spacing) * -0.7)" }} hidden={suggestions.length == 0}>
                 {suggestions.map((s: Suggestion | "skeleton", i) => {
                     const sk = s == "skeleton"
                     return (
