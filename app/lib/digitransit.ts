@@ -1,4 +1,4 @@
-export interface AutoCompleteFeatProps {
+export interface GeocodingFeatProps {
     id: string
     gid: string
     layer: "address" | "venue" | "street" | "stop" | "station" | "bikestation" | "neighbourhood" | "localadmin" | "region"
@@ -27,20 +27,10 @@ export interface AutoCompleteFeatProps {
     }
 }
 
-export interface AutoCompleteResponse {
+export interface GeocodingResponse {
     geocoding: {
         version: 0.2,
-        attribution: number,
-        query: {
-            text: string,
-            tokens: string[],
-            size: number,
-            private: boolean,
-            "boundary.country": string[
-
-            ],
-            lang: string
-        },
+        attribution: string,
         warnings: string[
         ],
         engine: {
@@ -58,9 +48,13 @@ export interface AutoCompleteResponse {
             type: "Point",
             coordinates: [number, number]
         },
-        properties: AutoCompleteFeatProps
+        properties: GeocodingFeatProps
     }[],
     bbox: [
         number, number, number, number
     ]
+}
+
+export interface GeocodingResponse {
+    
 }

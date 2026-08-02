@@ -1,6 +1,6 @@
 "use client"
 import IconItem from "./iconitem";
-import { ChangeEvent, HTMLAttributes, ReactElement, useState } from "react"
+import { ChangeEvent, HTMLAttributes, ReactElement, useEffect, useState } from "react"
 import Skeleton from "react-loading-skeleton";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -19,13 +19,25 @@ export interface InputFieldProps extends HTMLAttributes<HTMLDivElement> {
     onlySuggestions?: boolean,
     placeholder?: string,
     name: string,
-    initialValue?: string
+    initialValue?: string,
+    focusClear?: boolean
 }
-export default function InputField({ icon, suggestionFunction, onValueSet, name, onlySuggestions = true, placeholder, initialValue = "", className, ...props }: InputFieldProps) {
+export default function InputField({ icon, focusClear, suggestionFunction, onValueSet, name, onlySuggestions = true, placeholder, initialValue = "", className, ...props }: InputFieldProps) {
     const [focus, setFocus] = useState(false)
     const [value, setValue] = useState(initialValue)
+    useEffect(() => {
+        if (initialValue != value) setValue(initialValue)
+    }, [initialValue])
     const [suggestions, setSuggestions] = useState(new Array<Suggestion | "skeleton">())
+
+    useEffect(() => {
+        if (focusClear && focus) {
+            setValue("")
+        }
+    }, [focus])
+
     function onChange(e: ChangeEvent<HTMLInputElement>) {
+        if (value == "Loading...") return
         setValue(e.target.value)
         if (suggestionFunction) {
             setTimeout(() => {
@@ -46,7 +58,7 @@ export default function InputField({ icon, suggestionFunction, onValueSet, name,
         setSuggestions([])
     }
     return (
-        <div className={`border-3 border-box p-2 w-full rounded-xl relative ${focus && "border-green"} ${className}`} {...props}>
+        <div className={`border-3 border-box p-2 w-full rounded-xl relative hover:border-green ${focus && "border-green"} ${className}`} {...props}>
             <IconItem icon={{ children: icon }}>
                 <input
                     value={value}
@@ -55,7 +67,7 @@ export default function InputField({ icon, suggestionFunction, onValueSet, name,
                         e.preventDefault()
                         setFocus(true)
                         e.target.select()
-                        onChange(e)
+                        setTimeout(() => onChange(e),10)
                     }}
                     onClick={(e) => {
                         e.preventDefault()
@@ -70,7 +82,7 @@ export default function InputField({ icon, suggestionFunction, onValueSet, name,
                     type="text" className="outline-0 grow w-1 font-a" placeholder={placeholder} />
             </IconItem>
             <hr hidden={suggestions.length == 0} className={`border-1 m-1 ${focus && "border-green"}`} />
-            <div className="rounded-b-xl absolute z-100 border-3 bg-white border-t-0 p-2 border-green max-h-110 overflow-scroll" style={{ right: "calc(var(--spacing) * -0.7)", left: "calc(var(--spacing) * -0.7)" }} hidden={suggestions.length == 0}>
+            <div className="rounded-b-xl absolute z-100 border-3 bg-white border-t-0 p-2 border-green max-h-60 overflow-scroll" style={{ right: "-.17em", left: "-.17em" }} hidden={suggestions.length == 0}>
                 {suggestions.map((s: Suggestion | "skeleton", i) => {
                     const sk = s == "skeleton"
                     return (

@@ -25,3 +25,7 @@ h1 {
 .react-loading-skeleton {
   display: block;
 }
+div[mapboxgl-children] {
+  position: relative;
+  pointer-events: none;
+}

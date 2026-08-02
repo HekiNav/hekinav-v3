@@ -1,13 +1,13 @@
 "use server"
 import { Road } from "@material-symbols-svg/react";
 import { Suggestion } from "../components/inputfield";
-import { AutoCompleteFeatProps, AutoCompleteResponse } from "./digitransit";
+import { GeocodingFeatProps, GeocodingResponse } from "./digitransit";
 import { Signpost, LocationOn, PedalBike, Globe, HomeWork, DirectionsBus, Tram, Metro, Train } from "@material-symbols-svg/react/w700"
 import { ReactElement } from "react";
 import { LngLat } from "maplibre-gl";
 
-export async function search(text: string, focusPoint: LngLat): Promise<Suggestion[]> {
-    return [... await searchDigitransit(text, focusPoint)]
+export async function search(text: string, focusPoint: [number,number]): Promise<Suggestion[]> {
+    return [... await searchDigitransit(text, new LngLat(...focusPoint))]
 }
 async function searchDigitransit(text: string, focusPoint: LngLat): Promise<Suggestion[]> {
     console.log("hdhd")
@@ -18,7 +18,10 @@ async function searchDigitransit(text: string, focusPoint: LngLat): Promise<Sugg
             `https://api.digitransit.fi/geocoding/v1/autocomplete?digitransit-subscription-key=${process.env.DIGITRANSIT_KEY}&text=${encodeURIComponent(text)}&layers=${l.join(",")}&focus.point.lat=${focusPoint.lat}&focus.point.lon=${focusPoint.lng}`
         )
     }))
-    const results: AutoCompleteResponse = await (await Promise.all(responses.map(r => r.json()))).reduce((p, c) => ({ ...p, features: [...(p.features || []), ...c.features] }), {})
+    const results: GeocodingResponse = await (await Promise.all(responses.map(r => r.json()))).reduce((p, c) => ({ ...p, features: [...(p.features || []), ...c.features] }), {})
+    return await geocodingResultsToSuggestions(results)
+}
+export async function geocodingResultsToSuggestions(results: GeocodingResponse) {
     if (!results) return []
     const addressProperties: ("neighbourhood" | "locality" | "localadmin")[] = ["neighbourhood", "locality", "localadmin"]
     return results.features.sort((a,b) => b.properties.confidence - a.properties.confidence).map(f => ({
@@ -53,7 +56,7 @@ function getNameFromProps({ layer, ...props }: { [key: string]: any }): string {
             return props.name
     }
 }
-function getIconFromProps(props: AutoCompleteFeatProps) {
+function getIconFromProps(props: GeocodingFeatProps) {
     switch (props.layer) {
         case "address":
             return (<Signpost></Signpost>);

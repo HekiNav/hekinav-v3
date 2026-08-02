@@ -39,8 +39,8 @@ export default function Dropdown<T extends string | number>(props: DropdownProps
             <button
                 type="button"
                 className={`inline-flex justify-center w-full
-                               rounded border-2 border-green-600 
-                               shadow-lg/20 ${small ? "px-2 py-1" : "px-4 py-2"} bg-white text-sm
+                               rounded-xl border-3 border-green-600 
+                                ${small ? "px-2 py-1" : "px-4 py-2"} bg-white text-sm
                                font-medium text-black hover:bg-green-600`}
                 onClick={toggleDropdown}
             >
@@ -50,8 +50,8 @@ export default function Dropdown<T extends string | number>(props: DropdownProps
 
             {isOpen && (
                 <div className={`${top ? "origin-bottom-right bottom-[100%] mb-2" : "origin-top-right mt-2"} absolute z-1000
-                                    left-0 ${small ? "w-min max-h-40 overflow-scroll" : "w-56"} rounded
-                                    shadow-lg bg-white ring-2 ring-green-600
+                                    left-0 ${small ? "w-min max-h-40 overflow-scroll" : "w-56"} rounded-xl
+                                     bg-white ring-3 ring-green-600
                                     ring-opacity-5 focus:outline-none`}>
                     <div>
                         {items.map(({ content, id }, index) => (
