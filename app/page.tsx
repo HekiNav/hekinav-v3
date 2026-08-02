@@ -47,6 +47,8 @@ export default function Home() {
   const [pickedLocation, setPickedLocation] = useState<LngLat | null | boolean>(null)
   const [pickedLocationTarget, setPickedLocationTarget] = useState<"origin" | "destination" | null>(null)
 
+  const [focus, setFocus] = useState<boolean>(false)
+
   useEffect(() => {
     setPickedLocation(null)
     setPickedLocationTarget(null)
@@ -111,9 +113,9 @@ export default function Home() {
   }
 
   return (
-    <main className="w-full h-full flex md:flex-row overflo-scroll">
-      <div className="absolute bottom-0 left-5 right-5 md:h-40 z-100 bg-white rounded-t-2xl shadow-[0_0_10px_#0008] p-4 flex flex-col gap-2
-       md:static md:h-full md:w-160 md:rounded-none">
+    <main className="w-full h-full flex md:flex-row">
+      <div onClick={() => { setFocus(true); console.log("ee") }} className={`absolute ${focus ? "top-1/10" : "top-7/10"} ${pickedLocation == false && "top-10/10"} left-5 right-5 md:h-40 z-100 bg-white rounded-t-2xl shadow-[0_0_10px_#0008] p-4 flex flex-col gap-2
+       md:static md:h-full md:w-160 transition-all ease-in-out duration-1000 md:rounded-none overflow-scroll min-h-screen`}>
         <h1 className='text-black'><img src="/logo_full.svg" alt="Hekinav Logo" /></h1>
         <InputField initialValue={origin?.text} suggestionFunction={(t) => placeSearch(t, map?.getCenter() || new LngLat(24.94, 60.18))} onlySuggestions placeholder='Origin' name='origin' onValueSet={(t, v) => setOrigin(typeof v == "string" ? null : v)} icon={<LocationOn className='text-blue'></LocationOn>}></InputField>
         <InputField initialValue={destination?.text} suggestionFunction={(t) => placeSearch(t, map?.getCenter() || new LngLat(24.94, 60.18))} onlySuggestions placeholder='Destination' name='destination' onValueSet={(t, v) => setDestination(typeof v == "string" ? null : v)} icon={<LocationOn className='text-red'></LocationOn>}></InputField>
@@ -124,6 +126,7 @@ export default function Home() {
         </div>
       </div>
       <Map
+        onClick={() => setFocus(false)}
         initialViewState={{
           longitude: 24.94,
           latitude: 60.18,
@@ -134,7 +137,7 @@ export default function Home() {
         attributionControl={false}
       >
         {pickedLocation == false && <>
-          <div onClick={() => setPickedLocation(map?.getCenter() || new LngLat(0, 0))} className="absolute top-0 left-0 right-0 flex z-100 px-4 py-2 pointer-events-auto text-lg justify-center font-a font-medium text-white bg-green">
+          <div onClick={() => setPickedLocation(map?.getCenter() || new LngLat(0, 0))} className="absolute -top-12 pt-16 left-0 right-0 flex z-100 px-4 py-2 pointer-events-auto text-lg justify-center font-a font-medium text-white bg-green">
             Click here to confirm location
           </div>
           <div className="absolute top-0 bottom-0 left-0 right-0 flex items-center z-100 justify-center pointer-events-none">

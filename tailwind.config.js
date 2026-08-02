@@ -20,5 +20,5 @@ module.exports = {
         'darkblue': '#1D39BA',
         'turqoise': '#0DACA1'
       },
-    },
+    }
   }

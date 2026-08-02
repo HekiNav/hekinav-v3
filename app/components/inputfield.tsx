@@ -22,7 +22,7 @@ export interface InputFieldProps extends HTMLAttributes<HTMLDivElement> {
     initialValue?: string,
     focusClear?: boolean
 }
-export default function InputField({ icon, focusClear, suggestionFunction, onValueSet, name, onlySuggestions = true, placeholder, initialValue = "", className, ...props }: InputFieldProps) {
+export default function InputField({ icon, focusClear, suggestionFunction, onFocus , onValueSet, name, onlySuggestions = true, placeholder, initialValue = "", className, ...props }: InputFieldProps) {
     const [focus, setFocus] = useState(false)
     const [value, setValue] = useState(initialValue)
     useEffect(() => {
@@ -64,6 +64,7 @@ export default function InputField({ icon, focusClear, suggestionFunction, onVal
                     value={value}
                     onChange={onChange}
                     onFocus={(e) => {
+                        onFocus && onFocus(e)
                         e.preventDefault()
                         setFocus(true)
                         e.target.select()
