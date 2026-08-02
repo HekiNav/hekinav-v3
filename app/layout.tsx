@@ -27,6 +27,10 @@ export default function RootLayout({
       lang="en"
       className={`${hostGrotesk.variable} h-screen antialiased`}
     >
+      <head>
+      <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"></meta>
+      <title>Hekinav Routing</title>
+      </head>
       <MapProvider>
         <body className="h-screen flex flex-col overflow-hidden">
           <Toaster 
