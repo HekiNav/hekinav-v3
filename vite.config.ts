@@ -19,4 +19,8 @@ export default defineConfig({
       },
     }),
   ],
+  server: {
+    host: true,
+    allowedHosts: ["routing-test.hekinav.dev"]
+  }
 });

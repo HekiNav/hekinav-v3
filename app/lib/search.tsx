@@ -49,6 +49,7 @@ function getNameFromProps({ layer, ...props }: { [key: string]: any }): string {
     switch (layer) {
         case "stop":
         case "station":
+            if (!props.addendum) return props.name
             const gtfs = props.addendum.GTFS
             if (!gtfs) return props.name
             return `${props.name} ${gtfs.platform && "pl. " + gtfs.platform || ""} ${gtfs.code && "(" + gtfs.code + ")" || ""}`

@@ -84,7 +84,7 @@ export default function Home() {
           const { latitude, longitude } = data.coords
           fn({ icon: <NotListedLocation></NotListedLocation>, id: "loading", text: "Loading...", properties: { lat: latitude, lng: longitude } });
 
-          reverseGeocode([latitude, longitude]).then((data) => {
+          reverseGeocode([longitude, latitude]).then((data) => {
             if (data.length == 0) {
               toast.error("Failed to load address (routing will still work by coordinates)");
               fn({ icon: <NotListedLocation></NotListedLocation>, id: "unknown_location", text: "Somewhere", properties: { lat: latitude, lng: longitude } });
@@ -113,9 +113,9 @@ export default function Home() {
   }
 
   return (
-    <main className="w-full h-full flex md:flex-row">
-      <div onClick={() => { setFocus(true); console.log("ee") }} className={`absolute ${focus ? "top-1/10" : "top-7/10"} ${pickedLocation == false && "top-10/10"} left-5 right-5 md:h-40 z-100 bg-white rounded-t-2xl shadow-[0_0_10px_#0008] p-4 flex flex-col gap-2
-       md:static md:h-full md:w-160 transition-all ease-in-out duration-1000 md:rounded-none overflow-scroll min-h-screen`}>
+    <main className="w-full h-screen flex md:flex-row">
+      <div onClick={() => { setFocus(true); console.log("ee") }} className={`absolute ${focus ? "top-2/10" : "top-7/10"} ${pickedLocation == false && "top-10/10"} left-5 right-5 md:h-40 z-100 bg-white rounded-t-2xl shadow-[0_0_10px_#0008] p-4 flex flex-col gap-2
+       md:static md:h-full md:w-160 transition-all ease-in-out duration-1000 md:rounded-none overflow-scroll md:min-h-screen min-h-[200vh]`}>
         <h1 className='text-black'><img src="/logo_full.svg" alt="Hekinav Logo" /></h1>
         <InputField initialValue={origin?.text} suggestionFunction={(t) => placeSearch(t, map?.getCenter() || new LngLat(24.94, 60.18))} onlySuggestions placeholder='Origin' name='origin' onValueSet={(t, v) => setOrigin(typeof v == "string" ? null : v)} icon={<LocationOn className='text-blue'></LocationOn>}></InputField>
         <InputField initialValue={destination?.text} suggestionFunction={(t) => placeSearch(t, map?.getCenter() || new LngLat(24.94, 60.18))} onlySuggestions placeholder='Destination' name='destination' onValueSet={(t, v) => setDestination(typeof v == "string" ? null : v)} icon={<LocationOn className='text-red'></LocationOn>}></InputField>
