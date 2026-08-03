@@ -1,11 +1,13 @@
 "use client"
-import type { Metadata } from "next";
-import { Host_Grotesk } from "next/font/google";
 import "./globals.css";
 import "react-loading-skeleton/dist/skeleton.css";
+
+import type { Metadata } from "next";
+import { Host_Grotesk } from "next/font/google";
 import { MapProvider } from "@vis.gl/react-maplibre";
 import { Toaster } from "react-hot-toast";
 import { useEffect } from "react";
+import { MapLayoutProvider } from "./mapcontext";
 
 const hostGrotesk = Host_Grotesk({
   variable: "--font-a",
@@ -23,15 +25,16 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
   useEffect(() => {
     const vv = window.visualViewport;
     if (!vv) return;
-  
+
     const handleResize = () => {
       document.documentElement.style.setProperty('--vh', `${vv.height * 0.01}px`);
       window.scrollTo(0, 0);
     };
-  
+
     vv.addEventListener('resize', handleResize);
     vv.addEventListener('scroll', handleResize);
     return () => {
@@ -45,29 +48,31 @@ export default function RootLayout({
       className={`${hostGrotesk.variable} h-screen antialiased`}
     >
       <head>
-      <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, height=device-height"></meta>
-      <title>Hekinav Routing</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, height=device-height"></meta>
+        <title>Hekinav Routing</title>
       </head>
       <MapProvider>
         <body className="h-screen overflow-hidden">
-          <Toaster 
+          <Toaster
             toastOptions={{
               className: "border-3 border-black bg-white!",
               success: {
-                iconTheme:{
+                iconTheme: {
                   primary: "#0f8c0f",
                   secondary: "white"
                 }
               },
               error: {
-                iconTheme:{
+                iconTheme: {
                   primary: "#d73523",
                   secondary: "white"
                 }
               }
-            }} position="top-right"/>
-          {children}
-          </body>
+            }} position="top-right" />
+          
+            <MapLayoutProvider>{children}</MapLayoutProvider>;
+
+        </body>
       </MapProvider>
     </html>
   );
