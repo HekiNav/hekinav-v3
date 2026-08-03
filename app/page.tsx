@@ -113,10 +113,10 @@ export default function Home() {
   }
 
   return (
-    <main className="w-full h-[100dvh] flex md:flex-row">
+    <main className="w-full md:flex md:flex-row md:h-screen relative" style={{height: "calc(var(--vh, 1vh) * 120)"}}>
       <div onClick={() => setFocus(true)} onMouseOver={() => !map?.isMoving() && setFocus(true)} onMouseOut={() => setFocus(false)} className={`absolute ${focus ? "top-2/10" : "top-7/10"} ${focus ? "overflow-scroll" : "overflow-hidden!"} md:overflow-scroll ${pickedLocation == false && "top-10/10"} left-5 right-5 
       md:h-40 z-100 bg-white rounded-t-2xl shadow-[0_0_10px_#0008] p-4 flex flex-col gap-2
-       md:static md:h-full md:w-160 transition-all ease-in-out duration-1000 md:rounded-none overflow-scroll md:min-h-screen bottom-0`}>
+       md:static md:h-full md:w-160 transition-all ease-in-out duration-1000 md:rounded-none overflow-scroll md:min-h-screen bottom-[0lvh] pb-200`}>
         <h1 className='text-black'><img src="/logo_full.svg" alt="Hekinav Logo" /></h1>
         <InputField initialValue={origin?.text} suggestionFunction={(t) => placeSearch(t, map?.getCenter() || new LngLat(24.94, 60.18))} onlySuggestions placeholder='Origin' name='origin' onValueSet={(t, v) => setOrigin(typeof v == "string" ? null : v)} icon={<LocationOn className='text-blue'></LocationOn>}></InputField>
         <InputField initialValue={destination?.text} suggestionFunction={(t) => placeSearch(t, map?.getCenter() || new LngLat(24.94, 60.18))} onlySuggestions placeholder='Destination' name='destination' onValueSet={(t, v) => setDestination(typeof v == "string" ? null : v)} icon={<LocationOn className='text-red'></LocationOn>}></InputField>
