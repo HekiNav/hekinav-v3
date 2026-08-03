@@ -2,7 +2,15 @@
 import { Road } from "@material-symbols-svg/react";
 import { Suggestion } from "../components/inputfield";
 import { GeocodingFeatProps, GeocodingResponse } from "./digitransit";
-import { Signpost, LocationOn, PedalBike, Globe, HomeWork, DirectionsBus, Tram, Metro, Train } from "@material-symbols-svg/react/w700"
+import { SignpostW700 as Signpost } from '@material-symbols-svg/react/icons/signpost';
+import { LocationOnW700 as LocationOn } from '@material-symbols-svg/react/icons/location-on';
+import { PedalBikeW700 as PedalBike } from '@material-symbols-svg/react/icons/pedal-bike';
+import { GlobeW700 as Globe } from '@material-symbols-svg/react/icons/globe';
+import { HomeWorkW700 as HomeWork } from '@material-symbols-svg/react/icons/home-work';
+import { DirectionsBusW700 as DirectionsBus } from '@material-symbols-svg/react/icons/directions-bus';
+import { TramW700 as Tram } from '@material-symbols-svg/react/icons/tram';
+import { MetroW700 as Metro } from '@material-symbols-svg/react/icons/metro';
+import { TrainW700 as Train } from '@material-symbols-svg/react/icons/train';
 import { ReactElement } from "react";
 import { LngLat } from "maplibre-gl";
 

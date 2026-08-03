@@ -1,6 +1,11 @@
 "use client"
 
-import { CalendarToday, LocationOn, Map as MapIcon, MyLocation, NotListedLocation, Schedule } from "@material-symbols-svg/react/w700"
+import { CalendarTodayW700 as CalendarToday } from '@material-symbols-svg/react/icons/calendar-today';
+import { LocationOnW700 as LocationOn } from '@material-symbols-svg/react/icons/location-on';
+import { MapW700 as MapIcon } from '@material-symbols-svg/react/icons/map';
+import { MyLocationW700 as MyLocation } from '@material-symbols-svg/react/icons/my-location';
+import { NotListedLocationW700 as NotListedLocation } from '@material-symbols-svg/react/icons/not-listed-location';
+import { ScheduleW700 as Schedule } from '@material-symbols-svg/react/icons/schedule';
 import { LngLat } from "maplibre-gl"
 
 import InputField, { Suggestion } from './components/inputfield';
@@ -128,7 +133,7 @@ export default function Home() {
       </Sidebar>
       <MapOverlay>
         {pickedLocation == false && <>
-          <div onClick={() => setPickedLocation(map?.getCenter() || new LngLat(0, 0))} className="absolute -top-12 pt-16 left-0 right-0 flex z-100 px-4 py-2 pointer-events-auto text-lg justify-center font-a font-medium text-white bg-green" style={{ top: "env(safe-area-inset-top)" }}>
+          <div onClick={() => setPickedLocation(map?.getCenter() || new LngLat(0, 0))} className="absolute pt-16 left-0 right-0 flex z-100 px-4 py-2 pointer-events-auto text-lg justify-center font-a font-medium text-white bg-green" style={{ top: "calc(env(safe-area-inset-top) + calc(var(--spacing) * -14))" }}>
             Click here to confirm location
           </div>
           <div className="absolute top-0 bottom-0 left-0 right-0 flex items-center z-100 justify-center pointer-events-none">
