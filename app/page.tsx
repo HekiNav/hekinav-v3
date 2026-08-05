@@ -52,7 +52,7 @@ export default function Home() {
   const [pickedLocation, setPickedLocation] = useState<LngLat | null | boolean>(null)
   const [pickedLocationTarget, setPickedLocationTarget] = useState<"origin" | "destination" | null>(null)
 
-  const {setFocus} = useContext(FocusContext)
+  const {setSidebarHidden} = useContext(FocusContext)
 
   useEffect(() => {
     setPickedLocation(null)
@@ -78,7 +78,7 @@ export default function Home() {
       setPickedLocation(null)
       setPickedLocationTarget(null)
     })
-    setFocus && setFocus(true)
+    setSidebarHidden && setSidebarHidden(false)
   }, [pickedLocation])
 
   const { default: map } = useMap()
@@ -116,7 +116,7 @@ export default function Home() {
   function openMapLocationPicker(target: "origin" | "destination") {
     setPickedLocation(false)
     setPickedLocationTarget(target)
-    setFocus && setFocus(0)
+    setSidebarHidden && setSidebarHidden(true)
   }
 
   return (

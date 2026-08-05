@@ -4,7 +4,6 @@ import "react-loading-skeleton/dist/skeleton.css";
 
 import type { Metadata } from "next";
 import { Host_Grotesk } from "next/font/google";
-import { MapProvider } from "@vis.gl/react-maplibre";
 import { Toaster } from "react-hot-toast";
 import { useEffect } from "react";
 import { MapLayoutProvider } from "./mapcontext";
@@ -51,7 +50,6 @@ export default function RootLayout({
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, height=device-height"></meta>
         <title>Hekinav Routing</title>
       </head>
-      <MapProvider>
         <body className="h-screen overflow-hidden">
           <Toaster
             toastOptions={{
@@ -73,7 +71,6 @@ export default function RootLayout({
             <MapLayoutProvider>{children}</MapLayoutProvider>;
 
         </body>
-      </MapProvider>
     </html>
   );
 }

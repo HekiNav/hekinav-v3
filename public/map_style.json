@@ -1,6 +1,6 @@
 {
   "version": 8,
-  "name": "Grayscale with Transit",
+  "name": "",
   "metadata": {},
   "bearing": 0,
   "pitch": 45,
@@ -8,9 +8,29 @@
     "openmaptiles": {
       "type": "vector",
       "url": "https://api.maptiler.com/tiles/v3/tiles.json?key=DSJ8D0CYxVgUQHsmNwp3"
-    }
+    },
+    "vector": {
+      "type": "vector",
+      "url": "https://cdn.digitransit.fi/map/v3/hsl-vector-map/index.json?digitransit-subscription-key=bbc7a56df1674c59822889b1bc84e7ad"
   },
-  "sprite": "",
+  "terminals": {
+      "url": "https://kartat.hsl.fi/jore/tiles/terminals/index.json",
+      "type": "vector"
+  },
+  "stops": {
+      "url": "https://kartat.hsl.fi/jore/tiles/regular-stops/index.json",
+      "type": "vector"
+  },
+  "stops-by-routes": {
+      "url": "https://kartat.hsl.fi/jore/tiles/stops-by-routes/index.json",
+      "type": "vector"
+  },
+  "citybike": {
+      "url": "https://cdn.digitransit.fi/map/v3/hsl/fi/rentalStations/tilejson.json?digitransit-subscription-key=bbc7a56df1674c59822889b1bc84e7ad",
+      "type": "vector"
+  }
+  },
+  "sprite": "https://routing.hekinav.dev/sprites",
   "glyphs": "https://routing.storage.hekinav.dev/font-pbf/{fontstack}/{range}.pbf",
   "layers": [
     {
@@ -512,6 +532,778 @@
         "text-halo-color": "#ffffff",
         "text-halo-width": 0.8
       }
-    }
+    },
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  {
+      "id": "subway-entrance_icon",
+      "type": "symbol",
+      "source": "vector",
+      "source-layer": "poi",
+      "minzoom": 16,
+      "filter": [
+          "all",
+          [
+              "==",
+              "$type",
+              "Point"
+          ],
+          [
+              "in",
+              "class",
+              "entrance"
+          ],
+          [
+              "in",
+              "subclass",
+              "subway_entrance"
+          ]
+      ],
+      "layout": {
+          "icon-image": "icon-entrance-subway",
+          "icon-allow-overlap": true,
+          "icon-anchor": "bottom",
+          "icon-size": [
+              "interpolate",
+              [
+                  "exponential",
+                  1.15
+              ],
+              [
+                  "zoom"
+              ],
+              15,
+              0.533,
+              20,
+              0.8
+          ]
+      },
+      "paint": {
+          "icon-translate": [
+              0,
+              -5.25
+          ]
+      }
+  },
+  {
+      "id": "subway-entrance_letter",
+      "type": "symbol",
+      "source": "vector",
+      "source-layer": "poi",
+      "minzoom": 17,
+      "filter": [
+          "all",
+          [
+              "==",
+              "$type",
+              "Point"
+          ],
+          [
+              "in",
+              "class",
+              "entrance"
+          ],
+          [
+              "in",
+              "subclass",
+              "subway_entrance"
+          ],
+          [
+              "has",
+              "ref"
+          ]
+      ],
+      "layout": {
+          "icon-image": [
+              "concat",
+              "icon-letter-",
+              [
+                  "get",
+                  "ref"
+              ]
+          ],
+          "icon-allow-overlap": true,
+          "icon-anchor": "bottom",
+          "icon-size": [
+              "interpolate",
+              [
+                  "exponential",
+                  1.15
+              ],
+              [
+                  "zoom"
+              ],
+              13,
+              0.8,
+              20,
+              1.2
+          ]
+      },
+      "paint": {
+          "icon-translate": [
+              0,
+              -5.25
+          ]
+      }
+  },
+  {
+      "id": "icon_bus-station",
+      "type": "symbol",
+      "source": "terminals",
+      "source-layer": "terminals",
+      "minzoom": 11,
+      "filter": [
+          "all",
+          [
+              "==",
+              "$type",
+              "Point"
+          ],
+          [
+              "==",
+              "mode",
+              "BUS"
+          ]
+      ],
+      "layout": {
+          "text-optional": true,
+          "text-size": 10,
+          "text-field": "{nameFi}",
+          "text-font": [
+              "Host Grotesk"
+          ],
+          "text-anchor": "top",
+          "text-max-width": 8,
+          "text-offset": [
+              0,
+              0.5
+          ],
+          "icon-image": "icon-terminal-bus",
+          "icon-size": 0.9
+      },
+      "paint": {
+          "text-color": "#666",
+          "text-halo-color": "#fff",
+          "text-halo-width": 1,
+          "icon-translate": [
+              0,
+              -5.25
+          ]
+      }
+  },
+  {
+      "id": "icon_subway-station",
+      "type": "symbol",
+      "source": "terminals",
+      "source-layer": "terminals",
+      "minzoom": 11,
+      "filter": [
+          "all",
+          [
+              "==",
+              "$type",
+              "Point"
+          ],
+          [
+              "==",
+              "mode",
+              "SUBWAY"
+          ]
+      ],
+      "layout": {
+          "text-optional": true,
+          "text-size": 10,
+          "text-field": "{nameFi}",
+          "text-font": [
+              "Host Grotesk"
+          ],
+          "text-anchor": "top",
+          "text-max-width": 8,
+          "text-offset": [
+              0,
+              0.5
+          ],
+          "icon-image": "icon-terminal-subway",
+          "icon-size": 0.9
+      },
+      "paint": {
+          "text-color": "#666",
+          "text-halo-color": "#fff",
+          "text-halo-width": 1,
+          "icon-translate": [
+              0,
+              -5.25
+          ]
+      }
+  },
+  {
+      "id": "icon_railway-station",
+      "type": "symbol",
+      "source": "terminals",
+      "source-layer": "terminals",
+      "minzoom": 11,
+      "filter": [
+          "all",
+          [
+              "==",
+              "$type",
+              "Point"
+          ],
+          [
+              "==",
+              "mode",
+              "RAIL"
+          ]
+      ],
+      "layout": {
+          "text-optional": true,
+          "text-size": 10,
+          "text-field": "{nameFi}",
+          "text-font": [
+              "Host Grotesk"
+          ],
+          "text-anchor": "top",
+          "text-max-width": 8,
+          "text-offset": [
+              0,
+              0.75
+          ],
+          "icon-image": "icon-terminal-train",
+          "icon-size": 0.9
+      },
+      "paint": {
+          "text-color": "#666",
+          "text-halo-color": "#fff",
+          "text-halo-width": 1,
+          "icon-translate": [
+              0,
+              -5.25
+          ]
+      }
+  },
+  {
+      "id": "icon_aerodrome",
+      "type": "symbol",
+      "source": "vector",
+      "source-layer": "aerodrome_label",
+      "minzoom": 5,
+      "filter": [
+          "all",
+          [
+              "==",
+              "$type",
+              "Point"
+          ],
+          [
+              "in",
+              "class",
+              "international",
+              "public",
+              "regional"
+          ]
+      ],
+      "layout": {
+          "text-optional": true,
+          "text-size": 10,
+          "text-field": "{name_en}",
+          "text-font": [
+              "Host Grotesk"
+          ],
+          "text-anchor": "top",
+          "text-max-width": 8,
+          "text-offset": [
+              0,
+              0.5
+          ],
+          "icon-image": "icon-terminal-aerodrome",
+          "icon-size": 0.9
+      },
+      "paint": {
+          "text-color": "#666",
+          "text-halo-color": "#fff",
+          "text-halo-width": 1,
+          "icon-translate": [
+              0,
+              -5.25
+          ]
+      }
+  },
+  {
+      "id": "stops_case",
+      "type": "circle",
+      "source": "stops",
+      "source-layer": "stops",
+      "minzoom": 13,
+      "filter": [
+          "!=",
+          [
+              "get",
+              "mode"
+          ],
+          "RAIL"
+      ],
+      "paint": {
+          "circle-color": "#fff",
+          "circle-radius": [
+              "interpolate",
+              [
+                  "exponential",
+                  1.15
+              ],
+              [
+                  "zoom"
+              ],
+              12,
+              1.5,
+              22,
+              26
+          ]
+      }
+  },
+  {
+      "id": "stops_rail_case",
+      "type": "circle",
+      "source": "stops",
+      "source-layer": "stops",
+      "minzoom": 15,
+      "filter": [
+          "==",
+          [
+              "get",
+              "mode"
+          ],
+          "RAIL"
+      ],
+      "paint": {
+          "circle-color": "#fff",
+          "circle-radius": [
+              "interpolate",
+              [
+                  "exponential",
+                  1.15
+              ],
+              [
+                  "zoom"
+              ],
+              12,
+              1.5,
+              22,
+              26
+          ]
+      }
+  },
+  {
+      "id": "stops_rail",
+      "type": "circle",
+      "source": "stops",
+      "source-layer": "stops",
+      "minzoom": 15,
+      "filter": [
+          "==",
+          [
+              "get",
+              "mode"
+          ],
+          "RAIL"
+      ],
+      "paint": {
+          "circle-color": "#8c54a2",
+          "circle-radius": [
+              "interpolate",
+              [
+                  "exponential",
+                  1.15
+              ],
+              [
+                  "zoom"
+              ],
+              12,
+              1,
+              22,
+              24
+          ]
+      }
+  },
+  {
+      "id": "stops_bus",
+      "type": "circle",
+      "source": "stops",
+      "source-layer": "stops",
+      "minzoom": 13,
+      "filter": [
+          "all",
+          [
+              "!",
+              [
+                  "get",
+                  "isTrunkStop"
+              ]
+          ],
+          [
+              "==",
+              [
+                  "get",
+                  "mode"
+              ],
+              "BUS"
+          ]
+      ],
+      "paint": {
+          "circle-color": "#007ac9",
+          "circle-radius": [
+              "interpolate",
+              [
+                  "exponential",
+                  1.15
+              ],
+              [
+                  "zoom"
+              ],
+              12,
+              1,
+              22,
+              24
+          ]
+      }
+  },
+  {
+      "id": "stops_trunk",
+      "type": "circle",
+      "source": "stops",
+      "source-layer": "stops",
+      "minzoom": 13,
+      "filter": [
+          "all",
+          [
+              "get",
+              "isTrunkStop"
+          ],
+          [
+              "==",
+              [
+                  "get",
+                  "mode"
+              ],
+              "BUS"
+          ]
+      ],
+      "paint": {
+          "circle-color": "#CA4300",
+          "circle-radius": [
+              "interpolate",
+              [
+                  "exponential",
+                  1.15
+              ],
+              [
+                  "zoom"
+              ],
+              12,
+              1,
+              22,
+              24
+          ]
+      }
+  },
+  {
+      "id": "stops_ferry",
+      "type": "circle",
+      "source": "stops",
+      "source-layer": "stops",
+      "minzoom": 13,
+      "filter": [
+          "==",
+          [
+              "get",
+              "mode"
+          ],
+          "FERRY"
+      ],
+      "paint": {
+          "circle-color": "#00b9e4",
+          "circle-radius": [
+              "interpolate",
+              [
+                  "exponential",
+                  1.15
+              ],
+              [
+                  "zoom"
+              ],
+              12,
+              1,
+              22,
+              24
+          ]
+      }
+  },
+  {
+      "id": "stops_tram",
+      "type": "circle",
+      "source": "stops",
+      "source-layer": "stops",
+      "minzoom": 13,
+      "filter": [
+          "==",
+          [
+              "get",
+              "mode"
+          ],
+          "TRAM"
+      ],
+      "paint": {
+          "circle-color": "#00985f",
+          "circle-radius": [
+              "interpolate",
+              [
+                  "exponential",
+                  1.15
+              ],
+              [
+                  "zoom"
+              ],
+              12,
+              1,
+              22,
+              24
+          ]
+      }
+  },
+  {
+      "id": "stops_lrail",
+      "type": "circle",
+      "source": "stops",
+      "source-layer": "stops",
+      "minzoom": 13,
+      "filter": [
+          "==",
+          [
+              "get",
+              "mode"
+          ],
+          "L_RAIL"
+      ],
+      "paint": {
+          "circle-color": "#00b2a9",
+          "circle-radius": [
+              "interpolate",
+              [
+                  "exponential",
+                  1.15
+              ],
+              [
+                  "zoom"
+              ],
+              12,
+              1,
+              22,
+              24
+          ]
+      }
+  },
+  {
+      "id": "stops_subway",
+      "type": "circle",
+      "source": "stops",
+      "source-layer": "stops",
+      "minzoom": 13,
+      "filter": [
+          "==",
+          [
+              "get",
+              "mode"
+          ],
+          "SUBWAY"
+      ],
+      "paint": {
+          "circle-color": "#ff6319",
+          "circle-radius": [
+              "interpolate",
+              [
+                  "exponential",
+                  1.15
+              ],
+              [
+                  "zoom"
+              ],
+              12,
+              1,
+              22,
+              24
+          ]
+      }
+  },
+  {
+      "id": "stops_hub",
+      "type": "circle",
+      "source": "stops",
+      "source-layer": "stops",
+      "minzoom": 14,
+      "filter": [
+          "!=",
+          [
+              "get",
+              "mode"
+          ],
+          "RAIL"
+      ],
+      "paint": {
+          "circle-color": "#fff",
+          "circle-radius": [
+              "interpolate",
+              [
+                  "exponential",
+                  1.15
+              ],
+              [
+                  "zoom"
+              ],
+              14,
+              2,
+              22,
+              20
+          ]
+      }
+  },
+  {
+      "id": "stops_rail_hub",
+      "type": "circle",
+      "source": "stops",
+      "source-layer": "stops",
+      "minzoom": 15,
+      "filter": [
+          "==",
+          [
+              "get",
+              "mode"
+          ],
+          "RAIL"
+      ],
+      "paint": {
+          "circle-color": "#fff",
+          "circle-radius": [
+              "interpolate",
+              [
+                  "exponential",
+                  1.15
+              ],
+              [
+                  "zoom"
+              ],
+              14,
+              2,
+              22,
+              20
+          ]
+      }
+  },
+  {
+      "id": "citybike_stops_case",
+      "type": "circle",
+      "source": "citybike",
+      "source-layer": "rentalStations",
+      "minzoom": 13,
+      "maxzoom": 14,
+      "paint": {
+          "circle-color": "#fff",
+          "circle-radius": [
+              "interpolate",
+              [
+                  "exponential",
+                  1.15
+              ],
+              [
+                  "zoom"
+              ],
+              12,
+              1.5,
+              22,
+              26
+          ]
+      }
+  },
+  {
+      "id": "citybike_stops",
+      "type": "circle",
+      "source": "citybike",
+      "source-layer": "rentalStations",
+      "minzoom": 13,
+      "maxzoom": 14,
+      "paint": {
+          "circle-color": "#fcbc19",
+          "circle-radius": [
+              "interpolate",
+              [
+                  "exponential",
+                  1.15
+              ],
+              [
+                  "zoom"
+              ],
+              12,
+              1,
+              22,
+              24
+          ]
+      }
+  },
+  {
+      "id": "citybike_icon",
+      "type": "symbol",
+      "source": "citybike",
+      "source-layer": "rentalStations",
+      "minzoom": 14,
+      "layout": {
+          "icon-offset": [
+              0,
+              -6
+          ],
+          "icon-image": "icon-citybike-station",
+          "icon-allow-overlap": false,
+          "icon-size": {
+              "stops": [
+                  [
+                      13,
+                      0.8
+                  ],
+                  [
+                      20,
+                      1.2
+                  ]
+              ]
+          }
+      }
+  }
   ]
 }
