@@ -3,12 +3,17 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 
 import { Dispatch, SetStateAction, createContext, useContext, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Map, MapProvider, MapRef, useMap } from "@vis.gl/react-maplibre";
+import { Map, MapProvider, MapRef, Popup, PopupProps, useMap } from "@vis.gl/react-maplibre";
+import IconItem from './components/iconitem';
+import { IconTable, Mode } from './lib/digitransit';
+import { NotListedLocation } from '@material-symbols-svg/react/w700';
+import { redirect } from 'next/navigation';
 
 type Slots = {
     overlay: HTMLDivElement | null
     sidebar: HTMLDivElement | null
 }
+
 
 const SlotContext = createContext<Slots>({ overlay: null, sidebar: null })
 export const FocusContext = createContext<{ setSidebarHidden: Dispatch<SetStateAction<boolean>> | null }>({ setSidebarHidden: null })
@@ -16,6 +21,8 @@ export const FocusContext = createContext<{ setSidebarHidden: Dispatch<SetStateA
 export function MapLayoutProvider({ children }: { children: React.ReactNode }) {
     const [overlay, setOverlay] = useState<HTMLDivElement | null>(null)
     const [sidebar, setSidebar] = useState<HTMLDivElement | null>(null)
+
+    const [popup, setPopup] = useState<PopupProps | null>(null);
 
 
     const [focus, setFocus] = useState<boolean>(false)
@@ -45,7 +52,49 @@ export function MapLayoutProvider({ children }: { children: React.ReactNode }) {
                         </div>
                         <div className='h-screen' style={{ position: 'relative', flex: 1 }}>
                             <Map
-                                onClick={() => setFocus(false)}
+                                onClick={(e) => {
+                                    setFocus(false)
+                                    if (!map.current) return
+                                    const pxBoxSize = 16
+                                    const feats = map.current.queryRenderedFeatures([
+                                        [e.point.x - pxBoxSize, e.point.y - pxBoxSize],
+                                        [e.point.x + pxBoxSize, e.point.y + pxBoxSize]
+                                    ], { layers: ["stops_rail", "stops_bus", "stops_trunk", "stops_ferry", "stops_tram", "stops_lrail", "stops_subway", "icon_railway-station", "icon_subway-station", "icon_bus-station"] })
+                                    console.log(feats)
+                                    //if (feats.length == 0) redirect(Object.hasOwn(feats[0].properties,"terminalId") ? `/terminal/${properties.}`)
+                                    setPopup({
+                                        latitude: e.lngLat.lat,
+                                        longitude: e.lngLat.lng,
+                                        anchor: "bottom",
+                                        onClose: () => setPopup(null),
+                                        children:
+                                            (<>
+                                                {feats.map((f, i) => {
+                                                    const props = f.properties as {
+                                                        isTrunkStop: false
+                                                        mode: Mode
+                                                        nameFi: string
+                                                        nameSe: string
+                                                        platform: string
+                                                        shortId: string
+                                                        stopId: string
+                                                    } | {
+                                                        mode: Mode
+                                                        nameFi: string
+                                                        nameSe: string
+                                                        terminalId: string
+                                                    }
+                                                    return (<div key={i} className='p-1 font-a'>
+                                                        <IconItem icon={{children: IconTable[props.mode] || <NotListedLocation></NotListedLocation>}}>
+                                                        {/* @ts-ignore */}
+                                                        {`${props.nameFi} ${props.platform && "pl. " + props.platform || ""} ${props.shortId && "(" + props.shortId + ")" || ""}`}
+                                                        </IconItem>
+                                                    </div>)
+                                                })}
+                                            </>),
+                                    })
+                                    console.log(popup)
+                                }}
                                 ref={map}
                                 initialViewState={{
                                     longitude: 24.94,
@@ -56,6 +105,7 @@ export function MapLayoutProvider({ children }: { children: React.ReactNode }) {
                                 mapStyle="/map_style.json"
                                 attributionControl={false}
                             >
+                                {popup && <Popup {...popup}></Popup>}
                                 <div
                                     ref={setOverlay}
                                     style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}

@@ -1,3 +1,7 @@
+import { DirectionsBoat, DirectionsBus, Flight, Metro, Train, Tram } from "@material-symbols-svg/react/w700"
+
+export type Mode = "BUS" | "RAIL" | "BUS-EXPRESS" | "SUBWAY" | "SPEEDTRAM" | "TRAM" | "FERRY" | "AIRPLANE"
+
 export interface GeocodingFeatProps {
     id: string
     gid: string
@@ -21,7 +25,7 @@ export interface GeocodingFeatProps {
     addendum?: {
         GTFS: {
             code?: string
-            modes?: ("BUS" | "RAIL" | "BUS-EXPRESS" | "SUBWAY" | "SPEEDTRAM" | "TRAM" | "FERRY" | "AIRPLANE")[],
+            modes?: Mode[],
             platform?: string
         }
     }
@@ -57,4 +61,15 @@ export interface GeocodingResponse {
 
 export interface GeocodingResponse {
     
+}
+
+export const IconTable = {
+    "BUS-EXPRESS": (<DirectionsBus className="text-darkblue"></DirectionsBus>),
+    "SPEEDTRAM": (<Tram className="text-turqoise"></Tram>),
+    "BUS": (<DirectionsBus className="text-blue"></DirectionsBus>),
+    "RAIL": (<Train className="text-purple"></Train>),
+    "SUBWAY": (<Metro className="text-orange"></Metro>),
+    "TRAM": (<Tram className="text-green"></Tram>),
+    "FERRY": (<DirectionsBoat className="text-cyan"></DirectionsBoat>),
+    "AIRPLANE": (<Flight className="text-darkblue"></Flight>),
 }

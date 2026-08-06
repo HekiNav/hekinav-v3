@@ -1,7 +1,7 @@
 "use server"
 import { Road } from "@material-symbols-svg/react";
 import { Suggestion } from "../components/inputfield";
-import { GeocodingFeatProps, GeocodingResponse } from "./digitransit";
+import { GeocodingFeatProps, GeocodingResponse, IconTable } from "./digitransit";
 import { SignpostW700 as Signpost } from '@material-symbols-svg/react/icons/signpost';
 import { LocationOnW700 as LocationOn } from '@material-symbols-svg/react/icons/location-on';
 import { PedalBikeW700 as PedalBike } from '@material-symbols-svg/react/icons/pedal-bike';
@@ -81,15 +81,8 @@ function getIconFromProps(props: GeocodingFeatProps) {
         case "stop":
             const gtfs = props.addendum?.GTFS
             if (!gtfs || !gtfs.modes) return (<DirectionsBus></DirectionsBus>)
-            const table = {
-                "BUS-EXPRESS": (<DirectionsBus className="text-darkblue"></DirectionsBus>),
-                "SPEEDTRAM": (<Tram className="text-turqoise"></Tram>),
-                "BUS": (<DirectionsBus className="text-blue"></DirectionsBus>),
-                "RAIL": (<Train className="text-purple"></Train>),
-                "SUBWAY": (<Metro className="text-orange"></Metro>),
-                "TRAM": (<Tram className="text-green"></Tram>),
-            }
-            return Object.entries(table).reduce<ReactElement | null>((p, [k, v]) => !p && gtfs.modes?.some(m => m == k) ? v : p, null) || (<DirectionsBus></DirectionsBus>)
+            
+            return Object.entries(IconTable).reduce<ReactElement | null>((p, [k, v]) => !p && gtfs.modes?.some(m => m == k) ? v : p, null) || (<DirectionsBus></DirectionsBus>)
         case "street":
             return (<Road></Road>)
         default:
