@@ -13,21 +13,13 @@
       "type": "vector",
       "url": "https://cdn.digitransit.fi/map/v3/hsl-vector-map/index.json?digitransit-subscription-key=bbc7a56df1674c59822889b1bc84e7ad"
     },
-    "terminals": {
-      "url": "https://kartat.hsl.fi/jore/tiles/terminals/index.json",
-      "type": "vector"
+    "poi_transit": {
+      "type": "vector",
+      "url": "https://cdn.digitransit.fi/map/v3/finland/fi/stops,stations/tilejson.json?digitransit-subscription-key=bbc7a56df1674c59822889b1bc84e7ad"
     },
-    "stops": {
-      "url": "https://kartat.hsl.fi/jore/tiles/regular-stops/index.json",
-      "type": "vector"
-    },
-    "stops-by-routes": {
-      "url": "https://kartat.hsl.fi/jore/tiles/stops-by-routes/index.json",
-      "type": "vector"
-    },
-    "citybike": {
-      "url": "https://cdn.digitransit.fi/map/v3/hsl/fi/rentalStations/tilejson.json?digitransit-subscription-key=bbc7a56df1674c59822889b1bc84e7ad",
-      "type": "vector"
+    "rentalStations": {
+      "type": "vector",
+      "url": "https://cdn.digitransit.fi/map/v3/finland/fi/rentalStations/tilejson.json?digitransit-subscription-key=bbc7a56df1674c59822889b1bc84e7ad"
     }
   },
   "sprite": "https://routing.storage.hekinav.dev/img/sprites",
@@ -1171,26 +1163,39 @@
     {
       "id": "icon_bus-station",
       "type": "symbol",
-      "source": "terminals",
-      "source-layer": "terminals",
+      "source": "openmaptiles",
+      "source-layer": "poi",
       "minzoom": 11,
       "filter": [
         "all",
         [
           "==",
-          "$type",
+          [
+            "geometry-type"
+          ],
           "Point"
         ],
         [
           "==",
-          "mode",
-          "BUS"
+          [
+            "get",
+            "class"
+          ],
+          "bus"
+        ],
+        [
+          "==",
+          [
+            "get",
+            "subclass"
+          ],
+          "bus_station"
         ]
       ],
       "layout": {
         "text-optional": true,
         "text-size": 10,
-        "text-field": "{nameFi}",
+        "text-field": "{name}",
         "text-font": [
           "Host Grotesk"
         ],
@@ -1216,26 +1221,39 @@
     {
       "id": "icon_subway-station",
       "type": "symbol",
-      "source": "terminals",
-      "source-layer": "terminals",
+      "source": "openmaptiles",
+      "source-layer": "poi",
       "minzoom": 11,
       "filter": [
         "all",
         [
           "==",
-          "$type",
+          [
+            "geometry-type"
+          ],
           "Point"
         ],
         [
           "==",
-          "mode",
-          "SUBWAY"
+          [
+            "get",
+            "class"
+          ],
+          "railway"
+        ],
+        [
+          "==",
+          [
+            "get",
+            "subclass"
+          ],
+          "subway"
         ]
       ],
       "layout": {
         "text-optional": true,
         "text-size": 10,
-        "text-field": "{nameFi}",
+        "text-field": "{name}",
         "text-font": [
           "Host Grotesk"
         ],
@@ -1261,26 +1279,39 @@
     {
       "id": "icon_railway-station",
       "type": "symbol",
-      "source": "terminals",
-      "source-layer": "terminals",
+      "source": "openmaptiles",
+      "source-layer": "poi",
       "minzoom": 11,
       "filter": [
         "all",
         [
           "==",
-          "$type",
+          [
+            "geometry-type"
+          ],
           "Point"
         ],
         [
           "==",
-          "mode",
-          "RAIL"
+          [
+            "get",
+            "class"
+          ],
+          "railway"
+        ],
+        [
+          "==",
+          [
+            "get",
+            "subclass"
+          ],
+          "station"
         ]
       ],
       "layout": {
         "text-optional": true,
         "text-size": 10,
-        "text-field": "{nameFi}",
+        "text-field": "{name}",
         "text-font": [
           "Host Grotesk"
         ],
@@ -1353,19 +1384,19 @@
     {
       "id": "stops_case",
       "type": "circle",
-      "source": "stops",
+      "source": "poi_transit",
       "source-layer": "stops",
       "minzoom": 13,
       "filter": [
         "!=",
         [
           "get",
-          "mode"
+          "type"
         ],
         "RAIL"
       ],
       "paint": {
-        "circle-color": "#fff",
+        "circle-color": "#ffffff",
         "circle-radius": [
           "interpolate",
           [
@@ -1383,21 +1414,52 @@
       }
     },
     {
+      "id": "stops_unknown",
+      "type": "circle",
+      "source": "poi_transit",
+      "source-layer": "stops",
+      "minzoom": 13,
+      "filter": [
+        "!",
+        [
+          "has",
+          "type"
+        ]
+      ],
+      "paint": {
+        "circle-color": "#aaaaaa",
+        "circle-radius": [
+          "interpolate",
+          [
+            "exponential",
+            1.15
+          ],
+          [
+            "zoom"
+          ],
+          12,
+          1,
+          22,
+          24
+        ]
+      }
+    },
+    {
       "id": "stops_rail_case",
       "type": "circle",
-      "source": "stops",
+      "source": "poi_transit",
       "source-layer": "stops",
       "minzoom": 15,
       "filter": [
         "==",
         [
           "get",
-          "mode"
+          "type"
         ],
         "RAIL"
       ],
       "paint": {
-        "circle-color": "#fff",
+        "circle-color": "#ffffff",
         "circle-radius": [
           "interpolate",
           [
@@ -1417,19 +1479,19 @@
     {
       "id": "stops_rail",
       "type": "circle",
-      "source": "stops",
+      "source": "poi_transit",
       "source-layer": "stops",
       "minzoom": 15,
       "filter": [
         "==",
         [
           "get",
-          "mode"
+          "type"
         ],
         "RAIL"
       ],
       "paint": {
-        "circle-color": "#8c54a2",
+        "circle-color": "#912bdb",
         "circle-radius": [
           "interpolate",
           [
@@ -1449,29 +1511,33 @@
     {
       "id": "stops_bus",
       "type": "circle",
-      "source": "stops",
+      "source": "poi_transit",
       "source-layer": "stops",
       "minzoom": 13,
       "filter": [
         "all",
         [
-          "!",
-          [
-            "get",
-            "isTrunkStop"
-          ]
-        ],
-        [
           "==",
           [
             "get",
-            "mode"
+            "type"
           ],
           "BUS"
+        ],
+        [
+          "!",
+          [
+            "in",
+            "\"gtfsType\":702",
+            [
+              "get",
+              "routes"
+            ]
+          ]
         ]
       ],
       "paint": {
-        "circle-color": "#007ac9",
+        "circle-color": "#115ee3",
         "circle-radius": [
           "interpolate",
           [
@@ -1491,26 +1557,30 @@
     {
       "id": "stops_trunk",
       "type": "circle",
-      "source": "stops",
+      "source": "poi_transit",
       "source-layer": "stops",
       "minzoom": 13,
       "filter": [
         "all",
         [
-          "get",
-          "isTrunkStop"
-        ],
-        [
           "==",
           [
             "get",
-            "mode"
+            "type"
           ],
           "BUS"
+        ],
+        [
+          "in",
+          "\"gtfsType\":702",
+          [
+            "get",
+            "routes"
+          ]
         ]
       ],
       "paint": {
-        "circle-color": "#CA4300",
+        "circle-color": "#e97b15",
         "circle-radius": [
           "interpolate",
           [
@@ -1530,19 +1600,19 @@
     {
       "id": "stops_ferry",
       "type": "circle",
-      "source": "stops",
+      "source": "poi_transit",
       "source-layer": "stops",
       "minzoom": 13,
       "filter": [
         "==",
         [
           "get",
-          "mode"
+          "type"
         ],
         "FERRY"
       ],
       "paint": {
-        "circle-color": "#00b9e4",
+        "circle-color": "#3eb8e4",
         "circle-radius": [
           "interpolate",
           [
@@ -1562,19 +1632,19 @@
     {
       "id": "stops_tram",
       "type": "circle",
-      "source": "stops",
+      "source": "poi_transit",
       "source-layer": "stops",
       "minzoom": 13,
       "filter": [
         "==",
         [
           "get",
-          "mode"
+          "type"
         ],
         "TRAM"
       ],
       "paint": {
-        "circle-color": "#00985f",
+        "circle-color": "#0f8c0f",
         "circle-radius": [
           "interpolate",
           [
@@ -1594,19 +1664,19 @@
     {
       "id": "stops_lrail",
       "type": "circle",
-      "source": "stops",
+      "source": "poi_transit",
       "source-layer": "stops",
       "minzoom": 13,
       "filter": [
         "==",
         [
           "get",
-          "mode"
+          "type"
         ],
         "L_RAIL"
       ],
       "paint": {
-        "circle-color": "#00b2a9",
+        "circle-color": "#0DACA1",
         "circle-radius": [
           "interpolate",
           [
@@ -1626,19 +1696,51 @@
     {
       "id": "stops_subway",
       "type": "circle",
-      "source": "stops",
+      "source": "poi_transit",
       "source-layer": "stops",
       "minzoom": 13,
       "filter": [
         "==",
         [
           "get",
-          "mode"
+          "type"
         ],
         "SUBWAY"
       ],
       "paint": {
-        "circle-color": "#ff6319",
+        "circle-color": "#e97b15",
+        "circle-radius": [
+          "interpolate",
+          [
+            "exponential",
+            1.15
+          ],
+          [
+            "zoom"
+          ],
+          12,
+          1,
+          22,
+          24
+        ]
+      }
+    },
+    {
+      "id": "stops_airplane",
+      "type": "circle",
+      "source": "poi_transit",
+      "source-layer": "stops",
+      "minzoom": 13,
+      "filter": [
+        "==",
+        [
+          "get",
+          "type"
+        ],
+        "AIRPLANE"
+      ],
+      "paint": {
+        "circle-color": "#1D39BA",
         "circle-radius": [
           "interpolate",
           [
@@ -1658,19 +1760,19 @@
     {
       "id": "stops_hub",
       "type": "circle",
-      "source": "stops",
+      "source": "poi_transit",
       "source-layer": "stops",
       "minzoom": 14,
       "filter": [
         "!=",
         [
           "get",
-          "mode"
+          "type"
         ],
         "RAIL"
       ],
       "paint": {
-        "circle-color": "#fff",
+        "circle-color": "#ffffff",
         "circle-radius": [
           "interpolate",
           [
@@ -1690,19 +1792,19 @@
     {
       "id": "stops_rail_hub",
       "type": "circle",
-      "source": "stops",
+      "source": "poi_transit",
       "source-layer": "stops",
       "minzoom": 15,
       "filter": [
         "==",
         [
           "get",
-          "mode"
+          "type"
         ],
         "RAIL"
       ],
       "paint": {
-        "circle-color": "#fff",
+        "circle-color": "#ffffff",
         "circle-radius": [
           "interpolate",
           [
@@ -1722,12 +1824,12 @@
     {
       "id": "citybike_stops_case",
       "type": "circle",
-      "source": "citybike",
+      "source": "rentalStations",
       "source-layer": "rentalStations",
       "minzoom": 13,
       "maxzoom": 14,
       "paint": {
-        "circle-color": "#fff",
+        "circle-color": "#ffffff",
         "circle-radius": [
           "interpolate",
           [
@@ -1747,12 +1849,12 @@
     {
       "id": "citybike_stops",
       "type": "circle",
-      "source": "citybike",
+      "source": "rentalStations",
       "source-layer": "rentalStations",
       "minzoom": 13,
       "maxzoom": 14,
       "paint": {
-        "circle-color": "#fcbc19",
+        "circle-color": "#efd71d",
         "circle-radius": [
           "interpolate",
           [
@@ -1772,7 +1874,7 @@
     {
       "id": "citybike_icon",
       "type": "symbol",
-      "source": "citybike",
+      "source": "rentalStations",
       "source-layer": "rentalStations",
       "minzoom": 14,
       "layout": {

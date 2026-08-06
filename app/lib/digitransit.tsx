@@ -1,4 +1,9 @@
-import { DirectionsBoat, DirectionsBus, Flight, Metro, Train, Tram } from "@material-symbols-svg/react/w700"
+import { DirectionsBoatW700 as DirectionsBoat } from '@material-symbols-svg/react/icons/directions-boat';
+import { DirectionsBusW700 as DirectionsBus } from '@material-symbols-svg/react/icons/directions-bus';
+import { FlightW700 as Flight } from '@material-symbols-svg/react/icons/flight';
+import { MetroW700 as Metro } from '@material-symbols-svg/react/icons/metro';
+import { TrainW700 as Train } from '@material-symbols-svg/react/icons/train';
+import { TramW700 as Tram } from '@material-symbols-svg/react/icons/tram';
 
 export type Mode = "BUS" | "RAIL" | "BUS-EXPRESS" | "SUBWAY" | "SPEEDTRAM" | "TRAM" | "FERRY" | "AIRPLANE"
 
@@ -57,10 +62,6 @@ export interface GeocodingResponse {
     bbox: [
         number, number, number, number
     ]
-}
-
-export interface GeocodingResponse {
-    
 }
 
 export const IconTable = {

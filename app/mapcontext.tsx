@@ -1,13 +1,20 @@
 "use client";
 import 'maplibre-gl/dist/maplibre-gl.css';
 
-import { Dispatch, SetStateAction, createContext, useContext, useEffect, useRef, useState } from "react";
+import { Dispatch, ReactNode, SetStateAction, createContext, useContext, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Map, MapProvider, MapRef, Popup, PopupProps, useMap } from "@vis.gl/react-maplibre";
 import IconItem from './components/iconitem';
 import { IconTable, Mode } from './lib/digitransit';
-import { NotListedLocation } from '@material-symbols-svg/react/w700';
+import { NotListedLocationW700 as NotListedLocation } from '@material-symbols-svg/react/icons/not-listed-location';
 import { redirect } from 'next/navigation';
+import { DirectionsBusW700 as DirectionsBus } from '@material-symbols-svg/react/icons/directions-bus';
+import { TramW700 as Tram } from '@material-symbols-svg/react/icons/tram';
+import { BusRailwayW700 as BusRailway } from '@material-symbols-svg/react/icons/bus-railway';
+import { MetroW700 as Metro } from '@material-symbols-svg/react/icons/metro';
+import { DirectionsBoatW700 as DirectionsBoat } from '@material-symbols-svg/react/icons/directions-boat';
+import { FlightW700 as Flight } from '@material-symbols-svg/react/icons/flight';
+import { TrainW700 as Train } from '@material-symbols-svg/react/icons/train';
 
 type Slots = {
     overlay: HTMLDivElement | null
@@ -59,9 +66,9 @@ export function MapLayoutProvider({ children }: { children: React.ReactNode }) {
                                     const feats = map.current.queryRenderedFeatures([
                                         [e.point.x - pxBoxSize, e.point.y - pxBoxSize],
                                         [e.point.x + pxBoxSize, e.point.y + pxBoxSize]
-                                    ], { layers: ["stops_rail", "stops_bus", "stops_trunk", "stops_ferry", "stops_tram", "stops_lrail", "stops_subway", "icon_railway-station", "icon_subway-station", "icon_bus-station"] })
-                                    console.log(feats)
+                                    ], { layers: ["stops_airplane", "stops_rail", "stops_unknown", "stops_bus", "stops_trunk", "stops_ferry", "stops_tram", "stops_lrail", "stops_subway"] })
                                     //if (feats.length == 0) redirect(Object.hasOwn(feats[0].properties,"terminalId") ? `/terminal/${properties.}`)
+                                    console.log(feats)
                                     setPopup({
                                         latitude: e.lngLat.lat,
                                         longitude: e.lngLat.lng,
@@ -71,29 +78,25 @@ export function MapLayoutProvider({ children }: { children: React.ReactNode }) {
                                             (<>
                                                 {feats.map((f, i) => {
                                                     const props = f.properties as {
-                                                        isTrunkStop: false
-                                                        mode: Mode
-                                                        nameFi: string
-                                                        nameSe: string
-                                                        platform: string
-                                                        shortId: string
-                                                        stopId: string
-                                                    } | {
-                                                        mode: Mode
-                                                        nameFi: string
-                                                        nameSe: string
-                                                        terminalId: string
+                                                        code: string
+                                                        desc: string
+                                                        gtfsId: string
+                                                        name: string
+                                                        parentStation?: string
+                                                        platform?: string
+                                                        routes: string
+                                                        type: string
                                                     }
+
+
                                                     return (<div key={i} className='p-1 font-a'>
-                                                        <IconItem icon={{children: IconTable[props.mode] || <NotListedLocation></NotListedLocation>}}>
-                                                        {/* @ts-ignore */}
-                                                        {`${props.nameFi} ${props.platform && "pl. " + props.platform || ""} ${props.shortId && "(" + props.shortId + ")" || ""}`}
+                                                        <IconItem icon={{ children: getIconFromRoutesString(props.routes) }}>
+                                                            {`${props.name} ${props.platform && "pl. " + props.platform || ""} ${props.code && "(" + props.code + ")" || ""}`}
                                                         </IconItem>
                                                     </div>)
                                                 })}
                                             </>),
                                     })
-                                    console.log(popup)
                                 }}
                                 ref={map}
                                 initialViewState={{
@@ -118,6 +121,39 @@ export function MapLayoutProvider({ children }: { children: React.ReactNode }) {
             </SlotContext.Provider>
         </MapProvider>
     )
+}
+
+function getIconFromRoutesString(json: string): ReactNode {
+    const routes: { gtfsType: number }[] = JSON.parse(json)
+    const routeId = routes.reduce((p, c) => c.gtfsType > p ? c.gtfsType : p, -1)
+    switch (routeId) {
+        case 109:
+            return (<Train className="text-purple"></Train>)
+        case 102:
+            return (<Train className="text-green"></Train>)
+        case 701:
+        case 3:
+            return (<DirectionsBus className="text-blue"></DirectionsBus>)
+        case 702:
+            return (<DirectionsBus className="text-orange"></DirectionsBus>)
+        case 714:
+            return (<BusRailway className="text-red"></BusRailway>)
+        case 900:
+            return (<Tram className="text-turqoise"></Tram>)
+        case 1104:
+            return (<Flight className="text-darkblue"></Flight>)
+        case 0:
+            return (<Tram className="text-green"></Tram>)
+        case 1:
+            return (<Metro className="text-orange"></Metro>)
+        case 4:
+            return (<DirectionsBoat className="text-cyan"></DirectionsBoat>)
+        case -1:
+            return (<NotListedLocation className='text-gray'></NotListedLocation>)
+        default:
+            console.log(routeId)
+            return (<NotListedLocation></NotListedLocation>)
+    }
 }
 
 export function Sidebar({ children }: { children: React.ReactNode }) {
