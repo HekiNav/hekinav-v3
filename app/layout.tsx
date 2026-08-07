@@ -4,9 +4,10 @@ import "react-loading-skeleton/dist/skeleton.css";
 
 import type { Metadata } from "next";
 import { Host_Grotesk } from "next/font/google";
-import { Toaster } from "react-hot-toast";
-import { useEffect } from "react";
+import toast, { Toaster } from "react-hot-toast";
+import { createContext, useEffect } from "react";
 import { MapLayoutProvider } from "./mapcontext";
+import { useSearchParams } from "next/navigation";
 
 const hostGrotesk = Host_Grotesk({
   variable: "--font-a",
@@ -19,11 +20,31 @@ export const metadata: Metadata = {
   description: "Hekinav Routing",
 };
 
+export interface HekinavConfig {
+  region: "hsl" | "finland"
+}
+
+export const ConfigContext = createContext<HekinavConfig>({ region: "finland" })
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
+  const hslParam = useSearchParams().get("hsl")
+
+  const config: HekinavConfig = {
+    region: hslParam === null ? "finland" : "hsl"
+  }
+  useEffect(() => {
+    if (config.region == "hsl") {
+      toast(<span>You are using the HSL Region version of Hekinav. Switch to the <a href="/">Finland-wide version</a></span>, {})
+    } else {
+      toast(<span>You are using the Finland wide version of Hekinav. Switch to the <a href="/?hsl">HSL Region version</a></span>, {})
+    }
+  }, [config])
+
 
   useEffect(() => {
     const vv = window.visualViewport;
@@ -50,7 +71,8 @@ export default function RootLayout({
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, height=device-height"></meta>
         <title>Hekinav Routing</title>
       </head>
-        <body className="h-screen overflow-hidden">
+      <body className="h-screen overflow-hidden">
+        <ConfigContext value={config}>
           <Toaster
             toastOptions={{
               className: "border-3 border-black bg-white!",
@@ -67,10 +89,10 @@ export default function RootLayout({
                 }
               }
             }} position="top-right" />
-          
-            <MapLayoutProvider>{children}</MapLayoutProvider>;
 
-        </body>
+          <MapLayoutProvider>{children}</MapLayoutProvider>;
+        </ConfigContext>
+      </body>
     </html>
   );
 }

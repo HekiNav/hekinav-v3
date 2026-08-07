@@ -29,3 +29,7 @@ div[mapboxgl-children] {
   position: relative;
   pointer-events: none;
 }
+
+a:not(.decoration-none) {
+  text-decoration: underline;
+}

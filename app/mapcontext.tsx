@@ -1,11 +1,11 @@
 "use client";
 import 'maplibre-gl/dist/maplibre-gl.css';
 
-import { Dispatch, ReactNode, SetStateAction, createContext, useContext, useEffect, useRef, useState } from "react";
+import { ReactElement, ReactNode, createContext, useContext, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Map, MapProvider, MapRef, Popup, PopupProps, useMap } from "@vis.gl/react-maplibre";
 import IconItem from './components/iconitem';
-import { IconTable, Mode } from './lib/digitransit';
+import { IconTable, Mode, isHsl } from './lib/digitransit';
 import { NotListedLocationW700 as NotListedLocation } from '@material-symbols-svg/react/icons/not-listed-location';
 import { redirect } from 'next/navigation';
 import { DirectionsBusW700 as DirectionsBus } from '@material-symbols-svg/react/icons/directions-bus';
@@ -15,6 +15,9 @@ import { MetroW700 as Metro } from '@material-symbols-svg/react/icons/metro';
 import { DirectionsBoatW700 as DirectionsBoat } from '@material-symbols-svg/react/icons/directions-boat';
 import { FlightW700 as Flight } from '@material-symbols-svg/react/icons/flight';
 import { TrainW700 as Train } from '@material-symbols-svg/react/icons/train';
+import { GeoJSONFeature, LngLat } from 'maplibre-gl';
+import { ConfigContext } from './layout';
+import { FocusContext } from './FocusContext';
 
 type Slots = {
     overlay: HTMLDivElement | null
@@ -23,8 +26,6 @@ type Slots = {
 
 
 const SlotContext = createContext<Slots>({ overlay: null, sidebar: null })
-export const FocusContext = createContext<{ setSidebarHidden: Dispatch<SetStateAction<boolean>> | null }>({ setSidebarHidden: null })
-
 export function MapLayoutProvider({ children }: { children: React.ReactNode }) {
     const [overlay, setOverlay] = useState<HTMLDivElement | null>(null)
     const [sidebar, setSidebar] = useState<HTMLDivElement | null>(null)
@@ -36,6 +37,8 @@ export function MapLayoutProvider({ children }: { children: React.ReactNode }) {
     const [sidebarHidden, setSidebarHidden] = useState<boolean>(false)
 
     const map = useRef<MapRef>(null)
+
+    const { region } = useContext(ConfigContext)
 
     const focusSidebar = () => !map.current?.isMoving() && setFocus(true)
     const blurSidebar = () => setFocus(false)
@@ -63,21 +66,97 @@ export function MapLayoutProvider({ children }: { children: React.ReactNode }) {
                                     setFocus(false)
                                     if (!map.current) return
                                     const pxBoxSize = 16
+
+                                    const stations =
+                                        region == "hsl"
+                                            ? map.current.querySourceFeatures("terminals", { sourceLayer: "terminals" }).filter(s => e.lngLat.distanceTo(new LngLat(...(s.geometry as GeoJSON.Point).coordinates as [number, number])) < 125)
+                                            : map.current.querySourceFeatures("poi_transit", { sourceLayer: "stations" }).filter(s => e.lngLat.distanceTo(new LngLat(...(s.geometry as GeoJSON.Point).coordinates as [number, number])) < 125 && s.properties.routes && JSON.parse(s.properties.routes).length > 1)
+
                                     const feats = map.current.queryRenderedFeatures([
                                         [e.point.x - pxBoxSize, e.point.y - pxBoxSize],
                                         [e.point.x + pxBoxSize, e.point.y + pxBoxSize]
-                                    ], { layers: ["stops_airplane", "stops_rail", "stops_unknown", "stops_bus", "stops_trunk", "stops_ferry", "stops_tram", "stops_lrail", "stops_subway"] })
-                                    //if (feats.length == 0) redirect(Object.hasOwn(feats[0].properties,"terminalId") ? `/terminal/${properties.}`)
-                                    console.log(feats)
+                                    ], {
+                                        layers:
+                                            region == "hsl"
+                                                ? ["stops_rail", "stops_bus", "stops_trunk", "stops_ferry", "stops_tram", "stops_lrail", "stops_subway"]
+                                                : ["stops_airplane", "stops_rail", "stops_unknown", "stops_bus", "stops_trunk", "stops_ferry", "stops_tram", "stops_lrail", "stops_subway"]
+                                    })
+                                    const combined = [...feats, ...stations];
+                                    if (combined.length == 0) return
+                                    if (combined.length == 1) {
+                                        const first = combined[0]
+                                        if (isHsl(region)) {
+                                            console.log(first.properties.stopId, first.properties.terminalId)
+                                        } else {
+                                            console.log(first.properties.gtfsId)
+                                        }
+                                        return
+                                    }
+
+                                    console.log(feats, stations)
+
                                     setPopup({
                                         latitude: e.lngLat.lat,
                                         longitude: e.lngLat.lng,
                                         anchor: "bottom",
                                         onClose: () => setPopup(null),
                                         children:
-                                            (<>
+                                            (<div className='max-h-100 overflow-scroll font-medium'>
+                                                {stations.filter((value, index, self) =>
+                                                    index === self.findIndex((t) => (
+                                                        t.properties.name === value.properties.name && t.properties.gtfsId === value.properties.gtfsId
+                                                    ))
+                                                ).map((s, i) => {
+                                                    interface HslProperties {
+                                                        mode: Mode
+                                                        nameFi: string
+                                                        nameSe: string
+                                                        terminalId: string
+                                                    }
+
+                                                    interface FinlandProperties {
+                                                        gtfsId: string
+                                                        name: string
+                                                        routes: string
+                                                        stops: string
+                                                        type: string
+                                                    }
+
+                                                    if (isHsl(region)) {
+                                                        const props = s.properties as HslProperties
+                                                        return (<div key={i} className='p-1 font-a'>
+                                                            <a className='decoration-none text-sm' href={`/station/HSL:${props.terminalId}?hsl`}>
+                                                                <IconItem icon={{ boxed: true, children: IconTable[props.mode] }}>
+                                                                    {`${props.nameFi}`}
+                                                                </IconItem>
+                                                            </a>
+                                                        </div>)
+                                                    } else {
+                                                        const props = s.properties as FinlandProperties
+                                                        return (<div key={i} className='p-1 font-a'>
+                                                            <a className='decoration-none text-sm' href={`/station/${props.gtfsId}`}>
+                                                                <IconItem icon={{ boxed: true, children: getIconFromRoutesString(props.routes) }}>
+                                                                    {`${props.name}`}
+                                                                </IconItem>
+                                                            </a>
+                                                        </div>)
+                                                    }
+
+
+
+                                                })}
                                                 {feats.map((f, i) => {
-                                                    const props = f.properties as {
+                                                    interface HslProperties {
+                                                        isTrunkStop: boolean
+                                                        mode: Mode
+                                                        nameFi: string
+                                                        nameSe: string
+                                                        shortId: string
+                                                        platform: string
+                                                        stopId: string
+                                                        terminalId?: string
+                                                    }
+                                                    interface FinlandProperties {
                                                         code: string
                                                         desc: string
                                                         gtfsId: string
@@ -88,14 +167,27 @@ export function MapLayoutProvider({ children }: { children: React.ReactNode }) {
                                                         type: string
                                                     }
 
-
-                                                    return (<div key={i} className='p-1 font-a'>
-                                                        <IconItem icon={{ children: getIconFromRoutesString(props.routes) }}>
-                                                            {`${props.name} ${props.platform && "pl. " + props.platform || ""} ${props.code && "(" + props.code + ")" || ""}`}
-                                                        </IconItem>
-                                                    </div>)
+                                                    if (isHsl(region)) {
+                                                        const props = f.properties as HslProperties
+                                                        return (<div key={i} className='p-1 font-a'>
+                                                            <a className='decoration-none text-sm' href={`/stop/HSL:${props.stopId}?hsl`}>
+                                                                <IconItem icon={{ children: IconTable[props.mode] }}>
+                                                                    {`${props.nameFi} ${props.platform && "pl. " + props.platform || ""} ${props.shortId && "(" + props.shortId.replaceAll(" ","") + ")" || ""}`}
+                                                                </IconItem>
+                                                            </a>
+                                                        </div>)
+                                                    } else {
+                                                        const props = f.properties as FinlandProperties
+                                                        return (<div key={i} className='p-1 font-a'>
+                                                            <a className='decoration-none text-sm' href={`/stop/${props.gtfsId}`}>
+                                                                <IconItem icon={{ children: getIconFromRoutesString(props.routes) }}>
+                                                                    {`${props.name} ${props.platform && "pl. " + props.platform || ""} ${props.code && "(" + props.code + ")" || ""}`}
+                                                                </IconItem>
+                                                            </a>
+                                                        </div>)
+                                                    }
                                                 })}
-                                            </>),
+                                            </div>),
                                     })
                                 }}
                                 ref={map}
@@ -105,7 +197,7 @@ export function MapLayoutProvider({ children }: { children: React.ReactNode }) {
                                     zoom: 13
                                 }}
                                 style={{ width: "100%", height: "100%" }}
-                                mapStyle="/map_style.json"
+                                mapStyle={region == "hsl" ? "/map_style_hsl.json" : "/map_style.json"}
                                 attributionControl={false}
                             >
                                 {popup && <Popup {...popup}></Popup>}
@@ -124,20 +216,22 @@ export function MapLayoutProvider({ children }: { children: React.ReactNode }) {
 }
 
 function getIconFromRoutesString(json: string): ReactNode {
-    const routes: { gtfsType: number }[] = JSON.parse(json)
+    const routes: { gtfsType: number, mode: Mode }[] = JSON.parse(json)
     const routeId = routes.reduce((p, c) => c.gtfsType > p ? c.gtfsType : p, -1)
+    const mode = routes.length && routes[0].mode
     switch (routeId) {
         case 109:
             return (<Train className="text-purple"></Train>)
         case 102:
             return (<Train className="text-green"></Train>)
         case 701:
+        case 700:
         case 3:
             return (<DirectionsBus className="text-blue"></DirectionsBus>)
         case 702:
             return (<DirectionsBus className="text-orange"></DirectionsBus>)
         case 714:
-            return (<BusRailway className="text-red"></BusRailway>)
+            return (<DirectionsBus className="text-blue"></DirectionsBus>)
         case 900:
             return (<Tram className="text-turqoise"></Tram>)
         case 1104:
@@ -147,9 +241,12 @@ function getIconFromRoutesString(json: string): ReactNode {
         case 1:
             return (<Metro className="text-orange"></Metro>)
         case 4:
+        case 1008:
             return (<DirectionsBoat className="text-cyan"></DirectionsBoat>)
         case -1:
             return (<NotListedLocation className='text-gray'></NotListedLocation>)
+        case null:
+            return Object.entries(IconTable).reduce<ReactElement | null>((p, [k, v]) => !p && mode == k ? v : p, null) || (<NotListedLocation className='text-gray'></NotListedLocation>)
         default:
             console.log(routeId)
             return (<NotListedLocation></NotListedLocation>)

@@ -74,3 +74,8 @@ export const IconTable = {
     "FERRY": (<DirectionsBoat className="text-cyan"></DirectionsBoat>),
     "AIRPLANE": (<Flight className="text-darkblue"></Flight>),
 }
+
+
+export function isHsl(region: string): region is "hsl" {
+    return region === "hsl"
+}

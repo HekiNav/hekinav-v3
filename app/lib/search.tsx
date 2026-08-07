@@ -8,22 +8,18 @@ import { PedalBikeW700 as PedalBike } from '@material-symbols-svg/react/icons/pe
 import { GlobeW700 as Globe } from '@material-symbols-svg/react/icons/globe';
 import { HomeWorkW700 as HomeWork } from '@material-symbols-svg/react/icons/home-work';
 import { DirectionsBusW700 as DirectionsBus } from '@material-symbols-svg/react/icons/directions-bus';
-import { TramW700 as Tram } from '@material-symbols-svg/react/icons/tram';
-import { MetroW700 as Metro } from '@material-symbols-svg/react/icons/metro';
-import { TrainW700 as Train } from '@material-symbols-svg/react/icons/train';
 import { ReactElement } from "react";
 import { LngLat } from "maplibre-gl";
 
-export async function search(text: string, focusPoint: [number,number]): Promise<Suggestion[]> {
-    return [... await searchDigitransit(text, new LngLat(...focusPoint))]
+export async function search(text: string, focusPoint: [number,number], isHsl: boolean): Promise<Suggestion[]> {
+    return [... await searchDigitransit(text, new LngLat(...focusPoint),isHsl)]
 }
-async function searchDigitransit(text: string, focusPoint: LngLat): Promise<Suggestion[]> {
-    console.log("hdhd")
+async function searchDigitransit(text: string, focusPoint: LngLat, isHsl: boolean): Promise<Suggestion[]> {
 
     const layers = [["address", "venue", "street"], ["stop", "station", "bikestation"], ["neighbourhood", "localadmin", "region"]]
     const responses = await Promise.all(layers.map(async l => {
         return await fetch(
-            `https://api.digitransit.fi/geocoding/v1/autocomplete?digitransit-subscription-key=${process.env.DIGITRANSIT_KEY}&text=${encodeURIComponent(text)}&layers=${l.join(",")}&focus.point.lat=${focusPoint.lat}&focus.point.lon=${focusPoint.lng}`
+            `https://api.digitransit.fi/geocoding/v1/search?digitransit-subscription-key=${process.env.DIGITRANSIT_KEY}&text=${encodeURIComponent(text)}&layers=${l.join(",")}&focus.point.lat=${focusPoint.lat}&focus.point.lon=${focusPoint.lng}${isHsl ? "&boundary.polygon=25.5345 60.2592,25.3881 60.1693,25.3559 60.103,25.3293 59.9371,24.2831 59.78402,24.2721 59.95501,24.2899 60.00895,24.3087 60.01947,24.1994 60.12753,24.1362 60.1114,24.1305 60.12847,24.099 60.1405,24.0179 60.1512,24.0049 60.1901,24.0445 60.1918,24.0373 60.2036,24.0796 60.2298,24.1652 60.2428,24.3095 60.2965,24.3455 60.2488,24.428 60.3002,24.5015 60.2872,24.4888 60.3306,24.5625 60.3142,24.5957 60.3242,24.6264 60.3597,24.666 60.3638,24.7436 60.3441,24.9291 60.4523,24.974 60.5253,24.9355 60.5131,24.8971 60.562,25.0388 60.5806,25.1508 60.5167,25.2242 60.5016,25.3661 60.4118,25.3652 60.3756" : ""}`
         )
     }))
     const results: GeocodingResponse = await (await Promise.all(responses.map(r => r.json()))).reduce((p, c) => ({ ...p, features: [...(p.features || []), ...c.features] }), {})
@@ -53,7 +49,6 @@ export async function geocodingResultsToSuggestions(results: GeocodingResponse) 
     )
 }
 function getNameFromProps({ layer, ...props }: { [key: string]: any }): string {
-    console.log(layer)
     switch (layer) {
         case "stop":
         case "station":

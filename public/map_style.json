@@ -1049,6 +1049,20 @@
         "text-halo-width": 0.8
       }
     },
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     {
       "id": "subway-entrance_icon",
       "type": "symbol",
@@ -1154,227 +1168,6 @@
         ]
       },
       "paint": {
-        "icon-translate": [
-          0,
-          -5.25
-        ]
-      }
-    },
-    {
-      "id": "icon_bus-station",
-      "type": "symbol",
-      "source": "openmaptiles",
-      "source-layer": "poi",
-      "minzoom": 11,
-      "filter": [
-        "all",
-        [
-          "==",
-          [
-            "geometry-type"
-          ],
-          "Point"
-        ],
-        [
-          "==",
-          [
-            "get",
-            "class"
-          ],
-          "bus"
-        ],
-        [
-          "==",
-          [
-            "get",
-            "subclass"
-          ],
-          "bus_station"
-        ]
-      ],
-      "layout": {
-        "text-optional": true,
-        "text-size": 10,
-        "text-field": "{name}",
-        "text-font": [
-          "Host Grotesk"
-        ],
-        "text-anchor": "top",
-        "text-max-width": 8,
-        "text-offset": [
-          0,
-          0.5
-        ],
-        "icon-image": "icon-terminal-bus",
-        "icon-size": 0.9
-      },
-      "paint": {
-        "text-color": "#666",
-        "text-halo-color": "#fff",
-        "text-halo-width": 1,
-        "icon-translate": [
-          0,
-          -5.25
-        ]
-      }
-    },
-    {
-      "id": "icon_subway-station",
-      "type": "symbol",
-      "source": "openmaptiles",
-      "source-layer": "poi",
-      "minzoom": 11,
-      "filter": [
-        "all",
-        [
-          "==",
-          [
-            "geometry-type"
-          ],
-          "Point"
-        ],
-        [
-          "==",
-          [
-            "get",
-            "class"
-          ],
-          "railway"
-        ],
-        [
-          "==",
-          [
-            "get",
-            "subclass"
-          ],
-          "subway"
-        ]
-      ],
-      "layout": {
-        "text-optional": true,
-        "text-size": 10,
-        "text-field": "{name}",
-        "text-font": [
-          "Host Grotesk"
-        ],
-        "text-anchor": "top",
-        "text-max-width": 8,
-        "text-offset": [
-          0,
-          0.5
-        ],
-        "icon-image": "icon-terminal-subway",
-        "icon-size": 0.9
-      },
-      "paint": {
-        "text-color": "#666",
-        "text-halo-color": "#fff",
-        "text-halo-width": 1,
-        "icon-translate": [
-          0,
-          -5.25
-        ]
-      }
-    },
-    {
-      "id": "icon_railway-station",
-      "type": "symbol",
-      "source": "openmaptiles",
-      "source-layer": "poi",
-      "minzoom": 11,
-      "filter": [
-        "all",
-        [
-          "==",
-          [
-            "geometry-type"
-          ],
-          "Point"
-        ],
-        [
-          "==",
-          [
-            "get",
-            "class"
-          ],
-          "railway"
-        ],
-        [
-          "==",
-          [
-            "get",
-            "subclass"
-          ],
-          "station"
-        ]
-      ],
-      "layout": {
-        "text-optional": true,
-        "text-size": 10,
-        "text-field": "{name}",
-        "text-font": [
-          "Host Grotesk"
-        ],
-        "text-anchor": "top",
-        "text-max-width": 8,
-        "text-offset": [
-          0,
-          0.75
-        ],
-        "icon-image": "icon-terminal-train",
-        "icon-size": 0.9
-      },
-      "paint": {
-        "text-color": "#666",
-        "text-halo-color": "#fff",
-        "text-halo-width": 1,
-        "icon-translate": [
-          0,
-          -5.25
-        ]
-      }
-    },
-    {
-      "id": "icon_aerodrome",
-      "type": "symbol",
-      "source": "vector",
-      "source-layer": "aerodrome_label",
-      "minzoom": 5,
-      "filter": [
-        "all",
-        [
-          "==",
-          "$type",
-          "Point"
-        ],
-        [
-          "in",
-          "class",
-          "international",
-          "public",
-          "regional"
-        ]
-      ],
-      "layout": {
-        "text-optional": true,
-        "text-size": 10,
-        "text-field": "{name_en}",
-        "text-font": [
-          "Host Grotesk"
-        ],
-        "text-anchor": "top",
-        "text-max-width": 8,
-        "text-offset": [
-          0,
-          0.5
-        ],
-        "icon-image": "icon-terminal-aerodrome",
-        "icon-size": 0.9
-      },
-      "paint": {
-        "text-color": "#666",
-        "text-halo-color": "#fff",
-        "text-halo-width": 1,
         "icon-translate": [
           0,
           -5.25
@@ -1896,6 +1689,227 @@
             ]
           ]
         }
+      }
+    },
+    {
+      "id": "icon_bus-station",
+      "type": "symbol",
+      "source": "openmaptiles",
+      "source-layer": "poi",
+      "minzoom": 11,
+      "filter": [
+        "all",
+        [
+          "==",
+          [
+            "geometry-type"
+          ],
+          "Point"
+        ],
+        [
+          "==",
+          [
+            "get",
+            "class"
+          ],
+          "bus"
+        ],
+        [
+          "==",
+          [
+            "get",
+            "subclass"
+          ],
+          "bus_station"
+        ]
+      ],
+      "layout": {
+        "text-optional": true,
+        "text-size": 10,
+        "text-field": "{name}",
+        "text-font": [
+          "Host Grotesk"
+        ],
+        "text-anchor": "top",
+        "text-max-width": 8,
+        "text-offset": [
+          0,
+          0.5
+        ],
+        "icon-image": "icon-terminal-bus",
+        "icon-size": 0.9
+      },
+      "paint": {
+        "text-color": "#666",
+        "text-halo-color": "#fff",
+        "text-halo-width": 1,
+        "icon-translate": [
+          0,
+          -5.25
+        ]
+      }
+    },
+    {
+      "id": "icon_subway-station",
+      "type": "symbol",
+      "source": "openmaptiles",
+      "source-layer": "poi",
+      "minzoom": 11,
+      "filter": [
+        "all",
+        [
+          "==",
+          [
+            "geometry-type"
+          ],
+          "Point"
+        ],
+        [
+          "==",
+          [
+            "get",
+            "class"
+          ],
+          "railway"
+        ],
+        [
+          "==",
+          [
+            "get",
+            "subclass"
+          ],
+          "subway"
+        ]
+      ],
+      "layout": {
+        "text-optional": true,
+        "text-size": 10,
+        "text-field": "{name}",
+        "text-font": [
+          "Host Grotesk"
+        ],
+        "text-anchor": "top",
+        "text-max-width": 8,
+        "text-offset": [
+          0,
+          0.5
+        ],
+        "icon-image": "icon-terminal-subway",
+        "icon-size": 0.9
+      },
+      "paint": {
+        "text-color": "#666",
+        "text-halo-color": "#fff",
+        "text-halo-width": 1,
+        "icon-translate": [
+          0,
+          -5.25
+        ]
+      }
+    },
+    {
+      "id": "icon_railway-station",
+      "type": "symbol",
+      "source": "openmaptiles",
+      "source-layer": "poi",
+      "minzoom": 11,
+      "filter": [
+        "all",
+        [
+          "==",
+          [
+            "geometry-type"
+          ],
+          "Point"
+        ],
+        [
+          "==",
+          [
+            "get",
+            "class"
+          ],
+          "railway"
+        ],
+        [
+          "==",
+          [
+            "get",
+            "subclass"
+          ],
+          "station"
+        ]
+      ],
+      "layout": {
+        "text-optional": true,
+        "text-size": 10,
+        "text-field": "{name}",
+        "text-font": [
+          "Host Grotesk"
+        ],
+        "text-anchor": "top",
+        "text-max-width": 8,
+        "text-offset": [
+          0,
+          0.75
+        ],
+        "icon-image": "icon-terminal-train",
+        "icon-size": 0.9
+      },
+      "paint": {
+        "text-color": "#666",
+        "text-halo-color": "#fff",
+        "text-halo-width": 1,
+        "icon-translate": [
+          0,
+          -5.25
+        ]
+      }
+    },
+    {
+      "id": "icon_aerodrome",
+      "type": "symbol",
+      "source": "vector",
+      "source-layer": "aerodrome_label",
+      "minzoom": 5,
+      "filter": [
+        "all",
+        [
+          "==",
+          "$type",
+          "Point"
+        ],
+        [
+          "in",
+          "class",
+          "international",
+          "public",
+          "regional"
+        ]
+      ],
+      "layout": {
+        "text-optional": true,
+        "text-size": 10,
+        "text-field": "{name_en}",
+        "text-font": [
+          "Host Grotesk"
+        ],
+        "text-anchor": "top",
+        "text-max-width": 8,
+        "text-offset": [
+          0,
+          0.5
+        ],
+        "icon-image": "icon-terminal-aerodrome",
+        "icon-size": 0.9
+      },
+      "paint": {
+        "text-color": "#666",
+        "text-halo-color": "#fff",
+        "text-halo-width": 1,
+        "icon-translate": [
+          0,
+          -5.25
+        ]
       }
     }
   ]

@@ -19,7 +19,10 @@ import Button from "./components/button";
 import { TZDate } from "@date-fns/tz";
 import { format } from "date-fns-tz";
 import { isToday, isTomorrow } from "date-fns";
-import { FocusContext, MapOverlay, Sidebar } from "./mapcontext";
+import { MapOverlay, Sidebar } from "./mapcontext";
+import { FocusContext } from './FocusContext';
+import { ConfigContext } from './layout';
+import { isHsl } from './lib/digitransit';
 
 const timeOptions: Suggestion<{}>[] = []
 
@@ -82,6 +85,7 @@ export default function Home() {
   }, [pickedLocation])
 
   const { default: map } = useMap()
+  const { region } = useContext(ConfigContext)
 
   function getUserLocation(fn: Dispatch<SetStateAction<PlaceSuggestion | null>>) {
     if ("geolocation" in navigator) {
@@ -119,12 +123,13 @@ export default function Home() {
     setSidebarHidden && setSidebarHidden(true)
   }
 
+
   return (
     <>
       <Sidebar>
         <h1 className='text-black'><img src="/logo_full.svg" alt="Hekinav Logo" /></h1>
-        <InputField initialValue={origin?.text} suggestionFunction={(t) => placeSearch(t, map?.getCenter() || new LngLat(24.94, 60.18))} onlySuggestions placeholder='Origin' name='origin' onValueSet={(t, v) => setOrigin(typeof v == "string" ? null : v)} icon={<LocationOn className='text-blue'></LocationOn>}></InputField>
-        <InputField initialValue={destination?.text} suggestionFunction={(t) => placeSearch(t, map?.getCenter() || new LngLat(24.94, 60.18))} onlySuggestions placeholder='Destination' name='destination' onValueSet={(t, v) => setDestination(typeof v == "string" ? null : v)} icon={<LocationOn className='text-red'></LocationOn>}></InputField>
+        <InputField initialValue={origin?.text} suggestionFunction={(t) => placeSearch(t, map?.getCenter() || new LngLat(24.94, 60.18), isHsl(region))} onlySuggestions placeholder='Origin' name='origin' onValueSet={(t, v) => setOrigin(typeof v == "string" ? null : v)} icon={<LocationOn className='text-blue'></LocationOn>}></InputField>
+        <InputField initialValue={destination?.text} suggestionFunction={(t) => placeSearch(t, map?.getCenter() || new LngLat(24.94, 60.18), isHsl(region))} onlySuggestions placeholder='Destination' name='destination' onValueSet={(t, v) => setDestination(typeof v == "string" ? null : v)} icon={<LocationOn className='text-red'></LocationOn>}></InputField>
         <div className="flex flex-row gap-2">
           <Button className="w-70 text-center h-min" onClick={() => setDepArr(depArr == "dep" ? "arr" : "dep")}>{depArr == "dep" ? "Departure" : "Arrival"}</Button>
           <InputField className="h-min" name="date" initialValue={"Today"} suggestionFunction={async () => dateOptions} onlySuggestions onValueSet={(n, v) => typeof v != "string" && setDate(new TZDate(v.id))} icon={<CalendarToday></CalendarToday>}></InputField>
@@ -147,7 +152,7 @@ export default function Home() {
 
 export type PlaceSuggestion = Suggestion<{ lat: number, lng: number }>
 
-async function placeSearch(text: string, focusPoint: LngLat): Promise<PlaceSuggestion[]> {
+async function placeSearch(text: string, focusPoint: LngLat, isHsl: boolean): Promise<PlaceSuggestion[]> {
   const fallbackOptions = [{
     icon: (<MapIcon></MapIcon>),
     text: "Choose on map",
@@ -161,7 +166,7 @@ async function placeSearch(text: string, focusPoint: LngLat): Promise<PlaceSugge
   if (text.length <= 1) {
     return fallbackOptions
   } else {
-    const result = await search(text, focusPoint.toArray())
+    const result = await search(text, focusPoint.toArray(), isHsl)
     return result.length == 0 ? fallbackOptions : result
   }
 }
