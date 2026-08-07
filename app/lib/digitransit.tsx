@@ -65,14 +65,14 @@ export interface GeocodingResponse {
 }
 
 export const IconTable = {
-    "BUS-EXPRESS": (<DirectionsBus className="text-darkblue"></DirectionsBus>),
-    "SPEEDTRAM": (<Tram className="text-turqoise"></Tram>),
-    "BUS": (<DirectionsBus className="text-blue"></DirectionsBus>),
-    "RAIL": (<Train className="text-purple"></Train>),
-    "SUBWAY": (<Metro className="text-orange"></Metro>),
-    "TRAM": (<Tram className="text-green"></Tram>),
-    "FERRY": (<DirectionsBoat className="text-cyan"></DirectionsBoat>),
-    "AIRPLANE": (<Flight className="text-darkblue"></Flight>),
+    "BUS-EXPRESS": (<DirectionsBus className="text-darkblue border-darkblue"></DirectionsBus>),
+    "SPEEDTRAM": (<Tram className="text-turqoise border-turqoise"></Tram>),
+    "BUS": (<DirectionsBus className="text-blue border-blue"></DirectionsBus>),
+    "RAIL": (<Train className="text-purple border-purple"></Train>),
+    "SUBWAY": (<Metro className="text-orange border-orange"></Metro>),
+    "TRAM": (<Tram className="text-green border-green"></Tram>),
+    "FERRY": (<DirectionsBoat className="text-cyan border-cyan"></DirectionsBoat>),
+    "AIRPLANE": (<Flight className="text-darkblue border-darkblue"></Flight>),
 }
 
 

@@ -33,3 +33,11 @@ div[mapboxgl-children] {
 a:not(.decoration-none) {
   text-decoration: underline;
 }
+
+
+.nav-item .indicator {
+  width: 0;
+}
+.nav-item:hover .indicator, .nav-item.active .indicator {
+  width: 100%;
+}

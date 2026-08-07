@@ -896,7 +896,7 @@
         "type": "circle",
         "source": "stops",
         "source-layer": "stops",
-        "minzoom": 15,
+        "minzoom": 13,
         "filter": [
             "==",
             [
@@ -928,7 +928,7 @@
         "type": "circle",
         "source": "stops",
         "source-layer": "stops",
-        "minzoom": 15,
+        "minzoom": 13,
         "filter": [
             "==",
             [
@@ -1201,7 +1201,7 @@
         "type": "circle",
         "source": "stops",
         "source-layer": "stops",
-        "minzoom": 15,
+        "minzoom": 13,
         "filter": [
             "==",
             [

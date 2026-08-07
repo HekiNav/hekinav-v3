@@ -1,13 +1,13 @@
-import { PropsWithChildren, HTMLAttributes, PropsWithoutRef} from "react";
+import { HTMLAttributes, PropsWithoutRef, ReactElement} from "react";
 
-export interface IconProps extends PropsWithChildren, PropsWithoutRef<HTMLAttributes<HTMLDivElement>> {
-    boxed?: boolean
-    small?: boolean
+export interface IconProps extends PropsWithoutRef<HTMLAttributes<HTMLDivElement>> {
+    boxed?: boolean,
+    children: ReactElement
 }
 
 export default function Icon(props: IconProps) {
     return (
-        <div className={`${props.className || ""} flex items-center`}>
+        <div {...props} className={`${props.boxed && `rounded-lg border-3 ${(props.children.props as {className?: string}).className || ""}`} ${props.className || ""} flex items-center`}>
             {props.children}
         </div>
     )

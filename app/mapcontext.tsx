@@ -57,7 +57,7 @@ export function MapLayoutProvider({ children }: { children: React.ReactNode }) {
                 <FocusContext.Provider value={{ setSidebarHidden }}>
                     <main className="w-full md:flex md:flex-row md:h-screen relative" style={{ height: "calc(var(--vh, 1vh) * 120)" }}>
                         <div ref={setSidebar} className={`absolute ${focus ? "top-2/10" : "top-7/10"} ${focus ? "overflow-scroll" : "overflow-hidden!"} md:overflow-scroll ${sidebarHidden && "top-10/10"} left-5 right-5 
-       z-100 bg-white rounded-t-2xl shadow-[0_0_10px_#0008] p-4 flex flex-col gap-2
+       z-100 bg-white rounded-t-2xl shadow-[0_0_10px_#0008] md:shadow-none p-4 flex flex-col gap-2
        md:static md:h-full! md:w-100 transition-all ease-in-out duration-1000 md:rounded-none overflow-scroll bottom-0 md:pb-4! pb-200`}>
                         </div>
                         <div className='h-screen' style={{ position: 'relative', flex: 1 }}>
@@ -67,10 +67,12 @@ export function MapLayoutProvider({ children }: { children: React.ReactNode }) {
                                     if (!map.current) return
                                     const pxBoxSize = 16
 
+                                    const distance = map.current.getZoom() > 10 ? 125 : 500
+
                                     const stations =
                                         region == "hsl"
-                                            ? map.current.querySourceFeatures("terminals", { sourceLayer: "terminals" }).filter(s => e.lngLat.distanceTo(new LngLat(...(s.geometry as GeoJSON.Point).coordinates as [number, number])) < 125)
-                                            : map.current.querySourceFeatures("poi_transit", { sourceLayer: "stations" }).filter(s => e.lngLat.distanceTo(new LngLat(...(s.geometry as GeoJSON.Point).coordinates as [number, number])) < 125 && s.properties.routes && JSON.parse(s.properties.routes).length > 1)
+                                            ? map.current.querySourceFeatures("terminals", { sourceLayer: "terminals" }).filter(s => e.lngLat.distanceTo(new LngLat(...(s.geometry as GeoJSON.Point).coordinates as [number, number])) < distance)
+                                            : map.current.querySourceFeatures("poi_transit", { sourceLayer: "stations" }).filter(s => e.lngLat.distanceTo(new LngLat(...(s.geometry as GeoJSON.Point).coordinates as [number, number])) < distance && s.properties.routes && JSON.parse(s.properties.routes).length > 1)
 
                                     const feats = map.current.queryRenderedFeatures([
                                         [e.point.x - pxBoxSize, e.point.y - pxBoxSize],
@@ -85,15 +87,14 @@ export function MapLayoutProvider({ children }: { children: React.ReactNode }) {
                                     if (combined.length == 0) return
                                     if (combined.length == 1) {
                                         const first = combined[0]
+                                        const isStation = stations.length == 1
                                         if (isHsl(region)) {
-                                            console.log(first.properties.stopId, first.properties.terminalId)
+                                            redirect(`/${isStation ? "station" : "stop"}/${isStation ? first.properties.terminalId : first.properties.stopId}`)
                                         } else {
-                                            console.log(first.properties.gtfsId)
+                                            redirect(`/${isStation ? "station" : "stop"}/${first.properties.gtfsId}`)
                                         }
-                                        return
                                     }
 
-                                    console.log(feats, stations)
 
                                     setPopup({
                                         latitude: e.lngLat.lat,
@@ -104,7 +105,7 @@ export function MapLayoutProvider({ children }: { children: React.ReactNode }) {
                                             (<div className='max-h-100 overflow-scroll font-medium'>
                                                 {stations.filter((value, index, self) =>
                                                     index === self.findIndex((t) => (
-                                                        t.properties.name === value.properties.name && t.properties.gtfsId === value.properties.gtfsId
+                                                        t.properties.name === value.properties.name && t.properties.gtfsId === value.properties.gtfsId && t.properties.stopId === value.properties.stopId && t.properties.terminalId === value.properties.terminalId
                                                     ))
                                                 ).map((s, i) => {
                                                     interface HslProperties {
@@ -171,8 +172,8 @@ export function MapLayoutProvider({ children }: { children: React.ReactNode }) {
                                                         const props = f.properties as HslProperties
                                                         return (<div key={i} className='p-1 font-a'>
                                                             <a className='decoration-none text-sm' href={`/stop/HSL:${props.stopId}?hsl`}>
-                                                                <IconItem icon={{ children: IconTable[props.mode] }}>
-                                                                    {`${props.nameFi} ${props.platform && "pl. " + props.platform || ""} ${props.shortId && "(" + props.shortId.replaceAll(" ","") + ")" || ""}`}
+                                                                <IconItem icon={{ className: stations.length ? "m-[3px]" : "", children: IconTable[props.mode] }}>
+                                                                    {`${props.nameFi} ${props.platform && "pl. " + props.platform || ""} ${props.shortId && "(" + props.shortId.replaceAll(" ", "") + ")" || ""}`}
                                                                 </IconItem>
                                                             </a>
                                                         </div>)
@@ -180,7 +181,7 @@ export function MapLayoutProvider({ children }: { children: React.ReactNode }) {
                                                         const props = f.properties as FinlandProperties
                                                         return (<div key={i} className='p-1 font-a'>
                                                             <a className='decoration-none text-sm' href={`/stop/${props.gtfsId}`}>
-                                                                <IconItem icon={{ children: getIconFromRoutesString(props.routes) }}>
+                                                                <IconItem icon={{ className: stations.length ? "m-[3px]" : "", children: getIconFromRoutesString(props.routes) }}>
                                                                     {`${props.name} ${props.platform && "pl. " + props.platform || ""} ${props.code && "(" + props.code + ")" || ""}`}
                                                                 </IconItem>
                                                             </a>
@@ -197,7 +198,7 @@ export function MapLayoutProvider({ children }: { children: React.ReactNode }) {
                                     zoom: 13
                                 }}
                                 style={{ width: "100%", height: "100%" }}
-                                mapStyle={region == "hsl" ? "/map_style_hsl.json" : "/map_style.json"}
+                                mapStyle={isHsl(region) ? "/map_style_hsl.json" : "/map_style.json"}
                                 attributionControl={false}
                             >
                                 {popup && <Popup {...popup}></Popup>}
@@ -215,36 +216,36 @@ export function MapLayoutProvider({ children }: { children: React.ReactNode }) {
     )
 }
 
-function getIconFromRoutesString(json: string): ReactNode {
+function getIconFromRoutesString(json: string): ReactElement {
     const routes: { gtfsType: number, mode: Mode }[] = JSON.parse(json)
     const routeId = routes.reduce((p, c) => c.gtfsType > p ? c.gtfsType : p, -1)
     const mode = routes.length && routes[0].mode
     switch (routeId) {
         case 109:
-            return (<Train className="text-purple"></Train>)
+            return (<Train className="text-purple border-purple"></Train>)
         case 102:
-            return (<Train className="text-green"></Train>)
+            return (<Train className="text-green border-green"></Train>)
         case 701:
         case 700:
         case 3:
-            return (<DirectionsBus className="text-blue"></DirectionsBus>)
+            return (<DirectionsBus className="text-blue border-blue"></DirectionsBus>)
         case 702:
-            return (<DirectionsBus className="text-orange"></DirectionsBus>)
+            return (<DirectionsBus className="text-orange border-orange"></DirectionsBus>)
         case 714:
-            return (<DirectionsBus className="text-blue"></DirectionsBus>)
+            return (<DirectionsBus className="text-blue border-blue"></DirectionsBus>)
         case 900:
-            return (<Tram className="text-turqoise"></Tram>)
+            return (<Tram className="text-turqoise border-turqoise"></Tram>)
         case 1104:
-            return (<Flight className="text-darkblue"></Flight>)
+            return (<Flight className="text-darkblue border-darkblue"></Flight>)
         case 0:
-            return (<Tram className="text-green"></Tram>)
+            return (<Tram className="text-green border-green"></Tram>)
         case 1:
-            return (<Metro className="text-orange"></Metro>)
+            return (<Metro className="text-orange border-orange"></Metro>)
         case 4:
         case 1008:
-            return (<DirectionsBoat className="text-cyan"></DirectionsBoat>)
+            return (<DirectionsBoat className="text-cyan border-cyan"></DirectionsBoat>)
         case -1:
-            return (<NotListedLocation className='text-gray'></NotListedLocation>)
+            return (<NotListedLocation className='text-gray border-gray'></NotListedLocation>)
         case null:
             return Object.entries(IconTable).reduce<ReactElement | null>((p, [k, v]) => !p && mode == k ? v : p, null) || (<NotListedLocation className='text-gray'></NotListedLocation>)
         default:

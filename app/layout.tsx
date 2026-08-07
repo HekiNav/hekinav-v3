@@ -7,7 +7,8 @@ import { Host_Grotesk } from "next/font/google";
 import toast, { Toaster } from "react-hot-toast";
 import { createContext, useEffect } from "react";
 import { MapLayoutProvider } from "./mapcontext";
-import { useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
+import Navbar from "./components/navbar";
 
 const hostGrotesk = Host_Grotesk({
   variable: "--font-a",
@@ -37,7 +38,9 @@ export default function RootLayout({
   const config: HekinavConfig = {
     region: hslParam === null ? "finland" : "hsl"
   }
+  const path = usePathname()
   useEffect(() => {
+    if (path != "/") return
     if (config.region == "hsl") {
       toast(<span>You are using the HSL Region version of Hekinav. Switch to the <a href="/">Finland-wide version</a></span>, {})
     } else {
@@ -73,6 +76,7 @@ export default function RootLayout({
       </head>
       <body className="h-screen overflow-hidden">
         <ConfigContext value={config}>
+          <Navbar></Navbar>
           <Toaster
             toastOptions={{
               className: "border-3 border-black bg-white!",
