@@ -1,23 +1,23 @@
 "use client";
 import 'maplibre-gl/dist/maplibre-gl.css';
 
-import { ReactElement, ReactNode, createContext, useContext, useEffect, useRef, useState } from "react";
+import { ReactElement, createContext, useContext, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Map, MapProvider, MapRef, Popup, PopupProps, useMap } from "@vis.gl/react-maplibre";
+import { Map, MapProvider, MapRef, Popup, PopupProps } from "@vis.gl/react-maplibre";
 import IconItem from './components/iconitem';
-import { IconTable, Mode, isHsl } from './lib/digitransit';
+import { IconTable, Mode } from './lib/digitransit';
 import { NotListedLocationW700 as NotListedLocation } from '@material-symbols-svg/react/icons/not-listed-location';
 import { redirect } from 'next/navigation';
 import { DirectionsBusW700 as DirectionsBus } from '@material-symbols-svg/react/icons/directions-bus';
 import { TramW700 as Tram } from '@material-symbols-svg/react/icons/tram';
-import { BusRailwayW700 as BusRailway } from '@material-symbols-svg/react/icons/bus-railway';
 import { MetroW700 as Metro } from '@material-symbols-svg/react/icons/metro';
 import { DirectionsBoatW700 as DirectionsBoat } from '@material-symbols-svg/react/icons/directions-boat';
 import { FlightW700 as Flight } from '@material-symbols-svg/react/icons/flight';
 import { TrainW700 as Train } from '@material-symbols-svg/react/icons/train';
-import { GeoJSONFeature, LngLat } from 'maplibre-gl';
-import { ConfigContext } from './layout';
+import { LngLat } from 'maplibre-gl';
 import { FocusContext } from './FocusContext';
+import Link from 'next/link';
+import { useIsHsl } from './hooks/useHsl';
 
 type Slots = {
     overlay: HTMLDivElement | null
@@ -38,7 +38,7 @@ export function MapLayoutProvider({ children }: { children: React.ReactNode }) {
 
     const map = useRef<MapRef>(null)
 
-    const { region } = useContext(ConfigContext)
+    const isHsl = useIsHsl()
 
     const focusSidebar = () => !map.current?.isMoving() && setFocus(true)
     const blurSidebar = () => setFocus(false)
@@ -70,7 +70,7 @@ export function MapLayoutProvider({ children }: { children: React.ReactNode }) {
                                     const distance = map.current.getZoom() > 10 ? 125 : 500
 
                                     const stations =
-                                        region == "hsl"
+                                        isHsl
                                             ? map.current.querySourceFeatures("terminals", { sourceLayer: "terminals" }).filter(s => e.lngLat.distanceTo(new LngLat(...(s.geometry as GeoJSON.Point).coordinates as [number, number])) < distance)
                                             : map.current.querySourceFeatures("poi_transit", { sourceLayer: "stations" }).filter(s => e.lngLat.distanceTo(new LngLat(...(s.geometry as GeoJSON.Point).coordinates as [number, number])) < distance && s.properties.routes && JSON.parse(s.properties.routes).length > 1)
 
@@ -79,7 +79,7 @@ export function MapLayoutProvider({ children }: { children: React.ReactNode }) {
                                         [e.point.x + pxBoxSize, e.point.y + pxBoxSize]
                                     ], {
                                         layers:
-                                            region == "hsl"
+                                            isHsl
                                                 ? ["stops_rail", "stops_bus", "stops_trunk", "stops_ferry", "stops_tram", "stops_lrail", "stops_subway"]
                                                 : ["stops_airplane", "stops_rail", "stops_unknown", "stops_bus", "stops_trunk", "stops_ferry", "stops_tram", "stops_lrail", "stops_subway"]
                                     })
@@ -88,10 +88,10 @@ export function MapLayoutProvider({ children }: { children: React.ReactNode }) {
                                     if (combined.length == 1) {
                                         const first = combined[0]
                                         const isStation = stations.length == 1
-                                        if (isHsl(region)) {
-                                            redirect(`/${isStation ? "station" : "stop"}/${isStation ? first.properties.terminalId : first.properties.stopId}`)
+                                        if (isHsl) {
+                                            redirect(`/${isStation ? "station" : "stop"}/${isStation ? first.properties.terminalId : first.properties.stopId}/?hsl`)
                                         } else {
-                                            redirect(`/${isStation ? "station" : "stop"}/${first.properties.gtfsId}`)
+                                            redirect(`/${isStation ? "station" : "stop"}/${first.properties.gtfsId}/`)
                                         }
                                     }
 
@@ -123,23 +123,23 @@ export function MapLayoutProvider({ children }: { children: React.ReactNode }) {
                                                         type: string
                                                     }
 
-                                                    if (isHsl(region)) {
+                                                    if (isHsl) {
                                                         const props = s.properties as HslProperties
                                                         return (<div key={i} className='p-1 font-a'>
-                                                            <a className='decoration-none text-sm' href={`/station/HSL:${props.terminalId}?hsl`}>
+                                                            <Link className='decoration-none text-sm' href={`/station/HSL:${props.terminalId}/?hsl`}>
                                                                 <IconItem icon={{ boxed: true, children: IconTable[props.mode] }}>
                                                                     {`${props.nameFi}`}
                                                                 </IconItem>
-                                                            </a>
+                                                            </Link>
                                                         </div>)
                                                     } else {
                                                         const props = s.properties as FinlandProperties
                                                         return (<div key={i} className='p-1 font-a'>
-                                                            <a className='decoration-none text-sm' href={`/station/${props.gtfsId}`}>
+                                                            <Link className='decoration-none text-sm' href={`/station/${props.gtfsId}/`}>
                                                                 <IconItem icon={{ boxed: true, children: getIconFromRoutesString(props.routes) }}>
                                                                     {`${props.name}`}
                                                                 </IconItem>
-                                                            </a>
+                                                            </Link>
                                                         </div>)
                                                     }
 
@@ -168,23 +168,23 @@ export function MapLayoutProvider({ children }: { children: React.ReactNode }) {
                                                         type: string
                                                     }
 
-                                                    if (isHsl(region)) {
+                                                    if (isHsl) {
                                                         const props = f.properties as HslProperties
                                                         return (<div key={i} className='p-1 font-a'>
-                                                            <a className='decoration-none text-sm' href={`/stop/HSL:${props.stopId}?hsl`}>
+                                                            <Link className='decoration-none text-sm' href={`/stop/HSL:${props.stopId}/?hsl`}>
                                                                 <IconItem icon={{ className: stations.length ? "m-[3px]" : "", children: IconTable[props.mode] }}>
                                                                     {`${props.nameFi} ${props.platform && "pl. " + props.platform || ""} ${props.shortId && "(" + props.shortId.replaceAll(" ", "") + ")" || ""}`}
                                                                 </IconItem>
-                                                            </a>
+                                                            </Link>
                                                         </div>)
                                                     } else {
                                                         const props = f.properties as FinlandProperties
                                                         return (<div key={i} className='p-1 font-a'>
-                                                            <a className='decoration-none text-sm' href={`/stop/${props.gtfsId}`}>
+                                                            <Link className='decoration-none text-sm' href={`/stop/${props.gtfsId}/`}>
                                                                 <IconItem icon={{ className: stations.length ? "m-[3px]" : "", children: getIconFromRoutesString(props.routes) }}>
                                                                     {`${props.name} ${props.platform && "pl. " + props.platform || ""} ${props.code && "(" + props.code + ")" || ""}`}
                                                                 </IconItem>
-                                                            </a>
+                                                            </Link>
                                                         </div>)
                                                     }
                                                 })}
@@ -198,7 +198,7 @@ export function MapLayoutProvider({ children }: { children: React.ReactNode }) {
                                     zoom: 13
                                 }}
                                 style={{ width: "100%", height: "100%" }}
-                                mapStyle={isHsl(region) ? "/map_style_hsl.json" : "/map_style.json"}
+                                mapStyle={isHsl ? "/map_style_hsl.json" : "/map_style.json"}
                                 attributionControl={false}
                             >
                                 {popup && <Popup {...popup}></Popup>}

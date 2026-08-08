@@ -1,13 +1,14 @@
+import { HTMLAttributes } from "react"
 import { IconProps } from "./icon"
 import Icon from "./icon"
 
-export interface IconItemProps extends React.PropsWithChildren {
+export interface IconItemProps extends React.PropsWithChildren, HTMLAttributes<HTMLDivElement> {
     icon: IconProps,
     reversed?: boolean
 }
-export default function IconItem({children, icon, reversed = false}: IconItemProps) {
+export default function IconItem({children, icon, reversed = false, className, ...props}: IconItemProps) {
     return (
-        <div className={`flex ${reversed ? "flex-row-reverse" : "flex-row"} gap-2 items-center`}>
+        <div className={`flex ${reversed ? "flex-row-reverse" : "flex-row"} gap-2 items-center ${className}`} {...props}>
             <Icon {...icon}></Icon>
             {children}
         </div>

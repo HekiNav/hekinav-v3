@@ -21,8 +21,7 @@ import { format } from "date-fns-tz";
 import { isToday, isTomorrow } from "date-fns";
 import { MapOverlay, Sidebar } from "./mapcontext";
 import { FocusContext } from './FocusContext';
-import { ConfigContext } from './layout';
-import { isHsl } from './lib/digitransit';
+import { useIsHsl } from './hooks/useHsl';
 
 const timeOptions: Suggestion<{}>[] = []
 
@@ -85,7 +84,7 @@ export default function Home() {
   }, [pickedLocation])
 
   const { default: map } = useMap()
-  const { region } = useContext(ConfigContext)
+  const isHsl = useIsHsl()
 
   function getUserLocation(fn: Dispatch<SetStateAction<PlaceSuggestion | null>>) {
     if ("geolocation" in navigator) {
@@ -127,8 +126,8 @@ export default function Home() {
   return (
     <>
       <Sidebar>
-        <InputField initialValue={origin?.text} suggestionFunction={(t) => placeSearch(t, map?.getCenter() || new LngLat(24.94, 60.18), isHsl(region))} onlySuggestions placeholder='Origin' name='origin' onValueSet={(t, v) => setOrigin(typeof v == "string" ? null : v)} icon={<LocationOn className='text-blue'></LocationOn>}></InputField>
-        <InputField initialValue={destination?.text} suggestionFunction={(t) => placeSearch(t, map?.getCenter() || new LngLat(24.94, 60.18), isHsl(region))} onlySuggestions placeholder='Destination' name='destination' onValueSet={(t, v) => setDestination(typeof v == "string" ? null : v)} icon={<LocationOn className='text-red'></LocationOn>}></InputField>
+        <InputField initialValue={origin?.text} suggestionFunction={(t) => placeSearch(t, map?.getCenter() || new LngLat(24.94, 60.18), isHsl)} onlySuggestions placeholder='Origin' name='origin' onValueSet={(t, v) => setOrigin(typeof v == "string" ? null : v)} icon={<LocationOn className='text-blue'></LocationOn>}></InputField>
+        <InputField initialValue={destination?.text} suggestionFunction={(t) => placeSearch(t, map?.getCenter() || new LngLat(24.94, 60.18), isHsl)} onlySuggestions placeholder='Destination' name='destination' onValueSet={(t, v) => setDestination(typeof v == "string" ? null : v)} icon={<LocationOn className='text-red'></LocationOn>}></InputField>
         <div className="flex flex-row gap-2">
           <Button className="w-70 text-center h-min" onClick={() => setDepArr(depArr == "dep" ? "arr" : "dep")}>{depArr == "dep" ? "Departure" : "Arrival"}</Button>
           <InputField className="h-min" name="date" initialValue={"Today"} suggestionFunction={async () => dateOptions} onlySuggestions onValueSet={(n, v) => typeof v != "string" && setDate(new TZDate(v.id))} icon={<CalendarToday></CalendarToday>}></InputField>

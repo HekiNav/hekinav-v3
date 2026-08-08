@@ -38,6 +38,10 @@ a:not(.decoration-none) {
 .nav-item .indicator {
   width: 0;
 }
+.nav-item.active:hover .indicator {
+  width: 75%;
+}
+
 .nav-item:hover .indicator, .nav-item.active .indicator {
   width: 100%;
 }

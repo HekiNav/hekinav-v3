@@ -7,7 +7,6 @@ import { Host_Grotesk } from "next/font/google";
 import toast, { Toaster } from "react-hot-toast";
 import { createContext, useEffect } from "react";
 import { MapLayoutProvider } from "./mapcontext";
-import { usePathname, useSearchParams } from "next/navigation";
 import Navbar from "./components/navbar";
 
 const hostGrotesk = Host_Grotesk({
@@ -22,10 +21,9 @@ export const metadata: Metadata = {
 };
 
 export interface HekinavConfig {
-  region: "hsl" | "finland"
 }
-
-export const ConfigContext = createContext<HekinavConfig>({ region: "finland" })
+const defaultConfig: HekinavConfig = { }
+export const ConfigContext = createContext<HekinavConfig>(defaultConfig)
 
 export default function RootLayout({
   children,
@@ -33,20 +31,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
 
-  const hslParam = useSearchParams().get("hsl")
 
-  const config: HekinavConfig = {
-    region: hslParam === null ? "finland" : "hsl"
-  }
-  const path = usePathname()
-  useEffect(() => {
-    if (path != "/") return
-    if (config.region == "hsl") {
-      toast(<span>You are using the HSL Region version of Hekinav. Switch to the <a href="/">Finland-wide version</a></span>, {})
-    } else {
-      toast(<span>You are using the Finland wide version of Hekinav. Switch to the <a href="/?hsl">HSL Region version</a></span>, {})
-    }
-  }, [config])
 
 
   useEffect(() => {
@@ -75,7 +60,7 @@ export default function RootLayout({
         <title>Hekinav Routing</title>
       </head>
       <body className="h-screen overflow-hidden">
-        <ConfigContext value={config}>
+        <ConfigContext value={defaultConfig}>
           <Navbar></Navbar>
           <Toaster
             toastOptions={{
@@ -92,7 +77,7 @@ export default function RootLayout({
                   secondary: "white"
                 }
               }
-            }} position="top-right" />
+            }} position="top-right" containerStyle={{ marginTop: "64px" }} />
 
           <MapLayoutProvider>{children}</MapLayoutProvider>;
         </ConfigContext>
