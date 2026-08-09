@@ -1,8 +1,8 @@
 "use client"
-import { useEffect } from "react"
+import { ReactElement, useEffect } from "react"
 import toast from "react-hot-toast"
 
-export default function Toast({type, message}: {type: "error" | "info", message: string}) {
+export default function Toast({type, message}: {type: "error" | "info", message: ReactElement | string}) {
     useEffect(() => {
         if (type == "info") toast(message)
             else toast[type](message)

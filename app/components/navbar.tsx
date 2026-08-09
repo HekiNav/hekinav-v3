@@ -15,7 +15,7 @@ export default function NavBar() {
     return (
         <div className="w-full flex flex-row justify-between items-center bg-green p-2">
             <div className="flex flex-row w-full h-full font-medium justify-between">
-                <Link href="/"><h1 className='text-black pr-2'><img src="/logo_full.svg" alt="Hekinav Logo" /></h1></Link>
+                <Link href={region == "hsl" ? "/?hsl" : "/"}><h1 className='text-black pr-2'><img src="/logo_full.svg" alt="Hekinav Logo" /></h1></Link>
                 <div className="px-4">
                     <IconItem className="h-full" icon={{children: <Globe className="text-white h-full"></Globe>}}>
                         <NavItem onClick={() => changeRegion("hsl")} className={region == "hsl" ? "active" : ""}>HSL</NavItem>
@@ -27,7 +27,7 @@ export default function NavBar() {
     )
     function changeRegion(newRegion: "hsl" | "finland") {
         if (newRegion == region) return
-        router.push(newRegion == "hsl" ? "/?hsl" : "/")
+        router.push(newRegion == "hsl" ? "./?hsl" : "./")
     }
 }
 

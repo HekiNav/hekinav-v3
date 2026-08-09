@@ -8,6 +8,7 @@ import { StopQueryQuery, StopQueryQueryVariables } from "./page.generated";
 import Toast from "@/app/components/toast";
 import Label from "@/app/components/label";
 import IconItem from "@/app/components/iconitem";
+import Link from "next/link";
 
 
 const GET_STOP:
@@ -75,9 +76,17 @@ export default async function StopOrStation({
   if (!gtfsIdRegex.test(decodeURIComponent(id))) {
     redirect(`/${isHsl ? "?hsl" : ""}`)
   }
+  if (isHsl && id.slice(0,3) != "HSL") {
+    return (
+      <>
+        Failed to load stop
+        <Toast type="error" message={<span>You are using the HSL-only mode. This stop is not a HSL stop. <Link className="text-green" href="/?hsl">Go to home</Link> or <Link className="text-green" href="./">Change to the Finland-wide version</Link> </span>}></Toast>
+      </>
+    )
+  }
 
   const client = new ApolloClient({
-    link: new HttpLink({ uri: "https://api.digitransit.fi/routing/v2/finland/gtfs/v1/", headers: { "digitransit-subscription-key": process.env.DIGITRANSIT_KEY || "" } }),
+    link: new HttpLink({ uri: `https://api.digitransit.fi/routing/v2/${isHsl ? "hsl" : "finland"}/gtfs/v1/`, headers: { "digitransit-subscription-key": process.env.DIGITRANSIT_KEY || "" } }),
     cache: new InMemoryCache(),
   });
 
@@ -92,6 +101,7 @@ export default async function StopOrStation({
   if (result.error || !result.data?.stop) {
     return (
       <>
+        Failed to load stop
         <Toast type="error" message={`Failed to get stop data: ${result.error?.message || "Unknown error"}`}></Toast>
       </>
     )
@@ -102,7 +112,7 @@ export default async function StopOrStation({
       <Sidebar>
         <IconItem icon={{children: IconTable[stop.vehicleMode || "BUS"]}} className="text-lg"><span className="text-2xl">{stop.name}</span> {stop.platformCode && <Label className="bg-gray">{stop.platformCode}</Label>}</IconItem>
         <div className="text-sm">{stop.desc && <Label className="bg-gray">{stop.desc}</Label>} {stop.code && <Label className="bg-gray">{stop.code}</Label>}</div>
-      
+        
       </Sidebar>
       <MapOverlay>
 
