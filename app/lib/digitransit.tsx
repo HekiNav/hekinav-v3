@@ -4,6 +4,15 @@ import { FlightW700 as Flight } from '@material-symbols-svg/react/icons/flight';
 import { MetroW700 as Metro } from '@material-symbols-svg/react/icons/metro';
 import { TrainW700 as Train } from '@material-symbols-svg/react/icons/train';
 import { TramW700 as Tram } from '@material-symbols-svg/react/icons/tram';
+import { PedalBikeW700 as PedalBike } from '@material-symbols-svg/react/icons/pedal-bike';
+import { DirectionsCarW700 as DirectionsCar } from '@material-symbols-svg/react/icons/directions-car';
+import { DirectionsWalkW700 as DirectionsWalk } from '@material-symbols-svg/react/icons/directions-walk';
+import { FunicularW700 as Funicular } from '@material-symbols-svg/react/icons/funicular';
+import { GondolaLiftW700 as GondolaLift } from '@material-symbols-svg/react/icons/gondola-lift';
+import { LocalTaxiW700 as LocalTaxi } from '@material-symbols-svg/react/icons/local-taxi';
+import { MonorailW700 as Monorail } from '@material-symbols-svg/react/icons/monorail';
+import { QuestionMarkW700 as QuestionMark } from '@material-symbols-svg/react/icons/question-mark';
+import { ScooterW700 as Scooter } from '@material-symbols-svg/react/icons/scooter';
 
 export type Mode = "BUS" | "RAIL" | "BUS-EXPRESS" | "SUBWAY" | "SPEEDTRAM" | "TRAM" | "FERRY" | "AIRPLANE"
 
@@ -66,11 +75,29 @@ export interface GeocodingResponse {
 
 export const IconTable = {
     "BUS-EXPRESS": (<DirectionsBus className="text-darkblue border-darkblue"></DirectionsBus>),
+    "COACH": (<DirectionsBus className="text-darkblue border-darkblue"></DirectionsBus>),
     "SPEEDTRAM": (<Tram className="text-turqoise border-turqoise"></Tram>),
     "BUS": (<DirectionsBus className="text-blue border-blue"></DirectionsBus>),
+    "TRANSIT": (<DirectionsBus className="text-blue border-blue"></DirectionsBus>),
     "RAIL": (<Train className="text-purple border-purple"></Train>),
     "SUBWAY": (<Metro className="text-orange border-orange"></Metro>),
     "TRAM": (<Tram className="text-green border-green"></Tram>),
+    "TROLLEYBUS": (<Tram className="text-green border-green"></Tram>),
     "FERRY": (<DirectionsBoat className="text-cyan border-cyan"></DirectionsBoat>),
     "AIRPLANE": (<Flight className="text-darkblue border-darkblue"></Flight>),
+    "BICYCLE": (<PedalBike className="text-yellow border-yellow"></PedalBike>),
+    "CABLE_CAR": (<GondolaLift className="text-green border-green"></GondolaLift>),
+    "GONDOLA": (<GondolaLift className="text-green border-green"></GondolaLift>),
+    "FUNICULAR": (<Funicular className="text-green border-green"></Funicular>),
+    "MONORAIL": (<Monorail className="text-green border-green"></Monorail>),
+    "CAR": (<DirectionsCar className="text-green border-green"></DirectionsCar>),
+    "TAXI": (<LocalTaxi className="text-green border-green"></LocalTaxi>),
+    "CARPOOL": (<DirectionsCar className="text-green border-green"></DirectionsCar>),
+    "SCOOTER": (<Scooter className="text-green border-green"></Scooter>),
+    "FLEX": (<QuestionMark className="text-black border-black"></QuestionMark>),
+    "FLEXIBLE": (<QuestionMark className="text-black border-black"></QuestionMark>),
+    "LEG_SWITCH": (<QuestionMark className="text-black border-black"></QuestionMark>),
+    "WALK": (<DirectionsWalk className="text-black border-black"></DirectionsWalk>),
 }
+
+export const gtfsIdRegex = /^(.*)\:\d+$/

@@ -89,7 +89,7 @@ export function MapLayoutProvider({ children }: { children: React.ReactNode }) {
                                         const first = combined[0]
                                         const isStation = stations.length == 1
                                         if (isHsl) {
-                                            redirect(`/${isStation ? "station" : "stop"}/${isStation ? first.properties.terminalId : first.properties.stopId}/?hsl`)
+                                            redirect(`/${isStation ? "station" : "stop"}/HSL:${isStation ? first.properties.terminalId : first.properties.stopId}/?hsl`)
                                         } else {
                                             redirect(`/${isStation ? "station" : "stop"}/${first.properties.gtfsId}/`)
                                         }

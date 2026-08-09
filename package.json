@@ -10,15 +10,18 @@
     "dev:vinext": "vinext dev --port 3001",
     "build:vinext": "vinext build",
     "start:vinext": "wrangler dev --config dist/server/wrangler.json",
-    "deploy:vinext": "vinext-cloudflare deploy --config dist/server/wrangler.json"
+    "deploy:vinext": "vinext-cloudflare deploy --config dist/server/wrangler.json",
+    "codegen": "graphql-codegen --config codegen.ts"
   },
   "dependencies": {
+    "@apollo/client": "^4.2.10",
     "@date-fns/tz": "github:date-fns/tz",
     "@material-symbols-svg/react": "^0.12.0",
     "@vinext/cloudflare": "^1.0.0-beta.2",
     "@vis.gl/react-maplibre": "^8.1.1",
     "date-fns": "^4.4.0",
     "date-fns-tz": "^3.2.0",
+    "graphql": "^16.14.2",
     "maplibre-gl": "^5.24.0",
     "next": "16.2.10",
     "react": "^19.2.7",
@@ -26,10 +29,15 @@
     "react-hot-toast": "^2.6.0",
     "react-loading-skeleton": "^3.5.0",
     "react-server-dom-webpack": "^19.2.7",
+    "rxjs": "^7.8.2",
     "vinext": "^1.0.0-beta.2"
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "^1.45.1",
+    "@graphql-codegen/cli": "^7.2.0",
+    "@graphql-codegen/near-operation-file-preset": "^5.2.1",
+    "@graphql-codegen/typed-document-node": "^7.1.0",
+    "@graphql-codegen/typescript-operations": "^6.1.5",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",

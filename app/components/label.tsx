@@ -10,7 +10,7 @@ export interface LabelProps extends PropsWithChildren {
 
 export default function Label({children, hidden = false, className}:LabelProps) {
     return (
-        <span hidden={hidden} className={`px-1 text-nowrap rounded-xs ${className || "bg-stone-300"}`}>
+        <span hidden={hidden} className={`px-1 text-nowrap rounded-md ${className || "bg-gray"}`}>
             {children}
         </span>
     )
