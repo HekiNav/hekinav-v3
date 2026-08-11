@@ -101,3 +101,62 @@ export const IconTable = {
 }
 
 export const gtfsIdRegex = /^(.*)\:\d+$/
+
+export function getRouteColor(type: "bg", mode: number, stringMode?: string) {
+    switch (mode) {
+        case 109:
+            return "bg-purple"
+        case 102:
+            return "bg-green"
+        case 701:
+        case 704:
+        case 700:
+        case 3:
+            return "bg-blue"
+        case 702:
+            return "bg-orange"
+        case 714:
+            return "bg-blue"
+        case 900:
+            return "bg-turqoise"
+        case 1104:
+            return "bg-darkblue"
+        case 0:
+            return "bg-green"
+        case 1:
+            return "bg-orange"
+        case 4:
+        case 1008:
+            return "bg-cyan"
+        case -1:
+            switch (stringMode) {
+                case "BUS-EXPRESS": return "bg-darkblue"
+                case "COACH": return "bg-darkblue"
+                case "SPEEDTRAM": return "bg-turqoise"
+                case "BUS": return "bg-blue"
+                case "TRANSIT": return "bg-blue"
+                case "RAIL": return "bg-purple"
+                case "SUBWAY": return "bg-orange"
+                case "TRAM": return "bg-green"
+                case "TROLLEYBUS": return "bg-green"
+                case "FERRY": return "bg-cyan"
+                case "AIRPLANE": return "bg-darkblue"
+                case "BICYCLE": return "bg-yellow"
+                case "CABLE_CAR": return "bg-green"
+                case "GONDOLA": return "bg-green"
+                case "FUNICULAR": return "bg-green"
+                case "MONORAIL": return "bg-green"
+                case "CAR": return "bg-green"
+                case "TAXI": return "bg-green"
+                case "CARPOOL": return "bg-green"
+                case "SCOOTER": return "bg-green"
+                case "FLEX": return "bg-black"
+                case "FLEXIBLE": return "bg-black"
+                case "LEG_SWITCH": return "bg-black"
+                case "WALK": return "bg-black"
+            }
+        default:
+            console.log(mode)
+            return "bg-gray"
+    }
+}

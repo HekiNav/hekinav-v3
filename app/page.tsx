@@ -23,7 +23,7 @@ import { MapOverlay, Sidebar } from "./mapcontext";
 import { FocusContext } from './FocusContext';
 import { useIsHsl } from './hooks/useHsl';
 
-const timeOptions: Suggestion<{}>[] = []
+const timeOptions: Suggestion<object>[] = []
 
 for (let i = 0; i < 96; i++) {
   const date = new TZDate(1970, 0, 1, 0, i * 15, "Europe/Helsinki")
@@ -34,7 +34,7 @@ for (let i = 0; i < 96; i++) {
   })
 }
 
-const dateOptions: Suggestion<{}>[] = []
+const dateOptions: Suggestion<object>[] = []
 const startOfToday = new TZDate(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()).withTimeZone("Europe/Helsinki")
 for (let i = 0; i < 28; i++) {
   const date = new TZDate(startOfToday.getFullYear(), startOfToday.getMonth(), startOfToday.getDate() + i, "Europe/Helsinki")
@@ -54,20 +54,24 @@ export default function Home() {
   const [pickedLocation, setPickedLocation] = useState<LngLat | null | boolean>(null)
   const [pickedLocationTarget, setPickedLocationTarget] = useState<"origin" | "destination" | null>(null)
 
-  const {setSidebarHidden} = useContext(FocusContext)
+  const { setSidebarHidden } = useContext(FocusContext)
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPickedLocation(null)
     setPickedLocationTarget(null)
+    // eslint-disable-next-line react-hooks/immutability
     if (destination?.id == "choose_on_map") openMapLocationPicker("destination")
     if (origin?.id == "choose_on_map") openMapLocationPicker("origin")
+    // eslint-disable-next-line react-hooks/immutability
     if (origin?.id == "user_location") getUserLocation(setOrigin)
     if (destination?.id == "user_location") getUserLocation(setDestination)
-  }, [destination, origin])
+  }, [destination, openMapLocationPicker, origin])
 
   useEffect(() => {
     if (typeof pickedLocation != "object" || pickedLocation == null) return
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     (pickedLocationTarget == "destination" ? setDestination : setOrigin)({ icon: <NotListedLocation></NotListedLocation>, id: "loading", text: "Loading...", properties: pickedLocation });
     setPickedLocation(true)
     reverseGeocode(pickedLocation.toArray()).then((data) => {
@@ -79,9 +83,9 @@ export default function Home() {
       (pickedLocationTarget == "destination" ? setDestination : setOrigin)({ ...data[0], properties: pickedLocation })
       setPickedLocation(null)
       setPickedLocationTarget(null)
-    })
-    setSidebarHidden && setSidebarHidden(false)
-  }, [pickedLocation])
+    });
+    if (setSidebarHidden) setSidebarHidden(false)
+  }, [pickedLocation, pickedLocationTarget, setSidebarHidden])
 
   const { default: map } = useMap()
   const isHsl = useIsHsl()
@@ -116,10 +120,11 @@ export default function Home() {
     }
   }
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   function openMapLocationPicker(target: "origin" | "destination") {
     setPickedLocation(false)
     setPickedLocationTarget(target)
-    setSidebarHidden && setSidebarHidden(true)
+    if(setSidebarHidden) setSidebarHidden(true)
   }
 
 

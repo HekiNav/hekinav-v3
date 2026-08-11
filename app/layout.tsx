@@ -4,7 +4,7 @@ import "react-loading-skeleton/dist/skeleton.css";
 
 import type { Metadata } from "next";
 import { Host_Grotesk } from "next/font/google";
-import toast, { Toaster } from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
 import { createContext, useEffect } from "react";
 import { MapLayoutProvider } from "./mapcontext";
 import Navbar from "./components/navbar";
@@ -21,6 +21,7 @@ export const metadata: Metadata = {
 };
 
 export interface HekinavConfig {
+
 }
 const defaultConfig: HekinavConfig = { }
 export const ConfigContext = createContext<HekinavConfig>(defaultConfig)

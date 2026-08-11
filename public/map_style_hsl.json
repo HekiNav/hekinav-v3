@@ -5,1305 +5,1799 @@
     "bearing": 0,
     "pitch": 45,
     "sources": {
-      "openmaptiles": {
-        "type": "vector",
-        "url": "https://api.maptiler.com/tiles/v3/tiles.json?key=DSJ8D0CYxVgUQHsmNwp3"
-      },
-      "vector": {
-        "type": "vector",
-        "url": "https://cdn.digitransit.fi/map/v3/hsl-vector-map/index.json?digitransit-subscription-key=bbc7a56df1674c59822889b1bc84e7ad"
-    },
-    "terminals": {
-        "url": "https://kartat.hsl.fi/jore/tiles/terminals/index.json",
-        "type": "vector"
-    },
-    "stops": {
-        "url": "https://kartat.hsl.fi/jore/tiles/regular-stops/index.json",
-        "type": "vector"
-    },
-    "stops-by-routes": {
-        "url": "https://kartat.hsl.fi/jore/tiles/stops-by-routes/index.json",
-        "type": "vector"
-    },
-    "citybike": {
-        "url": "https://cdn.digitransit.fi/map/v3/hsl/fi/rentalStations/tilejson.json?digitransit-subscription-key=bbc7a56df1674c59822889b1bc84e7ad",
-        "type": "vector"
-    }
+        "openmaptiles": {
+            "type": "vector",
+            "url": "https://api.maptiler.com/tiles/v3/tiles.json?key=DSJ8D0CYxVgUQHsmNwp3"
+        },
+        "vector": {
+            "type": "vector",
+            "url": "https://cdn.digitransit.fi/map/v3/hsl-vector-map/index.json?digitransit-subscription-key=bbc7a56df1674c59822889b1bc84e7ad"
+        },
+        "terminals": {
+            "url": "https://kartat.hsl.fi/jore/tiles/terminals/index.json",
+            "type": "vector"
+        },
+        "stops": {
+            "url": "https://kartat.hsl.fi/jore/tiles/regular-stops/index.json",
+            "type": "vector"
+        },
+        "stops-by-routes": {
+            "url": "https://kartat.hsl.fi/jore/tiles/stops-by-routes/index.json",
+            "type": "vector"
+        },
+        "citybike": {
+            "url": "https://cdn.digitransit.fi/map/v3/hsl/fi/rentalStations/tilejson.json?digitransit-subscription-key=bbc7a56df1674c59822889b1bc84e7ad",
+            "type": "vector"
+        }
     },
     "sprite": "https://routing.storage.hekinav.dev/img/sprites",
     "glyphs": "https://routing.storage.hekinav.dev/font-pbf/{fontstack}/{range}.pbf",
     "layers": [
-      {
-        "id": "background",
-        "type": "background",
-        "paint": {"background-color": "#f7f7f7"}
-      },
-      {
-        "id": "landcover-wood",
-        "type": "fill",
-        "source": "openmaptiles",
-        "source-layer": "landcover",
-        "filter": ["==", "class", "wood"],
-        "paint": {"fill-color": "#bfe6b5", "fill-opacity": 0.6}
-      },
-      {
-        "id": "landcover-grass",
-        "type": "fill",
-        "source": "openmaptiles",
-        "source-layer": "landcover",
-        "filter": ["==", "class", "grass"],
-        "paint": {"fill-color": "#d3edc9", "fill-opacity": 0.6}
-      },
-      {
-        "id": "landuse-residential",
-        "type": "fill",
-        "source": "openmaptiles",
-        "source-layer": "landuse",
-        "filter": ["==", "class", "residential"],
-        "paint": {"fill-color": "#e4d3b8", "fill-opacity": 0.4}
-      },
-      {
-        "id": "park",
-        "type": "fill",
-        "source": "openmaptiles",
-        "source-layer": "park",
-        "paint": {"fill-color": "#a8d9a0", "fill-opacity": 0.6}
-      },
-      {
-        "id": "water",
-        "type": "fill",
-        "source": "openmaptiles",
-        "source-layer": "water",
-        "paint": {"fill-color": "#a8c4f0"}
-      },
-      {
-        "id": "waterway",
-        "type": "line",
-        "source": "openmaptiles",
-        "source-layer": "waterway",
-        "paint": {"line-color": "#8fb3ea", "line-width": 1}
-      },
-      {
-        "id": "road-path",
-        "type": "line",
-        "source": "openmaptiles",
-        "source-layer": "transportation",
-        "filter": ["==", "class", "path"],
-        "paint": {
-          "line-color": "#dddddd",
-          "line-width": 0.75,
-          "line-dasharray": [2, 2]
-        }
-      },
-      {
-        "id": "road-minor",
-        "type": "line",
-        "source": "openmaptiles",
-        "source-layer": "transportation",
-        "filter": ["in", "class", "minor", "service", "track"],
-        "paint": {
-          "line-color": "#e2e2e2",
-          "line-width": {"base": 1.2, "stops": [[13, 0.5], [16, 2]]}
-        }
-      },
-      {
-        "id": "road-secondary-tertiary",
-        "type": "line",
-        "source": "openmaptiles",
-        "source-layer": "transportation",
-        "filter": ["in", "class", "secondary", "tertiary"],
-        "paint": {
-          "line-color": "#d4d4d4",
-          "line-width": {"base": 1.2, "stops": [[10, 1], [16, 4]]}
-        }
-      },
-      {
-        "id": "road-primary",
-        "type": "line",
-        "source": "openmaptiles",
-        "source-layer": "transportation",
-        "filter": ["==", "class", "primary"],
-        "paint": {
-          "line-color": "#c6c6c6",
-          "line-width": {"base": 1.2, "stops": [[7, 1], [16, 6]]}
-        }
-      },
-      {
-        "id": "road-trunk-motorway-casing",
-        "type": "line",
-        "source": "openmaptiles",
-        "source-layer": "transportation",
-        "filter": ["in", "class", "trunk", "motorway"],
-        "paint": {
-          "line-color": "#d8b93a",
-          "line-width": {"base": 1.2, "stops": [[5, 1.2], [16, 9]]},
-          "line-opacity": 0.5
-        }
-      },
-      {
-        "id": "road-trunk-motorway",
-        "type": "line",
-        "source": "openmaptiles",
-        "source-layer": "transportation",
-        "filter": ["in", "class", "trunk", "motorway"],
-        "paint": {
-          "line-color": "#f5e79a",
-          "line-width": {"base": 1.2, "stops": [[5, 0.8], [16, 7]]}
-        }
-      },
-      {
-        "id": "transit-rail-casing",
-        "type": "line",
-        "source": "openmaptiles",
-        "source-layer": "transportation",
-        "minzoom": 6,
-        "filter": [
-          "all",
-          ["==", ["get", "class"], "rail"],
-          ["in", ["get", "subclass"], ["literal", ["rail", "narrow_gauge"]]]
-        ],
-        "paint": {
-          "line-color": "#ffffff",
-          "line-width": {"base": 1.2, "stops": [[6, 1.5], [16, 4]]},
-          "line-opacity": 0.7
-        }
-      },
-      {
-        "id": "transit-rail",
-        "type": "line",
-        "source": "openmaptiles",
-        "source-layer": "transportation",
-        "minzoom": 6,
-        "filter": [
-          "all",
-          ["==", ["get", "class"], "rail"],
-          ["in", ["get", "subclass"], ["literal", ["rail", "narrow_gauge"]]]
-        ],
-        "paint": {
-          "line-color": "#b5b5b5",
-          "line-width": {"base": 1.2, "stops": [[6, 0.7], [16, 2.2]]},
-          "line-opacity": 0.95
-        }
-      },
-      {
-        "id": "transit-subway-casing",
-        "type": "line",
-        "source": "openmaptiles",
-        "source-layer": "transportation",
-        "minzoom": 8,
-        "filter": [
-          "all",
-          ["==", ["get", "class"], "transit"],
-          ["==", ["get", "subclass"], "subway"]
-        ],
-        "paint": {
-          "line-color": "#ffffff",
-          "line-width": {"base": 1.2, "stops": [[8, 1.5], [16, 4]]},
-          "line-opacity": 0.7
-        }
-      },
-      {
-        "id": "transit-subway",
-        "type": "line",
-        "source": "openmaptiles",
-        "source-layer": "transportation",
-        "minzoom": 8,
-        "filter": [
-          "all",
-          ["==", ["get", "class"], "transit"],
-          ["==", ["get", "subclass"], "subway"]
-        ],
-        "paint": {
-          "line-color": "#b5b5b5",
-          "line-width": {"base": 1.2, "stops": [[8, 0.7], [16, 2.2]]},
-          "line-opacity": 0.95
-        }
-      },
-      {
-        "id": "transit-tram-lightrail-casing",
-        "type": "line",
-        "source": "openmaptiles",
-        "source-layer": "transportation",
-        "minzoom": 9,
-        "filter": [
-          "all",
-          ["==", ["get", "class"], "transit"],
-          ["in", ["get", "subclass"], ["literal", ["tram", "light_rail"]]]
-        ],
-        "paint": {"line-color": "#ffffff", "line-width": 2.4, "line-opacity": 0.7}
-      },
-      {
-        "id": "transit-tram-lightrail",
-        "type": "line",
-        "source": "openmaptiles",
-        "source-layer": "transportation",
-        "minzoom": 8,
-        "filter": [
-          "all",
-          ["==", ["get", "class"], "transit"],
-          ["in", ["get", "subclass"], ["literal", ["tram", "light_rail"]]]
-        ],
-        "paint": {
-          "line-color": "#b5b5b5",
-          "line-width": {"base": 1.2, "stops": [[9, 0.7], [16, 2]]},
-          "line-opacity": 0.95
-        }
-      },
-      {
-        "id": "transit-ferry",
-        "type": "line",
-        "source": "openmaptiles",
-        "source-layer": "transportation",
-        "minzoom": 10,
-        "filter": ["==", "class", "ferry"],
-        "paint": {
-          "line-color": "rgba(108, 137, 188, 1)",
-          "line-width": 1,
-          "line-opacity": 0.6,
-          "line-dasharray": [1, 2]
-        }
-      },
-      {
-        "id": "boundary-state",
-        "type": "line",
-        "source": "openmaptiles",
-        "source-layer": "boundary",
-        "filter": ["==", "admin_level", 4],
-        "paint": {
-          "line-color": "#bbbbbb",
-          "line-width": 0.75,
-          "line-dasharray": [2, 1]
-        }
-      },
-      {
-        "id": "boundary-country",
-        "type": "line",
-        "source": "openmaptiles",
-        "source-layer": "boundary",
-        "filter": ["==", "admin_level", 2],
-        "paint": {"line-color": "#999999", "line-width": 1.2}
-      },
-      {
-        "id": "building",
-        "type": "fill",
-        "source": "openmaptiles",
-        "source-layer": "building",
-        "minzoom": 13,
-        "maxzoom": 15,
-        "paint": {
-          "fill-color": "#dcdcdc",
-          "fill-outline-color": "#d0d0d0",
-          "fill-opacity": 0.8
-        }
-      },
-      {
-        "id": "building-3d",
-        "type": "fill-extrusion",
-        "source": "openmaptiles",
-        "source-layer": "building",
-        "minzoom": 15,
-        "paint": {
-          "fill-extrusion-color": "#d6d6d6",
-          "fill-extrusion-height": [
-            "coalesce",
-            ["get", "render_height"],
-            ["*", ["coalesce", ["get", "levels"], 1], 3]
-          ],
-          "fill-extrusion-base": ["coalesce", ["get", "render_min_height"], 0],
-          "fill-extrusion-opacity": 0.85
-        }
-      },
-      {
-        "id": "road-label-motorway",
-        "type": "symbol",
-        "source": "openmaptiles",
-        "source-layer": "transportation_name",
-        "minzoom": 9,
-        "filter": ["in", "class", "motorway", "trunk"],
-        "layout": {
-          "symbol-placement": "line",
-          "text-field": ["coalesce", ["get", "name"], ["get", "ref"]],
-          "text-font": ["Host Grotesk"],
-          "text-size": 12.5,
-          "text-letter-spacing": 0.03,
-          "text-transform": "uppercase"
+        {
+            "id": "background",
+            "type": "background",
+            "paint": {
+                "background-color": "#f7f7f7"
+            }
         },
-        "paint": {
-          "text-color": "#5a5a5a",
-          "text-halo-color": "#ffffff",
-          "text-halo-width": 1.3
-        }
-      },
-      {
-        "id": "road-label-primary",
-        "type": "symbol",
-        "source": "openmaptiles",
-        "source-layer": "transportation_name",
-        "minzoom": 11,
-        "filter": ["==", "class", "primary"],
-        "layout": {
-          "symbol-placement": "line",
-          "text-field": ["coalesce", ["get", "name"], ["get", "ref"]],
-          "text-font": ["Host Grotesk"],
-          "text-size": 12,
-          "text-letter-spacing": 0.02
-        },
-        "paint": {
-          "text-color": "#5a5a5a",
-          "text-halo-color": "#ffffff",
-          "text-halo-width": 1.2
-        }
-      },
-      {
-        "id": "road-label-secondary",
-        "type": "symbol",
-        "source": "openmaptiles",
-        "source-layer": "transportation_name",
-        "minzoom": 13,
-        "filter": ["in", "class", "secondary", "tertiary"],
-        "layout": {
-          "symbol-placement": "line",
-          "text-field": ["get", "name"],
-          "text-font": ["Host Grotesk"],
-          "text-size": 10.5
-        },
-        "paint": {
-          "text-color": "#7a7a7a",
-          "text-halo-color": "#ffffff",
-          "text-halo-width": 1
-        }
-      },
-      {
-        "id": "road-label-minor",
-        "type": "symbol",
-        "source": "openmaptiles",
-        "source-layer": "transportation_name",
-        "minzoom": 15,
-        "filter": ["in", "class", "minor", "service"],
-        "layout": {
-          "symbol-placement": "line",
-          "text-field": ["get", "name"],
-          "text-font": ["Host Grotesk"],
-          "text-size": 9.5
-        },
-        "paint": {
-          "text-color": "#8a8a8a",
-          "text-halo-color": "#ffffff",
-          "text-halo-width": 1
-        }
-      },
-      {
-        "id": "transit-rail-label",
-        "type": "symbol",
-        "source": "openmaptiles",
-        "source-layer": "transportation_name",
-        "minzoom": 12,
-        "filter": ["==", "class", "rail"],
-        "layout": {
-          "symbol-placement": "line",
-          "text-field": ["get", "name"],
-          "text-font": ["Host Grotesk"],
-          "text-size": 10
-        },
-        "paint": {
-          "text-color": "#8a8a8a",
-          "text-halo-color": "#ffffff",
-          "text-halo-width": 1
-        }
-      },
-      {
-        "id": "place-country-major",
-        "type": "symbol",
-        "source": "openmaptiles",
-        "source-layer": "place",
-        "filter": ["all", ["==", ["get", "class"], "country"], ["<=", ["get", "rank"], 3]],
-        "layout": {
-          "text-field": ["get", "name"],
-          "text-font": ["Host Grotesk"],
-          "text-size": 18,
-          "text-transform": "uppercase",
-          "text-letter-spacing": 0.08
-        },
-        "paint": {
-          "text-color": "#3d3d3d",
-          "text-halo-color": "#ffffff",
-          "text-halo-width": 1.6
-        }
-      },
-      {
-        "id": "place-country-minor",
-        "type": "symbol",
-        "source": "openmaptiles",
-        "source-layer": "place",
-        "filter": ["all", ["==", ["get", "class"], "country"], [">", ["get", "rank"], 3]],
-        "minzoom": 3,
-        "layout": {
-          "text-field": ["get", "name"],
-          "text-font": ["Host Grotesk"],
-          "text-size": 13,
-          "text-transform": "uppercase",
-          "text-letter-spacing": 0.06
-        },
-        "paint": {
-          "text-color": "#5a5a5a",
-          "text-halo-color": "#ffffff",
-          "text-halo-width": 1.4
-        }
-      },
-      {
-        "id": "place-state",
-        "type": "symbol",
-        "source": "openmaptiles",
-        "source-layer": "place",
-        "filter": ["==", "class", "state"],
-        "minzoom": 4,
-        "layout": {
-          "text-field": ["get", "name"],
-          "text-font": ["Host Grotesk"],
-          "text-size": 11,
-          "text-transform": "uppercase",
-          "text-letter-spacing": 0.04
-        },
-        "paint": {
-          "text-color": "#7a7a7a",
-          "text-halo-color": "#ffffff",
-          "text-halo-width": 1.2
-        }
-      },
-      {
-        "id": "place-city",
-        "type": "symbol",
-        "source": "openmaptiles",
-        "source-layer": "place",
-        "filter": ["==", "class", "city"],
-        "layout": {
-          "text-field": ["get", "name"],
-          "text-font": ["Host Grotesk"],
-          "text-size": [
-            "interpolate",
-            ["linear"],
-            ["zoom"],
-            3,
-            ["case", ["==", ["get", "capital"], 2], 13, 10],
-            10,
-            ["case", ["==", ["get", "capital"], 2], 17, 15]
-          ]
-        },
-        "paint": {
-          "text-color": "#3d3d3d",
-          "text-halo-color": "#ffffff",
-          "text-halo-width": 1.3
-        }
-      },
-      {
-        "id": "place-town-village",
-        "type": "symbol",
-        "source": "openmaptiles",
-        "source-layer": "place",
-        "minzoom": 8,
-        "filter": ["in", "class", "town", "village"],
-        "layout": {
-          "text-field": ["get", "name"],
-          "text-font": ["Host Grotesk"],
-          "text-size": ["interpolate", ["linear"], ["zoom"], 8, 10, 14, 13]
-        },
-        "paint": {
-          "text-color": "#666666",
-          "text-halo-color": "#ffffff",
-          "text-halo-width": 1
-        }
-      },
-      {
-        "id": "place-suburb-neighbourhood",
-        "type": "symbol",
-        "source": "openmaptiles",
-        "source-layer": "place",
-        "minzoom": 13,
-        "filter": ["in", "class", "suburb", "neighbourhood", "quarter"],
-        "layout": {
-          "text-field": ["get", "name"],
-          "text-font": ["Host Grotesk"],
-          "text-size": 10,
-          "text-transform": "uppercase",
-          "text-letter-spacing": 0.03
-        },
-        "paint": {
-          "text-color": "#8a8a8a",
-          "text-halo-color": "#ffffff",
-          "text-halo-width": 0.8
-        }
-      },
-  
-      
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-    {
-        "id": "subway-entrance_icon",
-        "type": "symbol",
-        "source": "vector",
-        "source-layer": "poi",
-        "minzoom": 16,
-        "filter": [
-            "all",
-            [
+        {
+            "id": "landcover-wood",
+            "type": "fill",
+            "source": "openmaptiles",
+            "source-layer": "landcover",
+            "filter": [
                 "==",
-                "$type",
-                "Point"
+                "class",
+                "wood"
             ],
-            [
+            "paint": {
+                "fill-color": "#bfe6b5",
+                "fill-opacity": 0.6
+            }
+        },
+        {
+            "id": "landcover-grass",
+            "type": "fill",
+            "source": "openmaptiles",
+            "source-layer": "landcover",
+            "filter": [
+                "==",
+                "class",
+                "grass"
+            ],
+            "paint": {
+                "fill-color": "#d3edc9",
+                "fill-opacity": 0.6
+            }
+        },
+        {
+            "id": "landuse-residential",
+            "type": "fill",
+            "source": "openmaptiles",
+            "source-layer": "landuse",
+            "filter": [
+                "==",
+                "class",
+                "residential"
+            ],
+            "paint": {
+                "fill-color": "#e4d3b8",
+                "fill-opacity": 0.4
+            }
+        },
+        {
+            "id": "park",
+            "type": "fill",
+            "source": "openmaptiles",
+            "source-layer": "park",
+            "paint": {
+                "fill-color": "#a8d9a0",
+                "fill-opacity": 0.6
+            }
+        },
+        {
+            "id": "water",
+            "type": "fill",
+            "source": "openmaptiles",
+            "source-layer": "water",
+            "paint": {
+                "fill-color": "#a8c4f0"
+            }
+        },
+        {
+            "id": "waterway",
+            "type": "line",
+            "source": "openmaptiles",
+            "source-layer": "waterway",
+            "paint": {
+                "line-color": "#8fb3ea",
+                "line-width": 1
+            }
+        },
+        {
+            "id": "road-path",
+            "type": "line",
+            "source": "openmaptiles",
+            "source-layer": "transportation",
+            "filter": [
+                "==",
+                "class",
+                "path"
+            ],
+            "paint": {
+                "line-color": "#dddddd",
+                "line-width": 0.75,
+                "line-dasharray": [
+                    2,
+                    2
+                ]
+            }
+        },
+        {
+            "id": "road-minor",
+            "type": "line",
+            "source": "openmaptiles",
+            "source-layer": "transportation",
+            "filter": [
                 "in",
                 "class",
-                "entrance"
+                "minor",
+                "service",
+                "track"
             ],
-            [
-                "in",
-                "subclass",
-                "subway_entrance"
-            ]
-        ],
-        "layout": {
-            "icon-image": "icon-entrance-subway",
-            "icon-allow-overlap": true,
-            "icon-anchor": "bottom",
-            "icon-size": [
-                "interpolate",
-                [
-                    "exponential",
-                    1.15
-                ],
-                [
-                    "zoom"
-                ],
-                15,
-                0.533,
-                20,
-                0.8
-            ]
+            "paint": {
+                "line-color": "#e2e2e2",
+                "line-width": {
+                    "base": 1.2,
+                    "stops": [
+                        [
+                            13,
+                            0.5
+                        ],
+                        [
+                            16,
+                            2
+                        ]
+                    ]
+                }
+            }
         },
-        "paint": {
-            "icon-translate": [
-                0,
-                -5.25
-            ]
-        }
-    },
-    {
-        "id": "subway-entrance_letter",
-        "type": "symbol",
-        "source": "vector",
-        "source-layer": "poi",
-        "minzoom": 17,
-        "filter": [
-            "all",
-            [
-                "==",
-                "$type",
-                "Point"
-            ],
-            [
+        {
+            "id": "road-secondary-tertiary",
+            "type": "line",
+            "source": "openmaptiles",
+            "source-layer": "transportation",
+            "filter": [
                 "in",
                 "class",
-                "entrance"
+                "secondary",
+                "tertiary"
             ],
-            [
+            "paint": {
+                "line-color": "#d4d4d4",
+                "line-width": {
+                    "base": 1.2,
+                    "stops": [
+                        [
+                            10,
+                            1
+                        ],
+                        [
+                            16,
+                            4
+                        ]
+                    ]
+                }
+            }
+        },
+        {
+            "id": "road-primary",
+            "type": "line",
+            "source": "openmaptiles",
+            "source-layer": "transportation",
+            "filter": [
+                "==",
+                "class",
+                "primary"
+            ],
+            "paint": {
+                "line-color": "#c6c6c6",
+                "line-width": {
+                    "base": 1.2,
+                    "stops": [
+                        [
+                            7,
+                            1
+                        ],
+                        [
+                            16,
+                            6
+                        ]
+                    ]
+                }
+            }
+        },
+        {
+            "id": "road-trunk-motorway-casing",
+            "type": "line",
+            "source": "openmaptiles",
+            "source-layer": "transportation",
+            "filter": [
                 "in",
-                "subclass",
-                "subway_entrance"
+                "class",
+                "trunk",
+                "motorway"
             ],
-            [
-                "has",
-                "ref"
-            ]
-        ],
-        "layout": {
-            "icon-image": [
-                "concat",
-                "icon-letter-",
+            "paint": {
+                "line-color": "#d8b93a",
+                "line-width": {
+                    "base": 1.2,
+                    "stops": [
+                        [
+                            5,
+                            1.2
+                        ],
+                        [
+                            16,
+                            9
+                        ]
+                    ]
+                },
+                "line-opacity": 0.5
+            }
+        },
+        {
+            "id": "road-trunk-motorway",
+            "type": "line",
+            "source": "openmaptiles",
+            "source-layer": "transportation",
+            "filter": [
+                "in",
+                "class",
+                "trunk",
+                "motorway"
+            ],
+            "paint": {
+                "line-color": "#f5e79a",
+                "line-width": {
+                    "base": 1.2,
+                    "stops": [
+                        [
+                            5,
+                            0.8
+                        ],
+                        [
+                            16,
+                            7
+                        ]
+                    ]
+                }
+            }
+        },
+        {
+            "id": "transit-rail-casing",
+            "type": "line",
+            "source": "openmaptiles",
+            "source-layer": "transportation",
+            "minzoom": 6,
+            "filter": [
+                "all",
                 [
+                    "==",
+                    [
+                        "get",
+                        "class"
+                    ],
+                    "rail"
+                ],
+                [
+                    "in",
+                    [
+                        "get",
+                        "subclass"
+                    ],
+                    [
+                        "literal",
+                        [
+                            "rail",
+                            "narrow_gauge"
+                        ]
+                    ]
+                ]
+            ],
+            "paint": {
+                "line-color": "#ffffff",
+                "line-width": {
+                    "base": 1.2,
+                    "stops": [
+                        [
+                            6,
+                            1.5
+                        ],
+                        [
+                            16,
+                            4
+                        ]
+                    ]
+                },
+                "line-opacity": 0.7
+            }
+        },
+        {
+            "id": "transit-rail",
+            "type": "line",
+            "source": "openmaptiles",
+            "source-layer": "transportation",
+            "minzoom": 6,
+            "filter": [
+                "all",
+                [
+                    "==",
+                    [
+                        "get",
+                        "class"
+                    ],
+                    "rail"
+                ],
+                [
+                    "in",
+                    [
+                        "get",
+                        "subclass"
+                    ],
+                    [
+                        "literal",
+                        [
+                            "rail",
+                            "narrow_gauge"
+                        ]
+                    ]
+                ]
+            ],
+            "paint": {
+                "line-color": "#b5b5b5",
+                "line-width": {
+                    "base": 1.2,
+                    "stops": [
+                        [
+                            6,
+                            0.7
+                        ],
+                        [
+                            16,
+                            2.2
+                        ]
+                    ]
+                },
+                "line-opacity": 0.95
+            }
+        },
+        {
+            "id": "transit-subway-casing",
+            "type": "line",
+            "source": "openmaptiles",
+            "source-layer": "transportation",
+            "minzoom": 8,
+            "filter": [
+                "all",
+                [
+                    "==",
+                    [
+                        "get",
+                        "class"
+                    ],
+                    "transit"
+                ],
+                [
+                    "==",
+                    [
+                        "get",
+                        "subclass"
+                    ],
+                    "subway"
+                ]
+            ],
+            "paint": {
+                "line-color": "#ffffff",
+                "line-width": {
+                    "base": 1.2,
+                    "stops": [
+                        [
+                            8,
+                            1.5
+                        ],
+                        [
+                            16,
+                            4
+                        ]
+                    ]
+                },
+                "line-opacity": 0.7
+            }
+        },
+        {
+            "id": "transit-subway",
+            "type": "line",
+            "source": "openmaptiles",
+            "source-layer": "transportation",
+            "minzoom": 8,
+            "filter": [
+                "all",
+                [
+                    "==",
+                    [
+                        "get",
+                        "class"
+                    ],
+                    "transit"
+                ],
+                [
+                    "==",
+                    [
+                        "get",
+                        "subclass"
+                    ],
+                    "subway"
+                ]
+            ],
+            "paint": {
+                "line-color": "#b5b5b5",
+                "line-width": {
+                    "base": 1.2,
+                    "stops": [
+                        [
+                            8,
+                            0.7
+                        ],
+                        [
+                            16,
+                            2.2
+                        ]
+                    ]
+                },
+                "line-opacity": 0.95
+            }
+        },
+        {
+            "id": "transit-tram-lightrail-casing",
+            "type": "line",
+            "source": "openmaptiles",
+            "source-layer": "transportation",
+            "minzoom": 9,
+            "filter": [
+                "all",
+                [
+                    "==",
+                    [
+                        "get",
+                        "class"
+                    ],
+                    "transit"
+                ],
+                [
+                    "in",
+                    [
+                        "get",
+                        "subclass"
+                    ],
+                    [
+                        "literal",
+                        [
+                            "tram",
+                            "light_rail"
+                        ]
+                    ]
+                ]
+            ],
+            "paint": {
+                "line-color": "#ffffff",
+                "line-width": 2.4,
+                "line-opacity": 0.7
+            }
+        },
+        {
+            "id": "transit-tram-lightrail",
+            "type": "line",
+            "source": "openmaptiles",
+            "source-layer": "transportation",
+            "minzoom": 8,
+            "filter": [
+                "all",
+                [
+                    "==",
+                    [
+                        "get",
+                        "class"
+                    ],
+                    "transit"
+                ],
+                [
+                    "in",
+                    [
+                        "get",
+                        "subclass"
+                    ],
+                    [
+                        "literal",
+                        [
+                            "tram",
+                            "light_rail"
+                        ]
+                    ]
+                ]
+            ],
+            "paint": {
+                "line-color": "#b5b5b5",
+                "line-width": {
+                    "base": 1.2,
+                    "stops": [
+                        [
+                            9,
+                            0.7
+                        ],
+                        [
+                            16,
+                            2
+                        ]
+                    ]
+                },
+                "line-opacity": 0.95
+            }
+        },
+        {
+            "id": "transit-ferry",
+            "type": "line",
+            "source": "openmaptiles",
+            "source-layer": "transportation",
+            "minzoom": 10,
+            "filter": [
+                "==",
+                "class",
+                "ferry"
+            ],
+            "paint": {
+                "line-color": "rgba(108, 137, 188, 1)",
+                "line-width": 1,
+                "line-opacity": 0.6,
+                "line-dasharray": [
+                    1,
+                    2
+                ]
+            }
+        },
+        {
+            "id": "boundary-state",
+            "type": "line",
+            "source": "openmaptiles",
+            "source-layer": "boundary",
+            "filter": [
+                "==",
+                "admin_level",
+                4
+            ],
+            "paint": {
+                "line-color": "#bbbbbb",
+                "line-width": 0.75,
+                "line-dasharray": [
+                    2,
+                    1
+                ]
+            }
+        },
+        {
+            "id": "boundary-country",
+            "type": "line",
+            "source": "openmaptiles",
+            "source-layer": "boundary",
+            "filter": [
+                "==",
+                "admin_level",
+                2
+            ],
+            "paint": {
+                "line-color": "#999999",
+                "line-width": 1.2
+            }
+        },
+        {
+            "id": "building",
+            "type": "fill",
+            "source": "openmaptiles",
+            "source-layer": "building",
+            "minzoom": 13,
+            "maxzoom": 15,
+            "paint": {
+                "fill-color": "#dcdcdc",
+                "fill-outline-color": "#d0d0d0",
+                "fill-opacity": 0.8
+            }
+        },
+        {
+            "id": "building-3d",
+            "type": "fill-extrusion",
+            "source": "openmaptiles",
+            "source-layer": "building",
+            "minzoom": 15,
+            "paint": {
+                "fill-extrusion-color": "#d6d6d6",
+                "fill-extrusion-height": [
+                    "coalesce",
+                    [
+                        "get",
+                        "render_height"
+                    ],
+                    [
+                        "*",
+                        [
+                            "coalesce",
+                            [
+                                "get",
+                                "levels"
+                            ],
+                            1
+                        ],
+                        3
+                    ]
+                ],
+                "fill-extrusion-base": [
+                    "coalesce",
+                    [
+                        "get",
+                        "render_min_height"
+                    ],
+                    0
+                ],
+                "fill-extrusion-opacity": 0.85
+            }
+        },
+        {
+            "id": "road-label-motorway",
+            "type": "symbol",
+            "source": "openmaptiles",
+            "source-layer": "transportation_name",
+            "minzoom": 9,
+            "filter": [
+                "in",
+                "class",
+                "motorway",
+                "trunk"
+            ],
+            "layout": {
+                "symbol-placement": "line",
+                "text-field": [
+                    "coalesce",
+                    [
+                        "get",
+                        "name"
+                    ],
+                    [
+                        "get",
+                        "ref"
+                    ]
+                ],
+                "text-font": [
+                    "Host Grotesk"
+                ],
+                "text-size": 12.5,
+                "text-letter-spacing": 0.03,
+                "text-transform": "uppercase"
+            },
+            "paint": {
+                "text-color": "#5a5a5a",
+                "text-halo-color": "#ffffff",
+                "text-halo-width": 1.3
+            }
+        },
+        {
+            "id": "road-label-primary",
+            "type": "symbol",
+            "source": "openmaptiles",
+            "source-layer": "transportation_name",
+            "minzoom": 11,
+            "filter": [
+                "==",
+                "class",
+                "primary"
+            ],
+            "layout": {
+                "symbol-placement": "line",
+                "text-field": [
+                    "coalesce",
+                    [
+                        "get",
+                        "name"
+                    ],
+                    [
+                        "get",
+                        "ref"
+                    ]
+                ],
+                "text-font": [
+                    "Host Grotesk"
+                ],
+                "text-size": 12,
+                "text-letter-spacing": 0.02
+            },
+            "paint": {
+                "text-color": "#5a5a5a",
+                "text-halo-color": "#ffffff",
+                "text-halo-width": 1.2
+            }
+        },
+        {
+            "id": "road-label-secondary",
+            "type": "symbol",
+            "source": "openmaptiles",
+            "source-layer": "transportation_name",
+            "minzoom": 13,
+            "filter": [
+                "in",
+                "class",
+                "secondary",
+                "tertiary"
+            ],
+            "layout": {
+                "symbol-placement": "line",
+                "text-field": [
                     "get",
+                    "name"
+                ],
+                "text-font": [
+                    "Host Grotesk"
+                ],
+                "text-size": 10.5
+            },
+            "paint": {
+                "text-color": "#7a7a7a",
+                "text-halo-color": "#ffffff",
+                "text-halo-width": 1
+            }
+        },
+        {
+            "id": "road-label-minor",
+            "type": "symbol",
+            "source": "openmaptiles",
+            "source-layer": "transportation_name",
+            "minzoom": 15,
+            "filter": [
+                "in",
+                "class",
+                "minor",
+                "service"
+            ],
+            "layout": {
+                "symbol-placement": "line",
+                "text-field": [
+                    "get",
+                    "name"
+                ],
+                "text-font": [
+                    "Host Grotesk"
+                ],
+                "text-size": 9.5
+            },
+            "paint": {
+                "text-color": "#8a8a8a",
+                "text-halo-color": "#ffffff",
+                "text-halo-width": 1
+            }
+        },
+        {
+            "id": "transit-rail-label",
+            "type": "symbol",
+            "source": "openmaptiles",
+            "source-layer": "transportation_name",
+            "minzoom": 12,
+            "filter": [
+                "==",
+                "class",
+                "rail"
+            ],
+            "layout": {
+                "symbol-placement": "line",
+                "text-field": [
+                    "get",
+                    "name"
+                ],
+                "text-font": [
+                    "Host Grotesk"
+                ],
+                "text-size": 10
+            },
+            "paint": {
+                "text-color": "#8a8a8a",
+                "text-halo-color": "#ffffff",
+                "text-halo-width": 1
+            }
+        },
+        {
+            "id": "place-country-major",
+            "type": "symbol",
+            "source": "openmaptiles",
+            "source-layer": "place",
+            "filter": [
+                "all",
+                [
+                    "==",
+                    [
+                        "get",
+                        "class"
+                    ],
+                    "country"
+                ],
+                [
+                    "<=",
+                    [
+                        "get",
+                        "rank"
+                    ],
+                    3
+                ]
+            ],
+            "layout": {
+                "text-field": [
+                    "get",
+                    "name"
+                ],
+                "text-font": [
+                    "Host Grotesk"
+                ],
+                "text-size": 18,
+                "text-transform": "uppercase",
+                "text-letter-spacing": 0.08
+            },
+            "paint": {
+                "text-color": "#3d3d3d",
+                "text-halo-color": "#ffffff",
+                "text-halo-width": 1.6
+            }
+        },
+        {
+            "id": "place-country-minor",
+            "type": "symbol",
+            "source": "openmaptiles",
+            "source-layer": "place",
+            "filter": [
+                "all",
+                [
+                    "==",
+                    [
+                        "get",
+                        "class"
+                    ],
+                    "country"
+                ],
+                [
+                    ">",
+                    [
+                        "get",
+                        "rank"
+                    ],
+                    3
+                ]
+            ],
+            "minzoom": 3,
+            "layout": {
+                "text-field": [
+                    "get",
+                    "name"
+                ],
+                "text-font": [
+                    "Host Grotesk"
+                ],
+                "text-size": 13,
+                "text-transform": "uppercase",
+                "text-letter-spacing": 0.06
+            },
+            "paint": {
+                "text-color": "#5a5a5a",
+                "text-halo-color": "#ffffff",
+                "text-halo-width": 1.4
+            }
+        },
+        {
+            "id": "place-state",
+            "type": "symbol",
+            "source": "openmaptiles",
+            "source-layer": "place",
+            "filter": [
+                "==",
+                "class",
+                "state"
+            ],
+            "minzoom": 4,
+            "layout": {
+                "text-field": [
+                    "get",
+                    "name"
+                ],
+                "text-font": [
+                    "Host Grotesk"
+                ],
+                "text-size": 11,
+                "text-transform": "uppercase",
+                "text-letter-spacing": 0.04
+            },
+            "paint": {
+                "text-color": "#7a7a7a",
+                "text-halo-color": "#ffffff",
+                "text-halo-width": 1.2
+            }
+        },
+        {
+            "id": "place-city",
+            "type": "symbol",
+            "source": "openmaptiles",
+            "source-layer": "place",
+            "filter": [
+                "==",
+                "class",
+                "city"
+            ],
+            "layout": {
+                "text-field": [
+                    "get",
+                    "name"
+                ],
+                "text-font": [
+                    "Host Grotesk"
+                ],
+                "text-size": [
+                    "interpolate",
+                    [
+                        "linear"
+                    ],
+                    [
+                        "zoom"
+                    ],
+                    3,
+                    [
+                        "case",
+                        [
+                            "==",
+                            [
+                                "get",
+                                "capital"
+                            ],
+                            2
+                        ],
+                        13,
+                        10
+                    ],
+                    10,
+                    [
+                        "case",
+                        [
+                            "==",
+                            [
+                                "get",
+                                "capital"
+                            ],
+                            2
+                        ],
+                        17,
+                        15
+                    ]
+                ]
+            },
+            "paint": {
+                "text-color": "#3d3d3d",
+                "text-halo-color": "#ffffff",
+                "text-halo-width": 1.3
+            }
+        },
+        {
+            "id": "place-town-village",
+            "type": "symbol",
+            "source": "openmaptiles",
+            "source-layer": "place",
+            "minzoom": 8,
+            "filter": [
+                "in",
+                "class",
+                "town",
+                "village"
+            ],
+            "layout": {
+                "text-field": [
+                    "get",
+                    "name"
+                ],
+                "text-font": [
+                    "Host Grotesk"
+                ],
+                "text-size": [
+                    "interpolate",
+                    [
+                        "linear"
+                    ],
+                    [
+                        "zoom"
+                    ],
+                    8,
+                    10,
+                    14,
+                    13
+                ]
+            },
+            "paint": {
+                "text-color": "#666666",
+                "text-halo-color": "#ffffff",
+                "text-halo-width": 1
+            }
+        },
+        {
+            "id": "place-suburb-neighbourhood",
+            "type": "symbol",
+            "source": "openmaptiles",
+            "source-layer": "place",
+            "minzoom": 13,
+            "filter": [
+                "in",
+                "class",
+                "suburb",
+                "neighbourhood",
+                "quarter"
+            ],
+            "layout": {
+                "text-field": [
+                    "get",
+                    "name"
+                ],
+                "text-font": [
+                    "Host Grotesk"
+                ],
+                "text-size": 10,
+                "text-transform": "uppercase",
+                "text-letter-spacing": 0.03
+            },
+            "paint": {
+                "text-color": "#8a8a8a",
+                "text-halo-color": "#ffffff",
+                "text-halo-width": 0.8
+            }
+        },
+        {
+            "id": "subway-entrance_icon",
+            "type": "symbol",
+            "source": "vector",
+            "source-layer": "poi",
+            "minzoom": 16,
+            "filter": [
+                "all",
+                [
+                    "==",
+                    "$type",
+                    "Point"
+                ],
+                [
+                    "in",
+                    "class",
+                    "entrance"
+                ],
+                [
+                    "in",
+                    "subclass",
+                    "subway_entrance"
+                ]
+            ],
+            "layout": {
+                "icon-image": "metro_entrance",
+                "icon-allow-overlap": true,
+                "icon-anchor": "bottom",
+                "icon-size": [
+                    "interpolate",
+                    [
+                        "exponential",
+                        1.15
+                    ],
+                    [
+                        "zoom"
+                    ],
+                    15,
+                    0.4,
+                    20,
+                    0.6
+                ]
+            },
+            "paint": {
+                "icon-translate": [
+                    0,
+                    -5.25
+                ]
+            }
+        },
+        {
+            "id": "subway-entrance_letter",
+            "type": "symbol",
+            "source": "vector",
+            "source-layer": "poi",
+            "minzoom": 17,
+            "filter": [
+                "all",
+                [
+                    "==",
+                    "$type",
+                    "Point"
+                ],
+                [
+                    "in",
+                    "class",
+                    "entrance"
+                ],
+                [
+                    "in",
+                    "subclass",
+                    "subway_entrance"
+                ],
+                [
+                    "has",
                     "ref"
                 ]
             ],
-            "icon-allow-overlap": true,
-            "icon-anchor": "bottom",
-            "icon-size": [
-                "interpolate",
+            "layout": {
+                "icon-image": [
+                    "concat",
+                    "letter_",
+                    [
+                        "downcase",
+                        [
+                            "get",
+                            "ref"
+                        ]
+                    ]
+                ],
+                "icon-allow-overlap": true,
+                "icon-anchor": "bottom",
+                "icon-size": [
+                    "interpolate",
+                    [
+                        "exponential",
+                        1.15
+                    ],
+                    [
+                        "zoom"
+                    ],
+                    13,
+                    0.61,
+                    20,
+                    0.81
+                ]
+            },
+            "paint": {
+                "icon-translate": [
+                    0,
+                    -5.25
+                ]
+            }
+        },
+        {
+            "id": "icon_bus-station",
+            "type": "symbol",
+            "source": "terminals",
+            "source-layer": "terminals",
+            "minzoom": 11,
+            "filter": [
+                "all",
                 [
-                    "exponential",
-                    1.15
+                    "==",
+                    "$type",
+                    "Point"
                 ],
                 [
-                    "zoom"
+                    "==",
+                    "mode",
+                    "BUS"
+                ]
+            ],
+            "layout": {
+                "text-optional": true,
+                "text-size": 10,
+                "text-field": "{nameFi}",
+                "text-font": [
+                    "Host Grotesk"
                 ],
-                13,
-                0.8,
-                20,
-                1.2
-            ]
+                "text-anchor": "top",
+                "text-max-width": 8,
+                "text-offset": [
+                    0,
+                    0.5
+                ],
+                "icon-image": "bus",
+                "icon-size": 0.7
+            },
+            "paint": {
+                "text-color": "#666",
+                "text-halo-color": "#fff",
+                "text-halo-width": 1,
+                "icon-translate": [
+                    0,
+                    -5.25
+                ]
+            }
         },
-        "paint": {
-            "icon-translate": [
-                0,
-                -5.25
-            ]
-        }
-    },
-    {
-        "id": "icon_bus-station",
-        "type": "symbol",
-        "source": "terminals",
-        "source-layer": "terminals",
-        "minzoom": 11,
-        "filter": [
-            "all",
-            [
-                "==",
-                "$type",
-                "Point"
+        {
+            "id": "icon_subway-station",
+            "type": "symbol",
+            "source": "terminals",
+            "source-layer": "terminals",
+            "minzoom": 11,
+            "filter": [
+                "all",
+                [
+                    "==",
+                    "$type",
+                    "Point"
+                ],
+                [
+                    "==",
+                    "mode",
+                    "SUBWAY"
+                ]
             ],
-            [
-                "==",
-                "mode",
-                "BUS"
-            ]
-        ],
-        "layout": {
-            "text-optional": true,
-            "text-size": 10,
-            "text-field": "{nameFi}",
-            "text-font": [
-                "Host Grotesk"
-            ],
-            "text-anchor": "top",
-            "text-max-width": 8,
-            "text-offset": [
-                0,
-                0.5
-            ],
-            "icon-image": "icon-terminal-bus",
-            "icon-size": 0.9
+            "layout": {
+                "text-optional": true,
+                "text-size": 10,
+                "text-field": "{nameFi}",
+                "text-font": [
+                    "Host Grotesk"
+                ],
+                "text-anchor": "top",
+                "text-max-width": 8,
+                "text-offset": [
+                    0,
+                    0.5
+                ],
+                "icon-image": "metro",
+                "icon-size": 0.7
+            },
+            "paint": {
+                "text-color": "#666",
+                "text-halo-color": "#fff",
+                "text-halo-width": 1,
+                "icon-translate": [
+                    0,
+                    -5.25
+                ]
+            }
         },
-        "paint": {
-            "text-color": "#666",
-            "text-halo-color": "#fff",
-            "text-halo-width": 1,
-            "icon-translate": [
-                0,
-                -5.25
-            ]
-        }
-    },
-    {
-        "id": "icon_subway-station",
-        "type": "symbol",
-        "source": "terminals",
-        "source-layer": "terminals",
-        "minzoom": 11,
-        "filter": [
-            "all",
-            [
-                "==",
-                "$type",
-                "Point"
+        {
+            "id": "icon_railway-station",
+            "type": "symbol",
+            "source": "terminals",
+            "source-layer": "terminals",
+            "minzoom": 11,
+            "filter": [
+                "all",
+                [
+                    "==",
+                    "$type",
+                    "Point"
+                ],
+                [
+                    "==",
+                    "mode",
+                    "RAIL"
+                ]
             ],
-            [
-                "==",
-                "mode",
-                "SUBWAY"
-            ]
-        ],
-        "layout": {
-            "text-optional": true,
-            "text-size": 10,
-            "text-field": "{nameFi}",
-            "text-font": [
-                "Host Grotesk"
-            ],
-            "text-anchor": "top",
-            "text-max-width": 8,
-            "text-offset": [
-                0,
-                0.5
-            ],
-            "icon-image": "icon-terminal-subway",
-            "icon-size": 0.9
+            "layout": {
+                "text-optional": true,
+                "text-size": 10,
+                "text-field": "{nameFi}",
+                "text-font": [
+                    "Host Grotesk"
+                ],
+                "text-anchor": "top",
+                "text-max-width": 8,
+                "text-offset": [
+                    0,
+                    0.75
+                ],
+                "icon-image": "rail",
+                "icon-size": 0.7
+            },
+            "paint": {
+                "text-color": "#666",
+                "text-halo-color": "#fff",
+                "text-halo-width": 1,
+                "icon-translate": [
+                    0,
+                    -5.25
+                ]
+            }
         },
-        "paint": {
-            "text-color": "#666",
-            "text-halo-color": "#fff",
-            "text-halo-width": 1,
-            "icon-translate": [
-                0,
-                -5.25
-            ]
-        }
-    },
-    {
-        "id": "icon_railway-station",
-        "type": "symbol",
-        "source": "terminals",
-        "source-layer": "terminals",
-        "minzoom": 11,
-        "filter": [
-            "all",
-            [
-                "==",
-                "$type",
-                "Point"
+        {
+            "id": "icon_aerodrome",
+            "type": "symbol",
+            "source": "vector",
+            "source-layer": "aerodrome_label",
+            "minzoom": 5,
+            "filter": [
+                "all",
+                [
+                    "==",
+                    "$type",
+                    "Point"
+                ],
+                [
+                    "in",
+                    "class",
+                    "international",
+                    "public",
+                    "regional"
+                ]
             ],
-            [
-                "==",
-                "mode",
+            "layout": {
+                "text-optional": true,
+                "text-size": 10,
+                "text-field": "{name_en}",
+                "text-font": [
+                    "Host Grotesk"
+                ],
+                "text-anchor": "top",
+                "text-max-width": 8,
+                "text-offset": [
+                    0,
+                    0.5
+                ],
+                "icon-image": "airport",
+                "icon-size": 0.7
+            },
+            "paint": {
+                "text-color": "#666",
+                "text-halo-color": "#fff",
+                "text-halo-width": 1,
+                "icon-translate": [
+                    0,
+                    -5.25
+                ]
+            }
+        },
+        {
+            "id": "stops_case",
+            "type": "circle",
+            "source": "stops",
+            "source-layer": "stops",
+            "minzoom": 13,
+            "filter": [
+                "!=",
+                [
+                    "get",
+                    "mode"
+                ],
                 "RAIL"
-            ]
-        ],
-        "layout": {
-            "text-optional": true,
-            "text-size": 10,
-            "text-field": "{nameFi}",
-            "text-font": [
-                "Host Grotesk"
             ],
-            "text-anchor": "top",
-            "text-max-width": 8,
-            "text-offset": [
-                0,
-                0.75
-            ],
-            "icon-image": "icon-terminal-train",
-            "icon-size": 0.9
+            "paint": {
+                "circle-color": "#fff",
+                "circle-radius": [
+                    "interpolate",
+                    [
+                        "exponential",
+                        1.15
+                    ],
+                    [
+                        "zoom"
+                    ],
+                    12,
+                    1.5,
+                    22,
+                    26
+                ]
+            }
         },
-        "paint": {
-            "text-color": "#666",
-            "text-halo-color": "#fff",
-            "text-halo-width": 1,
-            "icon-translate": [
-                0,
-                -5.25
-            ]
-        }
-    },
-    {
-        "id": "icon_aerodrome",
-        "type": "symbol",
-        "source": "vector",
-        "source-layer": "aerodrome_label",
-        "minzoom": 5,
-        "filter": [
-            "all",
-            [
+        {
+            "id": "stops_rail_case",
+            "type": "circle",
+            "source": "stops",
+            "source-layer": "stops",
+            "minzoom": 13,
+            "filter": [
                 "==",
-                "$type",
-                "Point"
+                [
+                    "get",
+                    "mode"
+                ],
+                "RAIL"
             ],
-            [
-                "in",
-                "class",
-                "international",
-                "public",
-                "regional"
-            ]
-        ],
-        "layout": {
-            "text-optional": true,
-            "text-size": 10,
-            "text-field": "{name_en}",
-            "text-font": [
-                "Host Grotesk"
-            ],
-            "text-anchor": "top",
-            "text-max-width": 8,
-            "text-offset": [
-                0,
-                0.5
-            ],
-            "icon-image": "icon-terminal-aerodrome",
-            "icon-size": 0.9
+            "paint": {
+                "circle-color": "#fff",
+                "circle-radius": [
+                    "interpolate",
+                    [
+                        "exponential",
+                        1.15
+                    ],
+                    [
+                        "zoom"
+                    ],
+                    12,
+                    1.5,
+                    22,
+                    26
+                ]
+            }
         },
-        "paint": {
-            "text-color": "#666",
-            "text-halo-color": "#fff",
-            "text-halo-width": 1,
-            "icon-translate": [
-                0,
-                -5.25
-            ]
-        }
-    },
-    {
-        "id": "stops_case",
-        "type": "circle",
-        "source": "stops",
-        "source-layer": "stops",
-        "minzoom": 13,
-        "filter": [
-            "!=",
-            [
-                "get",
-                "mode"
+        {
+            "id": "stops_rail",
+            "type": "circle",
+            "source": "stops",
+            "source-layer": "stops",
+            "minzoom": 13,
+            "filter": [
+                "==",
+                [
+                    "get",
+                    "mode"
+                ],
+                "RAIL"
             ],
-            "RAIL"
-        ],
-        "paint": {
-            "circle-color": "#fff",
-            "circle-radius": [
-                "interpolate",
+            "paint": {
+                "circle-color": "#8c54a2",
+                "circle-radius": [
+                    "interpolate",
+                    [
+                        "exponential",
+                        1.15
+                    ],
+                    [
+                        "zoom"
+                    ],
+                    12,
+                    1,
+                    22,
+                    24
+                ]
+            }
+        },
+        {
+            "id": "stops_bus",
+            "type": "circle",
+            "source": "stops",
+            "source-layer": "stops",
+            "minzoom": 13,
+            "filter": [
+                "all",
                 [
-                    "exponential",
-                    1.15
+                    "!",
+                    [
+                        "get",
+                        "isTrunkStop"
+                    ]
                 ],
                 [
-                    "zoom"
-                ],
-                12,
-                1.5,
-                22,
-                26
-            ]
-        }
-    },
-    {
-        "id": "stops_rail_case",
-        "type": "circle",
-        "source": "stops",
-        "source-layer": "stops",
-        "minzoom": 13,
-        "filter": [
-            "==",
-            [
-                "get",
-                "mode"
+                    "==",
+                    [
+                        "get",
+                        "mode"
+                    ],
+                    "BUS"
+                ]
             ],
-            "RAIL"
-        ],
-        "paint": {
-            "circle-color": "#fff",
-            "circle-radius": [
-                "interpolate",
-                [
-                    "exponential",
-                    1.15
-                ],
-                [
-                    "zoom"
-                ],
-                12,
-                1.5,
-                22,
-                26
-            ]
-        }
-    },
-    {
-        "id": "stops_rail",
-        "type": "circle",
-        "source": "stops",
-        "source-layer": "stops",
-        "minzoom": 13,
-        "filter": [
-            "==",
-            [
-                "get",
-                "mode"
-            ],
-            "RAIL"
-        ],
-        "paint": {
-            "circle-color": "#8c54a2",
-            "circle-radius": [
-                "interpolate",
-                [
-                    "exponential",
-                    1.15
-                ],
-                [
-                    "zoom"
-                ],
-                12,
-                1,
-                22,
-                24
-            ]
-        }
-    },
-    {
-        "id": "stops_bus",
-        "type": "circle",
-        "source": "stops",
-        "source-layer": "stops",
-        "minzoom": 13,
-        "filter": [
-            "all",
-            [
-                "!",
+            "paint": {
+                "circle-color": "#007ac9",
+                "circle-radius": [
+                    "interpolate",
+                    [
+                        "exponential",
+                        1.15
+                    ],
+                    [
+                        "zoom"
+                    ],
+                    12,
+                    1,
+                    22,
+                    24
+                ]
+            }
+        },
+        {
+            "id": "stops_trunk",
+            "type": "circle",
+            "source": "stops",
+            "source-layer": "stops",
+            "minzoom": 13,
+            "filter": [
+                "all",
                 [
                     "get",
                     "isTrunkStop"
+                ],
+                [
+                    "==",
+                    [
+                        "get",
+                        "mode"
+                    ],
+                    "BUS"
                 ]
             ],
-            [
-                "==",
-                [
-                    "get",
-                    "mode"
-                ],
-                "BUS"
-            ]
-        ],
-        "paint": {
-            "circle-color": "#007ac9",
-            "circle-radius": [
-                "interpolate",
-                [
-                    "exponential",
-                    1.15
-                ],
-                [
-                    "zoom"
-                ],
-                12,
-                1,
-                22,
-                24
-            ]
-        }
-    },
-    {
-        "id": "stops_trunk",
-        "type": "circle",
-        "source": "stops",
-        "source-layer": "stops",
-        "minzoom": 13,
-        "filter": [
-            "all",
-            [
-                "get",
-                "isTrunkStop"
-            ],
-            [
-                "==",
-                [
-                    "get",
-                    "mode"
-                ],
-                "BUS"
-            ]
-        ],
-        "paint": {
-            "circle-color": "#CA4300",
-            "circle-radius": [
-                "interpolate",
-                [
-                    "exponential",
-                    1.15
-                ],
-                [
-                    "zoom"
-                ],
-                12,
-                1,
-                22,
-                24
-            ]
-        }
-    },
-    {
-        "id": "stops_ferry",
-        "type": "circle",
-        "source": "stops",
-        "source-layer": "stops",
-        "minzoom": 13,
-        "filter": [
-            "==",
-            [
-                "get",
-                "mode"
-            ],
-            "FERRY"
-        ],
-        "paint": {
-            "circle-color": "#00b9e4",
-            "circle-radius": [
-                "interpolate",
-                [
-                    "exponential",
-                    1.15
-                ],
-                [
-                    "zoom"
-                ],
-                12,
-                1,
-                22,
-                24
-            ]
-        }
-    },
-    {
-        "id": "stops_tram",
-        "type": "circle",
-        "source": "stops",
-        "source-layer": "stops",
-        "minzoom": 13,
-        "filter": [
-            "==",
-            [
-                "get",
-                "mode"
-            ],
-            "TRAM"
-        ],
-        "paint": {
-            "circle-color": "#00985f",
-            "circle-radius": [
-                "interpolate",
-                [
-                    "exponential",
-                    1.15
-                ],
-                [
-                    "zoom"
-                ],
-                12,
-                1,
-                22,
-                24
-            ]
-        }
-    },
-    {
-        "id": "stops_lrail",
-        "type": "circle",
-        "source": "stops",
-        "source-layer": "stops",
-        "minzoom": 13,
-        "filter": [
-            "==",
-            [
-                "get",
-                "mode"
-            ],
-            "L_RAIL"
-        ],
-        "paint": {
-            "circle-color": "#00b2a9",
-            "circle-radius": [
-                "interpolate",
-                [
-                    "exponential",
-                    1.15
-                ],
-                [
-                    "zoom"
-                ],
-                12,
-                1,
-                22,
-                24
-            ]
-        }
-    },
-    {
-        "id": "stops_subway",
-        "type": "circle",
-        "source": "stops",
-        "source-layer": "stops",
-        "minzoom": 13,
-        "filter": [
-            "==",
-            [
-                "get",
-                "mode"
-            ],
-            "SUBWAY"
-        ],
-        "paint": {
-            "circle-color": "#ff6319",
-            "circle-radius": [
-                "interpolate",
-                [
-                    "exponential",
-                    1.15
-                ],
-                [
-                    "zoom"
-                ],
-                12,
-                1,
-                22,
-                24
-            ]
-        }
-    },
-    {
-        "id": "stops_hub",
-        "type": "circle",
-        "source": "stops",
-        "source-layer": "stops",
-        "minzoom": 14,
-        "filter": [
-            "!=",
-            [
-                "get",
-                "mode"
-            ],
-            "RAIL"
-        ],
-        "paint": {
-            "circle-color": "#fff",
-            "circle-radius": [
-                "interpolate",
-                [
-                    "exponential",
-                    1.15
-                ],
-                [
-                    "zoom"
-                ],
-                14,
-                2,
-                22,
-                20
-            ]
-        }
-    },
-    {
-        "id": "stops_rail_hub",
-        "type": "circle",
-        "source": "stops",
-        "source-layer": "stops",
-        "minzoom": 13,
-        "filter": [
-            "==",
-            [
-                "get",
-                "mode"
-            ],
-            "RAIL"
-        ],
-        "paint": {
-            "circle-color": "#fff",
-            "circle-radius": [
-                "interpolate",
-                [
-                    "exponential",
-                    1.15
-                ],
-                [
-                    "zoom"
-                ],
-                14,
-                2,
-                22,
-                20
-            ]
-        }
-    },
-    {
-        "id": "citybike_stops_case",
-        "type": "circle",
-        "source": "citybike",
-        "source-layer": "rentalStations",
-        "minzoom": 13,
-        "maxzoom": 14,
-        "paint": {
-            "circle-color": "#fff",
-            "circle-radius": [
-                "interpolate",
-                [
-                    "exponential",
-                    1.15
-                ],
-                [
-                    "zoom"
-                ],
-                12,
-                1.5,
-                22,
-                26
-            ]
-        }
-    },
-    {
-        "id": "citybike_stops",
-        "type": "circle",
-        "source": "citybike",
-        "source-layer": "rentalStations",
-        "minzoom": 13,
-        "maxzoom": 14,
-        "paint": {
-            "circle-color": "#fcbc19",
-            "circle-radius": [
-                "interpolate",
-                [
-                    "exponential",
-                    1.15
-                ],
-                [
-                    "zoom"
-                ],
-                12,
-                1,
-                22,
-                24
-            ]
-        }
-    },
-    {
-        "id": "citybike_icon",
-        "type": "symbol",
-        "source": "citybike",
-        "source-layer": "rentalStations",
-        "minzoom": 14,
-        "layout": {
-            "icon-offset": [
-                0,
-                -6
-            ],
-            "icon-image": "icon-citybike-station",
-            "icon-allow-overlap": false,
-            "icon-size": {
-                "stops": [
+            "paint": {
+                "circle-color": "#ff6319",
+                "circle-radius": [
+                    "interpolate",
                     [
-                        13,
-                        0.8
+                        "exponential",
+                        1.15
                     ],
                     [
-                        20,
-                        1.2
-                    ]
+                        "zoom"
+                    ],
+                    12,
+                    1,
+                    22,
+                    24
                 ]
             }
+        },
+        {
+            "id": "stops_ferry",
+            "type": "circle",
+            "source": "stops",
+            "source-layer": "stops",
+            "minzoom": 13,
+            "filter": [
+                "==",
+                [
+                    "get",
+                    "mode"
+                ],
+                "FERRY"
+            ],
+            "paint": {
+                "circle-color": "#00b9e4",
+                "circle-radius": [
+                    "interpolate",
+                    [
+                        "exponential",
+                        1.15
+                    ],
+                    [
+                        "zoom"
+                    ],
+                    12,
+                    1,
+                    22,
+                    24
+                ]
+            }
+        },
+        {
+            "id": "stops_tram",
+            "type": "circle",
+            "source": "stops",
+            "source-layer": "stops",
+            "minzoom": 13,
+            "filter": [
+                "==",
+                [
+                    "get",
+                    "mode"
+                ],
+                "TRAM"
+            ],
+            "paint": {
+                "circle-color": "#00985f",
+                "circle-radius": [
+                    "interpolate",
+                    [
+                        "exponential",
+                        1.15
+                    ],
+                    [
+                        "zoom"
+                    ],
+                    12,
+                    1,
+                    22,
+                    24
+                ]
+            }
+        },
+        {
+            "id": "stops_lrail",
+            "type": "circle",
+            "source": "stops",
+            "source-layer": "stops",
+            "minzoom": 13,
+            "filter": [
+                "==",
+                [
+                    "get",
+                    "mode"
+                ],
+                "L_RAIL"
+            ],
+            "paint": {
+                "circle-color": "#00b2a9",
+                "circle-radius": [
+                    "interpolate",
+                    [
+                        "exponential",
+                        1.15
+                    ],
+                    [
+                        "zoom"
+                    ],
+                    12,
+                    1,
+                    22,
+                    24
+                ]
+            }
+        },
+        {
+            "id": "stops_subway",
+            "type": "circle",
+            "source": "stops",
+            "source-layer": "stops",
+            "minzoom": 13,
+            "filter": [
+                "==",
+                [
+                    "get",
+                    "mode"
+                ],
+                "SUBWAY"
+            ],
+            "paint": {
+                "circle-color": "#ff6319",
+                "circle-radius": [
+                    "interpolate",
+                    [
+                        "exponential",
+                        1.15
+                    ],
+                    [
+                        "zoom"
+                    ],
+                    12,
+                    1,
+                    22,
+                    24
+                ]
+            }
+        },
+        {
+            "id": "stops_hub",
+            "type": "circle",
+            "source": "stops",
+            "source-layer": "stops",
+            "minzoom": 14,
+            "filter": [
+                "!=",
+                [
+                    "get",
+                    "mode"
+                ],
+                "RAIL"
+            ],
+            "paint": {
+                "circle-color": "#fff",
+                "circle-radius": [
+                    "interpolate",
+                    [
+                        "exponential",
+                        1.15
+                    ],
+                    [
+                        "zoom"
+                    ],
+                    14,
+                    2,
+                    22,
+                    20
+                ]
+            }
+        },
+        {
+            "id": "stops_rail_hub",
+            "type": "circle",
+            "source": "stops",
+            "source-layer": "stops",
+            "minzoom": 13,
+            "filter": [
+                "==",
+                [
+                    "get",
+                    "mode"
+                ],
+                "RAIL"
+            ],
+            "paint": {
+                "circle-color": "#fff",
+                "circle-radius": [
+                    "interpolate",
+                    [
+                        "exponential",
+                        1.15
+                    ],
+                    [
+                        "zoom"
+                    ],
+                    14,
+                    2,
+                    22,
+                    20
+                ]
+            }
+        },
+        {
+            "id": "citybike_stops_case",
+            "type": "circle",
+            "source": "citybike",
+            "source-layer": "rentalStations",
+            "minzoom": 13,
+            "maxzoom": 14,
+            "paint": {
+                "circle-color": "#fff",
+                "circle-radius": [
+                    "interpolate",
+                    [
+                        "exponential",
+                        1.15
+                    ],
+                    [
+                        "zoom"
+                    ],
+                    12,
+                    1.5,
+                    22,
+                    26
+                ]
+            }
+        },
+        {
+            "id": "citybike_stops",
+            "type": "circle",
+            "source": "citybike",
+            "source-layer": "rentalStations",
+            "minzoom": 13,
+            "maxzoom": 14,
+            "paint": {
+                "circle-color": "#fcbc19",
+                "circle-radius": [
+                    "interpolate",
+                    [
+                        "exponential",
+                        1.15
+                    ],
+                    [
+                        "zoom"
+                    ],
+                    12,
+                    1,
+                    22,
+                    24
+                ]
+            }
+        },
+        {
+            "id": "citybike_icon",
+            "type": "symbol",
+            "source": "citybike",
+            "source-layer": "rentalStations",
+            "minzoom": 14,
+            "layout": {
+                "icon-offset": [
+                    0,
+                    -6
+                ],
+                "icon-image": "bike",
+                "icon-allow-overlap": false,
+                "icon-size": {
+                    "stops": [
+                        [
+                            13,
+                            0.6
+                        ],
+                        [
+                            20,
+                            0.8
+                        ]
+                    ]
+                }
+            }
         }
-    }
     ]
-  }
+}

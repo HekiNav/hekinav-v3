@@ -1647,7 +1647,7 @@
       "minzoom": 13,
       "maxzoom": 14,
       "paint": {
-        "circle-color": "#efd71d",
+        "circle-color": "#EDAF20",
         "circle-radius": [
           "interpolate",
           [
