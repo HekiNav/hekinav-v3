@@ -1049,20 +1049,6 @@
         "text-halo-width": 0.8
       }
     },
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     {
       "id": "subway-entrance_icon",
       "type": "symbol",
@@ -1088,7 +1074,7 @@
         ]
       ],
       "layout": {
-        "icon-image": "icon-entrance-subway",
+        "icon-image": "metro_entrance",
         "icon-allow-overlap": true,
         "icon-anchor": "bottom",
         "icon-size": [
@@ -1101,9 +1087,9 @@
             "zoom"
           ],
           15,
-          0.533,
+          0.4,
           20,
-          0.8
+          0.6
         ]
       },
       "paint": {
@@ -1144,10 +1130,13 @@
       "layout": {
         "icon-image": [
           "concat",
-          "icon-letter-",
+          "letter_",
           [
-            "get",
-            "ref"
+            "downcase",
+            [
+              "get",
+              "ref"
+            ]
           ]
         ],
         "icon-allow-overlap": true,
@@ -1162,9 +1151,9 @@
             "zoom"
           ],
           13,
-          0.8,
+          0.61,
           20,
-          1.2
+          0.81
         ]
       },
       "paint": {
@@ -1675,17 +1664,17 @@
           0,
           -6
         ],
-        "icon-image": "icon-citybike-station",
+        "icon-image": "bike",
         "icon-allow-overlap": false,
         "icon-size": {
           "stops": [
             [
               13,
-              0.8
+              0.6
             ],
             [
               20,
-              1.2
+              0.8
             ]
           ]
         }
@@ -1736,8 +1725,8 @@
           0,
           0.5
         ],
-        "icon-image": "icon-terminal-bus",
-        "icon-size": 0.9
+        "icon-image": "bus",
+        "icon-size": 0.7
       },
       "paint": {
         "text-color": "#666",
@@ -1794,8 +1783,8 @@
           0,
           0.5
         ],
-        "icon-image": "icon-terminal-subway",
-        "icon-size": 0.9
+        "icon-image": "metro",
+        "icon-size": 0.7
       },
       "paint": {
         "text-color": "#666",
@@ -1852,8 +1841,8 @@
           0,
           0.75
         ],
-        "icon-image": "icon-terminal-train",
-        "icon-size": 0.9
+        "icon-image": "rail",
+        "icon-size": 0.7
       },
       "paint": {
         "text-color": "#666",
@@ -1899,8 +1888,8 @@
           0,
           0.5
         ],
-        "icon-image": "icon-terminal-aerodrome",
-        "icon-size": 0.9
+        "icon-image": "airport",
+        "icon-size": 0.7
       },
       "paint": {
         "text-color": "#666",

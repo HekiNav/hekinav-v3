@@ -100,7 +100,7 @@ export const IconTable = {
     "WALK": (<DirectionsWalk className="text-black border-black"></DirectionsWalk>),
 }
 
-export const gtfsIdRegex = /^(.*)\:\d+$/
+export const gtfsIdRegex = /^(.*)\:(\d|[A-Z]|\Ä|\Ö|\Å|_|-)+$/
 
 export function getRouteColor(type: "bg", mode: number, stringMode?: string) {
     switch (mode) {
