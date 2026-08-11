@@ -1,0 +1,142 @@
+"use server"
+
+import { redirect } from "next/navigation";
+import { getRouteColor, gtfsIdRegex } from "@/app/lib/digitransit";
+import { ApolloClient, gql, HttpLink, InMemoryCache, TypedDocumentNode } from "@apollo/client";
+import Toast from "@/app/components/toast";
+import Link from "next/link";
+import { Sidebar } from "@/app/mapcontext";
+import { PatternQueryQuery, PatternQueryQueryVariables } from "./page.generated";
+import Label from "@/app/components/label";
+import Icon from "@/app/components/icon";
+import { ArrowRightAltW700 as ArrowRightAlt } from '@material-symbols-svg/react/icons/arrow-right-alt';
+import Dropdown, { DropdownItem } from "@/app/components/dropdown";
+import IconItem from "@/app/components/iconitem";
+
+const GET_PATTERN:
+  TypedDocumentNode<PatternQueryQuery, PatternQueryQueryVariables> =
+  gql`
+query PatternQuery($patternId: String!) {
+  pattern(id: $patternId) {
+    name
+    code
+    stops {
+      name
+      gtfsId
+      code
+      desc
+      platformCode
+      stopTimesForPattern(id: $patternId, numberOfDepartures: 2) {
+        arrivalDelay
+        realtimeArrival
+        scheduledArrival
+
+        realtime
+        departureDelay
+        realtimeDeparture
+        scheduledDeparture
+      }
+    }
+    route {
+      mode
+      type
+      shortName
+      longName
+      patterns {
+        code
+        directionId
+        stops {
+          name
+        }
+      }
+    }
+  }
+}
+
+
+    `
+
+type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
+
+
+export default async function StopOrStation({
+  params,
+  searchParams
+}: {
+  params: Promise<{
+    direction_pattern: string
+    id: string
+  }>,
+  searchParams: SearchParams;
+}) {
+  const { id, direction_pattern } = await params
+
+  const [direction, pattern] = direction_pattern.split("-")
+
+
+  const isHsl = (await searchParams).hsl != undefined
+
+  if (!gtfsIdRegex.test(decodeURIComponent(id))) {
+    redirect(`/${isHsl ? "?hsl" : ""}`)
+  }
+  if (isHsl && id.slice(0, 3) != "HSL") {
+    return (
+      <Sidebar>
+        Failed to load route
+        <Toast type="error" message={<span>You are using the HSL-only mode. This route does not look like a HSL route. <Link className="text-green" href="/?hsl">Go to home</Link> or <Link className="text-green" href="./">Change to the Finland-wide version</Link> </span>}></Toast>
+      </Sidebar>
+    )
+  }
+
+  const client = new ApolloClient({
+    link: new HttpLink({ uri: `https://api.digitransit.fi/routing/v2/${isHsl ? "hsl" : "finland"}/gtfs/v1/`, headers: { "digitransit-subscription-key": process.env.DIGITRANSIT_KEY || "" } }),
+    cache: new InMemoryCache(),
+  });
+
+  const result = await client.query({
+    query: GET_PATTERN,
+    variables: {
+      patternId: `${decodeURIComponent(id)}:${direction}:${pattern}`
+    }
+  })
+
+  if (result.error || !result.data) {
+    return (
+      <Sidebar>
+        Failed to load route
+        <Toast type="error" message={`Failed to get route data: ${result.error?.message || "Unknown error"}`}></Toast>
+      </Sidebar>
+    )
+  }
+  const data = result.data.pattern
+  if (!data || !data.stops) return (
+    <Sidebar>
+      Failed to load route
+    </Sidebar>
+  )
+
+  const patternOptions: DropdownItem<string>[] = (result.data.pattern?.route.patterns || []).map(p => ({
+    content: (p && <Link className="decoration-none" href={`/route/${id}/${p.directionId}-${p.code.split(":")[3]}/${isHsl ? "?hsl" : ""}`}><Pattern data={p as never}></Pattern></Link>), id: p?.code || ""
+  }))
+
+  return (
+    <Sidebar>
+      <span className="flex justify-start items-center gap-2 mb-4">
+        <Label className={`text-2xl w-min ${getRouteColor("bg", data.route.type || -1, data.route.mode || "")} text-white font-bold`}>{data.route.shortName || data.route.longName}</Label>
+        <Pattern data={data}></Pattern>
+      </span>
+      <Dropdown initial={<span className="text-xl font-medium text-green">Other patterns</span>} items={patternOptions}></Dropdown>
+    </Sidebar>
+  )
+}
+
+function Pattern({data}: {data: Omit<NonNullable<PatternQueryQuery["pattern"]>, "route" | "name">}) {
+  if (!data.stops) return data.code
+  return (
+    <div className="flex justify-start items-center gap-1">
+      <span className="font-medium text-xl">{data.stops[0].name}</span>
+      <Icon><ArrowRightAlt height={24}></ArrowRightAlt></Icon>
+      <span className="font-medium text-xl">{data.stops[data.stops.length - 1].name}</span>
+    </div>
+  )
+}

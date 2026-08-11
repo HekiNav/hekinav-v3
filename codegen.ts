@@ -4,7 +4,7 @@ import { CodegenConfig } from "@graphql-codegen/cli";
 const config: CodegenConfig = {
   overwrite: true,
   schema: "https://api.digitransit.fi/routing/v2/finland/gtfs/v1/?digitransit-subscription-key=bbc7a56df1674c59822889b1bc84e7ad",
-  documents: ["app/**/*.{ts,tsx}"],
+  documents: ["./app/**/*.{ts,tsx}"],
   ignoreNoDocuments: true,
   generates: {
     "./app/lib/__generated__/graphql.ts": {
