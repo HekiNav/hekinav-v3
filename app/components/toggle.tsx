@@ -1,15 +1,15 @@
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch } from "react";
 
 export interface ToggleProps {
     state: boolean,
-    setState: Dispatch<SetStateAction<boolean>>,
+    setState: Dispatch<boolean>,
     noColors?: boolean
 }
 export default function Toggle({ state, setState, noColors=false }: ToggleProps) {
-    return (<div className="bg-gray-300 p-1 flex flex-col rounded-md h-6 w-10 m-1 mx-2" onClick={() => setState(!state)}>
+    return (<div className="outline-gray outline-3 p-[2px] flex flex-col rounded-md h-5 w-9 m-1 mx-2" onClick={() => setState(!state)}>
         <div style={{
             transform: `translate(${state ? "100" : "0"}%,0)`
-        }} className={`w-5/10 h-full rounded-sm transition duration-500 ease-in-out bg-gray-600 ${state && !noColors ? "bg-green-600" : !noColors && "bg-red-600"}`}>
+        }} className={`w-5/10 h-full rounded-sm transition duration-500 ease-in-out bg-gray ${state && !noColors ? "bg-green" : !noColors && "bg-red"}`}>
 
         </div>
     </div>)

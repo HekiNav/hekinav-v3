@@ -5,7 +5,7 @@ import "react-loading-skeleton/dist/skeleton.css";
 import type { Metadata } from "next";
 import { Host_Grotesk } from "next/font/google";
 import { Toaster } from "react-hot-toast";
-import { createContext, useEffect } from "react";
+import { createContext, useEffect, useState } from "react";
 import { MapLayoutProvider } from "./mapcontext";
 import Navbar from "./components/navbar";
 
@@ -21,10 +21,12 @@ export const metadata: Metadata = {
 };
 
 export interface HekinavConfig {
-
+  advancedDepartures: boolean
 }
-const defaultConfig: HekinavConfig = { }
-export const ConfigContext = createContext<HekinavConfig>(defaultConfig)
+const defaultConfig: HekinavConfig = {
+  advancedDepartures: false
+}
+export const ConfigContext = createContext<{ config: HekinavConfig, setConfig: <K extends keyof HekinavConfig>(key: K, value: HekinavConfig[K]) => void }>({ config: defaultConfig, setConfig: () => { } })
 
 export default function RootLayout({
   children,
@@ -32,8 +34,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
 
+  const [config, setConfig] = useState<HekinavConfig>(defaultConfig)
 
-
+  function setConfigKey<K extends keyof HekinavConfig>(key: K, value: HekinavConfig[K]) {
+    setConfig({ ...config, [key]: value })
+  }
 
   useEffect(() => {
     const vv = window.visualViewport;
@@ -61,7 +66,7 @@ export default function RootLayout({
         <title>Hekinav Routing</title>
       </head>
       <body className="h-screen overflow-hidden">
-        <ConfigContext value={defaultConfig}>
+        <ConfigContext value={{ config, setConfig: setConfigKey }}>
           <Navbar></Navbar>
           <Toaster
             toastOptions={{

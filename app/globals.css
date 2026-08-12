@@ -45,3 +45,14 @@ a:not(.decoration-none) {
 .nav-item:hover .indicator, .nav-item.active .indicator {
   width: 100%;
 }
+
+td {
+  text-wrap: nowrap;
+}
+
+.td-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+  max-width: 0;
+}

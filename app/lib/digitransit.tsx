@@ -102,61 +102,61 @@ export const IconTable = {
 
 export const gtfsIdRegex = /^(.*)\:(\d|[A-Z]|\Ä|\Ö|\Å|_|-)+$/
 
-export function getRouteColor(type: "bg", mode: number, stringMode?: string) {
+export function getRouteColor(type: "bg" | "border", mode: number, stringMode?: string) {
     switch (mode) {
         case 109:
-            return "bg-purple"
+            return type == "border" ? "border-purple" : "bg-purple"
         case 102:
-            return "bg-green"
+            return type == "border" ? "border-green" : "bg-green"
         case 701:
         case 704:
         case 700:
         case 3:
-            return "bg-blue"
+            return type == "border" ? "border-blue" : "bg-blue"
         case 702:
-            return "bg-orange"
+            return type == "border" ? "border-orange" : "bg-orange"
         case 714:
-            return "bg-blue"
+            return type == "border" ? "border-blue" : "bg-blue"
         case 900:
-            return "bg-turqoise"
+            return type == "border" ? "border-turqoise" : "bg-turqoise"
         case 1104:
-            return "bg-darkblue"
+            return type == "border" ? "border-darkblue" : "bg-darkblue"
         case 0:
-            return "bg-green"
+            return type == "border" ? "border-green" : "bg-green"
         case 1:
-            return "bg-orange"
+            return type == "border" ? "border-orange" : "bg-orange"
         case 4:
         case 1008:
-            return "bg-cyan"
+            return type == "border" ? "border-cyan" : "bg-cyan"
         case -1:
             switch (stringMode) {
-                case "BUS-EXPRESS": return "bg-darkblue"
-                case "COACH": return "bg-darkblue"
-                case "SPEEDTRAM": return "bg-turqoise"
-                case "BUS": return "bg-blue"
-                case "TRANSIT": return "bg-blue"
-                case "RAIL": return "bg-purple"
-                case "SUBWAY": return "bg-orange"
-                case "TRAM": return "bg-green"
-                case "TROLLEYBUS": return "bg-green"
-                case "FERRY": return "bg-cyan"
-                case "AIRPLANE": return "bg-darkblue"
-                case "BICYCLE": return "bg-yellow"
-                case "CABLE_CAR": return "bg-green"
-                case "GONDOLA": return "bg-green"
-                case "FUNICULAR": return "bg-green"
-                case "MONORAIL": return "bg-green"
-                case "CAR": return "bg-green"
-                case "TAXI": return "bg-green"
-                case "CARPOOL": return "bg-green"
-                case "SCOOTER": return "bg-green"
-                case "FLEX": return "bg-black"
-                case "FLEXIBLE": return "bg-black"
-                case "LEG_SWITCH": return "bg-black"
-                case "WALK": return "bg-black"
+                case "BUS-EXPRESS": return type == "border" ? "border-darkblue" : "bg-darkblue"
+                case "COACH": return type == "border" ? "border-darkblue" : "bg-darkblue"
+                case "SPEEDTRAM": return type == "border" ? "border-turqoise" : "bg-turqoise"
+                case "BUS": return type == "border" ? "border-blue" : "bg-blue"
+                case "TRANSIT": return type == "border" ? "border-blue" : "bg-blue"
+                case "RAIL": return type == "border" ? "border-purple" : "bg-purple"
+                case "SUBWAY": return type == "border" ? "border-orange" : "bg-orange"
+                case "TRAM": return type == "border" ? "border-green" : "bg-green"
+                case "TROLLEYBUS": return type == "border" ? "border-green" : "bg-green"
+                case "FERRY": return type == "border" ? "border-cyan" : "bg-cyan"
+                case "AIRPLANE": return type == "border" ? "border-darkblue" : "bg-darkblue"
+                case "BICYCLE": return type == "border" ? "border-yellow" : "bg-yellow"
+                case "CABLE_CAR": return type == "border" ? "border-green" : "bg-green"
+                case "GONDOLA": return type == "border" ? "border-green" : "bg-green"
+                case "FUNICULAR": return type == "border" ? "border-green" : "bg-green"
+                case "MONORAIL": return type == "border" ? "border-green" : "bg-green"
+                case "CAR": return type == "border" ? "border-green" : "bg-green"
+                case "TAXI": return type == "border" ? "border-green" : "bg-green"
+                case "CARPOOL": return type == "border" ? "border-green" : "bg-green"
+                case "SCOOTER": return type == "border" ? "border-green" : "bg-green"
+                case "FLEX": return type == "border" ? "border-black" : "bg-black"
+                case "FLEXIBLE": return type == "border" ? "border-black" : "bg-black"
+                case "LEG_SWITCH": return type == "border" ? "border-black" : "bg-black"
+                case "WALK": return type == "border" ? "border-black" : "bg-black"
             }
         default:
             console.log(mode)
-            return "bg-gray"
+            return type == "border" ? "border-gray" : "bg-gray"
     }
 }

@@ -11,7 +11,8 @@ import Label from "@/app/components/label";
 import Icon from "@/app/components/icon";
 import { ArrowRightAltW700 as ArrowRightAlt } from '@material-symbols-svg/react/icons/arrow-right-alt';
 import Dropdown, { DropdownItem } from "@/app/components/dropdown";
-import IconItem from "@/app/components/iconitem";
+import Button from "@/app/components/button";
+import { SyncAltW700 as SyncAlt } from '@material-symbols-svg/react/icons/sync-alt';
 
 const GET_PATTERN:
   TypedDocumentNode<PatternQueryQuery, PatternQueryQueryVariables> =
@@ -59,7 +60,7 @@ query PatternQuery($patternId: String!) {
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 
 
-export default async function StopOrStation({
+export default async function Route({
   params,
   searchParams
 }: {
@@ -115,22 +116,54 @@ export default async function StopOrStation({
     </Sidebar>
   )
 
-  const patternOptions: DropdownItem<string>[] = (result.data.pattern?.route.patterns || []).map(p => ({
+  const patternOptions: DropdownItem<string>[] = (result.data.pattern?.route.patterns || []).filter(p => p?.code != data.code).map(p => ({
     content: (p && <Link className="decoration-none" href={`/route/${id}/${p.directionId}-${p.code.split(":")[3]}/${isHsl ? "?hsl" : ""}`}><Pattern data={p as never}></Pattern></Link>), id: p?.code || ""
   }))
+
+  const firstPattern = data.route.patterns && data.route.patterns.find(p => p?.code != data.code)
 
   return (
     <Sidebar>
       <span className="flex justify-start items-center gap-2 mb-4">
         <Label className={`text-2xl w-min ${getRouteColor("bg", data.route.type || -1, data.route.mode || "")} text-white font-bold`}>{data.route.shortName || data.route.longName}</Label>
-        <Pattern data={data}></Pattern>
+        <Pattern data={data}></Pattern> {(patternOptions.length == 1 && firstPattern) && <Link className="decoration-none" href={`/route/${id}/${firstPattern.directionId}-${firstPattern.code.split(":")[3]}/${isHsl ? "?hsl" : ""}`}><Icon boxed><SyncAlt></SyncAlt></Icon></Link>}
       </span>
-      <Dropdown initial={<span className="text-xl font-medium text-green">Other patterns</span>} items={patternOptions}></Dropdown>
+      {patternOptions.length > 1 && <Dropdown initial={<span className="text-xl font-medium text-green">Other patterns</span>} items={patternOptions}></Dropdown>}
+      <div className="stops flex flex-col">
+        {
+          data.stops.map((s, i, a) => {
+
+            return (
+              <Link className="h-full flex decoration-none" key={i} href={`/stop/${s.gtfsId}/${isHsl ? "?hsl" : ""}`}>
+                <div className="flex flex-row w-full">
+                  <div className={`mx-4 w-3 relative h-full flex ${i == 0 ? "items-end" : i == a.length - 1 ? "items-start" : ""}`}>
+                    <div className={`w-full ${i == 0 || i == a.length - 1 ? "h-5/10" : "h-full"} ${getRouteColor("bg", data.route.type || -1, data.route.mode || "")}`}></div>
+                    <div className="absolute -left-1.5 -right-1.5 top-0 bottom-0 flex justify-center items-center">
+                      <div className={`${getRouteColor("border", data.route.type || -1, data.route.mode || "")} border-[.25rem] bg-white h-6 w-6 rounded-full z-100`}></div>
+                    </div>
+                  </div>
+                  <div className="p-2 flex flex-row justify-between w-full">
+                    <div>
+                      <span className="text-lg font-medium">{s.name}</span> {s.platformCode && <Label>pl. {s.platformCode}</Label>} <br />
+                      <span className="text-sm">{s.desc}</span> {s.code && <Label className="text-xs bg-gray">{s.code}</Label>}
+                    </div>
+                    <div className="text-end">
+                      <span className="text-md font-medium">{s.name}</span> <br />
+                      <span className="text-sm">Next {s.desc}</span>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            )
+          })
+        }
+      </div>
+
     </Sidebar>
   )
 }
 
-function Pattern({data}: {data: Omit<NonNullable<PatternQueryQuery["pattern"]>, "route" | "name">}) {
+function Pattern({ data }: { data: Omit<NonNullable<PatternQueryQuery["pattern"]>, "route" | "name"> }) {
   if (!data.stops) return data.code
   return (
     <div className="flex justify-start items-center gap-1">

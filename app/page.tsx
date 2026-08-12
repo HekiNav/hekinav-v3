@@ -103,7 +103,6 @@ export default function Home() {
               fn({ icon: <NotListedLocation></NotListedLocation>, id: "unknown_location", text: "Somewhere", properties: { lat: latitude, lng: longitude } });
               return
             }
-            console.log(data);
             fn({ ...data[0], properties: { lat: latitude, lng: longitude } })
             setPickedLocation(null)
             setPickedLocationTarget(null)

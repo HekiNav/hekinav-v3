@@ -2,16 +2,12 @@
 
 import { redirect } from "next/navigation";
 import { MapOverlay, Sidebar } from "../../mapcontext";
-import { IconTable, getRouteColor, gtfsIdRegex } from "@/app/lib/digitransit";
+import { gtfsIdRegex } from "@/app/lib/digitransit";
 import { ApolloClient, HttpLink, InMemoryCache, TypedDocumentNode, gql } from "@apollo/client";
 import { StationQueryQuery, StationQueryQueryVariables, StopQueryQuery, StopQueryQueryVariables } from "./page.generated";
 import Toast from "@/app/components/toast";
-import Label from "@/app/components/label";
-import IconItem from "@/app/components/iconitem";
-import Date from "./date";
 import Link from "next/link";
-import Day from "./day";
-import { ReactElement } from "react";
+import Content from "./content";
 
 
 const GET_STOP:
@@ -162,43 +158,19 @@ export default async function StopOrStation({
       </Sidebar>
     )
   }
-  const data = stop_or_station == "stop" ? (result.data as StopQueryQuery).stop : (result.data as StationQueryQuery).station
+  const data = (result.data as StopQueryQuery).stop || (result.data as StationQueryQuery).station
   if (!data) return
-
+  
   return (
     <>
       <Sidebar>
-        <IconItem icon={{ boxed: stop_or_station == "station", children: IconTable[data.vehicleMode || "BUS"] }} className="text-lg"><span className="text-2xl">{data.name}</span> {data.platformCode && <Label className="bg-gray">{data.platformCode}</Label>}</IconItem>
-        <div className="text-sm">{data.desc && <Label className="bg-gray">{data.desc}</Label>} {data.code && <Label className="bg-gray">{data.code}</Label>}</div>
-        <h2 className="text-lg">Departures</h2>
-        {data.stoptimesWithoutPatterns && data.stoptimesWithoutPatterns.length ? <table><tbody>
-          {
-            data.stoptimesWithoutPatterns?.reduce((p, s, i, a) => {
-              const delay = (s?.departureDelay || s?.arrivalDelay || 0)
-              const last = a[i - 1]
-              const url = `/route/${s?.trip?.route.gtfsId}/${s?.trip?.directionId || ""}-${s?.trip?.pattern?.code.split(":")[3]}${isHsl ? "?hsl" : ""}`
-              return [...p, (last && last.serviceDay != s?.serviceDay) ? (
-                <tr key={`h${i}`} className={`px-1 border-t-10 border-white`}>
-                  <th className="text-start" colSpan={3}><Day day={s?.serviceDay as number || 0}></Day></th>
-                </tr>) : [], (
-                <tr key={i} className={`px-1 border-t-3 border-white`}>
-                  <td className={`${i % 2 == 1 ? "bg-[#eee]" : "bg-white"} rounded-l-lg ps-[2px]`}>
-                    <Link className="decoration-none" href={url}>
-                      <Label className={`text-white font-bold ${getRouteColor("bg", s?.trip?.route.type || -1, s?.trip?.route.mode || undefined)}`}>{s?.trip?.routeShortName}</Label>
-                    </Link>
-                  </td>
-                  <td className={`${i % 2 == 1 ? "bg-[#eee]" : "bg-white"}`}>
-                    <Link className="decoration-none" href={url}>{s?.pickupType == "NONE" ? "Arriving / Terminus" : s?.headsign}</Link>
-                  </td>
-                  <td className={`${i % 2 == 1 ? "bg-[#eee]" : "bg-white"} rounded-r-lg items-center justify-end pr-1 flex flex-row flex-nowrap ${s?.realtime ? getColorFromDelay(delay) : "text-black"}`}>
-                    <Date approx={!s?.realtime} showScheduled={delay < -120 || delay > 120} scheduledTime={s?.scheduledDeparture || s?.scheduledArrival || 0} time={s?.realtimeDeparture || s?.scheduledDeparture || s?.realtimeArrival || s?.scheduledArrival || 0} day={s?.serviceDay as number || 0}></Date>
-                  </td>
-                </tr>)
-              ].flat()
-            }, new Array<ReactElement>())
-          }
-        </tbody>
-        </table> : "No departures"}
+
+        <Content
+          data={data as NonNullable<StopQueryQuery["stop"]>}
+          isHsl={isHsl}
+          stop_or_station={stop_or_station}
+        />
+
       </Sidebar>
       <MapOverlay>
         <div></div>
@@ -207,15 +179,6 @@ export default async function StopOrStation({
   );
 }
 
-function getColorFromDelay(delay: number) {
-  console.log(delay)
-  if (delay > 600) {
-    return "text-red"
-  } else if (delay > 120) {
-    return "text-orange"
-  } else if (delay < -120) {
-    return "text-cyan"
-  } else {
-    return "text-green"
-  }
-}
+
+
+
