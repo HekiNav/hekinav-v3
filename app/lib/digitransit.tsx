@@ -160,3 +160,63 @@ export function getRouteColor(type: "bg" | "border", mode: number, stringMode?: 
             return type == "border" ? "border-gray" : "bg-gray"
     }
 }
+
+
+export function getColor(mode: number, stringMode?: string) {
+    switch (mode) {
+        case 109:
+            return '#912bdb'
+        case 102:
+            return '#0f8c0f'
+        case 701:
+        case 704:
+        case 700:
+        case 3:
+            return '#115ee3'
+        case 702:
+            return '#e97b15'
+        case 714:
+            return '#115ee3'
+        case 900:
+            return '#0DACA1'
+        case 1104:
+            return '#1D39BA'
+        case 0:
+            return '#0f8c0f'
+        case 1:
+            return '#e97b15'
+        case 4:
+        case 1008:
+            return '#3eb8e4'
+        case -1:
+            switch (stringMode) {
+                case "BUS-EXPRESS": return '#1D39BA'
+                case "COACH": return '#1D39BA'
+                case "SPEEDTRAM": return '#0DACA1'
+                case "BUS": return '#115ee3'
+                case "TRANSIT": return '#115ee3'
+                case "RAIL": return '#912bdb'
+                case "SUBWAY": return '#e97b15'
+                case "TRAM": return '#0f8c0f'
+                case "TROLLEYBUS": return '#0f8c0f'
+                case "FERRY": return '#3eb8e4'
+                case "AIRPLANE": return '#1D39BA'
+                case "BICYCLE": return '#EDAF20'
+                case "CABLE_CAR": return '#0f8c0f'
+                case "GONDOLA": return '#0f8c0f'
+                case "FUNICULAR": return '#0f8c0f'
+                case "MONORAIL": return '#0f8c0f'
+                case "CAR": return '#0f8c0f'
+                case "TAXI": return '#0f8c0f'
+                case "CARPOOL": return '#0f8c0f'
+                case "SCOOTER": return '#0f8c0f'
+                case "FLEX": return '#111111'
+                case "FLEXIBLE": return '#111111'
+                case "LEG_SWITCH": return '#111111'
+                case "WALK": return '#111111'
+            }
+        default:
+            console.log(mode)
+            return '#ccc'
+    }
+}

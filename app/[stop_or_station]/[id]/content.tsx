@@ -2,13 +2,15 @@
 import { IconTable, getRouteColor } from "@/app/lib/digitransit";
 import Label from "@/app/components/label";
 import IconItem from "@/app/components/iconitem";
-import Date from "./date";
+import Date from "../../components/Date";
 import Link from "next/link";
 import Day from "./day";
-import { ReactElement, useContext } from "react";
+import { ReactElement, useContext, useEffect } from "react";
 import Toggle from "@/app/components/toggle";
-import { ConfigContext } from "@/app/layout";
+import { ConfigContext } from "@/app/HekinavConfig";
 import { StopQueryQuery } from "./page.generated";
+import { useMap } from "@vis.gl/react-maplibre";
+import { LngLat } from "maplibre-gl"
 
 interface ContentProps {
     data: NonNullable<StopQueryQuery["stop"]>
@@ -20,13 +22,24 @@ interface ContentProps {
 export default function Content({ data,
     isHsl,
     stop_or_station }: ContentProps) {
-        
+
     const { config, setConfig } = useContext(ConfigContext)
+
+    const { default: map } = useMap()
+
+    useEffect(() => {
+        map?.flyTo({
+            center: new LngLat(data.lon || 0, data.lat || 0),
+            zoom: 15,
+            duration: 3000
+        })
+    }, [data.lat, data.lon, map])
+
     return (
         <>
             <IconItem icon={{ boxed: stop_or_station == "station", children: IconTable[data.vehicleMode || "BUS"] }} className="text-lg"><span className="text-2xl">{data.name}</span> {data.platformCode && <Label className="bg-gray">{data.platformCode}</Label>}</IconItem>
             <div className="text-sm">{data.desc && <Label className="bg-gray">{data.desc}</Label>} {data.code && <Label className="bg-gray">{data.code}</Label>}</div>
-            <h2 className="text-xl flex justify-between"><span>Departures</span><span className="flex flex-nowrap text-lg">Advanced<Toggle state={config.advancedDepartures} setState={(value) => setConfig("advancedDepartures",value)}></Toggle></span></h2>
+            <h2 className="text-xl flex justify-between"><span>Departures</span><span className="flex flex-nowrap text-lg">Advanced<Toggle state={config.advancedDepartures} setState={(value) => setConfig("advancedDepartures", value)}></Toggle></span></h2>
             {data.stoptimesWithoutPatterns && data.stoptimesWithoutPatterns.length ? <table><tbody>
                 {
                     data.stoptimesWithoutPatterns?.reduce((p, s, i, a) => {
@@ -40,7 +53,7 @@ export default function Content({ data,
                             </tr>) : [], (
                             <tr key={i} className={`px-1 border-t-3 border-white`}>
                                 <td className={`${i % 2 == 1 ? "bg-[#eee]" : "bg-white"} rounded-l-lg ps-[2px]`}>
-                                    <Link className="decoration-none" href={url}>
+                                    <Link className="decoration-none mr-2" href={url}>
                                         <Label className={`text-white font-bold ${getRouteColor("bg", s?.trip?.route.type || -1, s?.trip?.route.mode || undefined)}`}>{s?.trip?.routeShortName}</Label>
                                     </Link>
                                 </td>
@@ -61,13 +74,13 @@ export default function Content({ data,
 }
 
 function getColorFromDelay(delay: number) {
-  if (delay > 900) {
-    return "text-red"
-  } else if (delay > 180) {
-    return "text-orange"
-  } else if (delay < -300) {
-    return "text-cyan"
-  } else {
-    return "text-green"
-  }
+    if (delay > 900) {
+        return "text-red"
+    } else if (delay > 180) {
+        return "text-orange"
+    } else if (delay < -300) {
+        return "text-cyan"
+    } else {
+        return "text-green"
+    }
 }

@@ -5,9 +5,10 @@ import "react-loading-skeleton/dist/skeleton.css";
 import type { Metadata } from "next";
 import { Host_Grotesk } from "next/font/google";
 import { Toaster } from "react-hot-toast";
-import { createContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { MapLayoutProvider } from "./mapcontext";
 import Navbar from "./components/navbar";
+import { HekinavConfig, defaultConfig, ConfigContext } from "./HekinavConfig";
 
 const hostGrotesk = Host_Grotesk({
   variable: "--font-a",
@@ -19,14 +20,6 @@ export const metadata: Metadata = {
   title: "Hekinav Routing",
   description: "Hekinav Routing",
 };
-
-export interface HekinavConfig {
-  advancedDepartures: boolean
-}
-const defaultConfig: HekinavConfig = {
-  advancedDepartures: false
-}
-export const ConfigContext = createContext<{ config: HekinavConfig, setConfig: <K extends keyof HekinavConfig>(key: K, value: HekinavConfig[K]) => void }>({ config: defaultConfig, setConfig: () => { } })
 
 export default function RootLayout({
   children,

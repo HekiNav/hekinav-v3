@@ -8,6 +8,7 @@ import { StationQueryQuery, StationQueryQueryVariables, StopQueryQuery, StopQuer
 import Toast from "@/app/components/toast";
 import Link from "next/link";
 import Content from "./content";
+import { Map } from "./Map";
 
 
 const GET_STOP:
@@ -160,7 +161,7 @@ export default async function StopOrStation({
   }
   const data = (result.data as StopQueryQuery).stop || (result.data as StationQueryQuery).station
   if (!data) return
-  
+
   return (
     <>
       <Sidebar>
@@ -173,11 +174,16 @@ export default async function StopOrStation({
 
       </Sidebar>
       <MapOverlay>
-        <div></div>
+        <Map data={data as NonNullable<StopQueryQuery["stop"]>}
+
+        />
       </MapOverlay>
     </>
   );
 }
+
+
+
 
 
 

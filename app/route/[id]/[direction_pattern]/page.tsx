@@ -11,8 +11,9 @@ import Label from "@/app/components/label";
 import Icon from "@/app/components/icon";
 import { ArrowRightAltW700 as ArrowRightAlt } from '@material-symbols-svg/react/icons/arrow-right-alt';
 import Dropdown, { DropdownItem } from "@/app/components/dropdown";
-import Button from "@/app/components/button";
 import { SyncAltW700 as SyncAlt } from '@material-symbols-svg/react/icons/sync-alt';
+import DateEl from "@/app/components/Date";
+import { Map } from "./Map";
 
 const GET_PATTERN:
   TypedDocumentNode<PatternQueryQuery, PatternQueryQueryVariables> =
@@ -22,6 +23,8 @@ query PatternQuery($patternId: String!) {
     name
     code
     stops {
+      lat
+      lon
       name
       gtfsId
       code
@@ -36,7 +39,12 @@ query PatternQuery($patternId: String!) {
         departureDelay
         realtimeDeparture
         scheduledDeparture
+        serviceDay
       }
+    }
+    patternGeometry {
+      length
+      points
     }
     route {
       mode
@@ -122,6 +130,7 @@ export default async function Route({
 
   const firstPattern = data.route.patterns && data.route.patterns.find(p => p?.code != data.code)
 
+
   return (
     <Sidebar>
       <span className="flex justify-start items-center gap-2 mb-4">
@@ -132,7 +141,8 @@ export default async function Route({
       <div className="stops flex flex-col">
         {
           data.stops.map((s, i, a) => {
-
+            const firstDep = s.stopTimesForPattern && s.stopTimesForPattern[0]
+            const secondDep = s.stopTimesForPattern && s.stopTimesForPattern[1]
             return (
               <Link className="h-full flex decoration-none" key={i} href={`/stop/${s.gtfsId}/${isHsl ? "?hsl" : ""}`}>
                 <div className="flex flex-row w-full">
@@ -148,8 +158,8 @@ export default async function Route({
                       <span className="text-sm">{s.desc}</span> {s.code && <Label className="text-xs bg-gray">{s.code}</Label>}
                     </div>
                     <div className="text-end">
-                      <span className="text-md font-medium">{s.name}</span> <br />
-                      <span className="text-sm">Next {s.desc}</span>
+                      {firstDep && <span className={`text-md font-medium ${firstDep.realtime ? "text-green" : "text-black"}`}><DateEl showTime={false} day={firstDep.serviceDay as number || 0} time={firstDep.realtimeDeparture || firstDep.scheduledDeparture || 0}></DateEl></span>} <br />
+                      {secondDep && <span className={`text-sm font-medium ${secondDep.realtime ? "text-green" : "text-black"}`}>Next <DateEl showTime={false} day={secondDep.serviceDay as number || 0} time={secondDep.realtimeDeparture || secondDep.scheduledDeparture || 0}></DateEl></span>}
                     </div>
                   </div>
                 </div>
@@ -158,7 +168,7 @@ export default async function Route({
           })
         }
       </div>
-
+        <Map data={data}/>
     </Sidebar>
   )
 }

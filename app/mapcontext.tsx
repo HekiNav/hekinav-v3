@@ -1,7 +1,7 @@
 "use client";
 import 'maplibre-gl/dist/maplibre-gl.css';
 
-import { ReactElement, createContext, useContext, useEffect, useRef, useState } from "react";
+import { Dispatch, ReactElement, RefObject, SetStateAction, createContext, memo, useContext, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Map, MapProvider, MapRef, Popup, PopupProps } from "@vis.gl/react-maplibre";
 import IconItem from './components/iconitem';
@@ -45,6 +45,11 @@ export function MapLayoutProvider({ children }: { children: React.ReactNode }) {
 
     const focusSidebar = () => !map.current?.isMoving() && setFocus(true)
     const blurSidebar = () => setFocus(false)
+    
+
+    useEffect(() => {
+        console.log("HSL CHNAGE")
+    }, [popup])
 
     useEffect(() => {
         if (!sidebar) return
@@ -57,7 +62,7 @@ export function MapLayoutProvider({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         // eslint-disable-next-line @typescript-eslint/no-unused-expressions, react-hooks/set-state-in-effect
         popup && setPopup(null)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [path])
 
     return (
@@ -70,152 +75,16 @@ export function MapLayoutProvider({ children }: { children: React.ReactNode }) {
        md:static md:h-full! md:w-120 transition-all ease-in-out duration-1000 md:rounded-none overflow-scroll bottom-0 md:pb-4! pb-200`}>
                         </div>
                         <div className='h-screen' style={{ position: 'relative', flex: 1 }}>
-                            <Map
-                                onClick={(e) => {
-                                    setFocus(false)
-                                    if (!map.current) return
-                                    const pxBoxSize = 16
 
-                                    const distance = map.current.getZoom() > 10 ? 125 : 500
+                            <MapContainer
+                                isHsl={isHsl}
+                                map={map}
+                                setFocus={setFocus}
+                                setOverlay={setOverlay}
+                                setPopup={setPopup}
+                                popup={popup}
+                            />
 
-                                    const stations =
-                                        isHsl
-                                            ? map.current.querySourceFeatures("terminals", { sourceLayer: "terminals" }).filter(s => e.lngLat.distanceTo(new LngLat(...(s.geometry as GeoJSON.Point).coordinates as [number, number])) < distance)
-                                            : map.current.querySourceFeatures("poi_transit", { sourceLayer: "stations" }).filter(s => e.lngLat.distanceTo(new LngLat(...(s.geometry as GeoJSON.Point).coordinates as [number, number])) < distance && s.properties.routes && JSON.parse(s.properties.routes).length > 1)
-
-                                    const feats = map.current.queryRenderedFeatures([
-                                        [e.point.x - pxBoxSize, e.point.y - pxBoxSize],
-                                        [e.point.x + pxBoxSize, e.point.y + pxBoxSize]
-                                    ], {
-                                        layers:
-                                            isHsl
-                                                ? ["stops_rail", "stops_bus", "stops_trunk", "stops_ferry", "stops_tram", "stops_lrail", "stops_subway"]
-                                                : ["stops_airplane", "stops_rail", "stops_unknown", "stops_bus", "stops_trunk", "stops_ferry", "stops_tram", "stops_lrail", "stops_subway"]
-                                    })
-                                    const combined = [...feats, ...stations];
-                                    if (combined.length == 0) return
-                                    if (combined.length == 1) {
-                                        const first = combined[0]
-                                        const isStation = stations.length == 1
-                                        if (isHsl) {
-                                            redirect(`/${isStation ? "station" : "stop"}/HSL:${isStation ? first.properties.terminalId : first.properties.stopId}/?hsl`)
-                                        } else {
-                                            redirect(`/${isStation ? "station" : "stop"}/${first.properties.gtfsId}/`)
-                                        }
-                                    }
-
-
-                                    setPopup({
-                                        latitude: e.lngLat.lat,
-                                        longitude: e.lngLat.lng,
-                                        anchor: "bottom",
-                                        onClose: () => setPopup(null),
-                                        children:
-                                            (<div className='max-h-100 overflow-scroll font-medium'>
-                                                {stations.filter((value, index, self) =>
-                                                    index === self.findIndex((t) => (
-                                                        t.properties.name === value.properties.name && t.properties.gtfsId === value.properties.gtfsId && t.properties.stopId === value.properties.stopId && t.properties.terminalId === value.properties.terminalId
-                                                    ))
-                                                ).map((s, i) => {
-                                                    interface HslProperties {
-                                                        mode: Mode
-                                                        nameFi: string
-                                                        nameSe: string
-                                                        terminalId: string
-                                                    }
-
-                                                    interface FinlandProperties {
-                                                        gtfsId: string
-                                                        name: string
-                                                        routes: string
-                                                        stops: string
-                                                        type: string
-                                                    }
-
-                                                    if (isHsl) {
-                                                        const props = s.properties as HslProperties
-                                                        return (<div key={i} className='p-1 font-a'>
-                                                            <Link className='decoration-none text-sm' href={`/station/HSL:${props.terminalId}/?hsl`}>
-                                                                <IconItem icon={{ boxed: true, children: IconTable[props.mode] }}>
-                                                                    {`${props.nameFi}`}
-                                                                </IconItem>
-                                                            </Link>
-                                                        </div>)
-                                                    } else {
-                                                        const props = s.properties as FinlandProperties
-                                                        return (<div key={i} className='p-1 font-a'>
-                                                            <Link className='decoration-none text-sm' href={`/station/${props.gtfsId}/`}>
-                                                                <IconItem icon={{ boxed: true, children: getIconFromRoutesString(props.routes) }}>
-                                                                    {`${props.name}`}
-                                                                </IconItem>
-                                                            </Link>
-                                                        </div>)
-                                                    }
-
-
-
-                                                })}
-                                                {feats.map((f, i) => {
-                                                    interface HslProperties {
-                                                        isTrunkStop: boolean
-                                                        mode: Mode
-                                                        nameFi: string
-                                                        nameSe: string
-                                                        shortId: string
-                                                        platform: string
-                                                        stopId: string
-                                                        terminalId?: string
-                                                    }
-                                                    interface FinlandProperties {
-                                                        code: string
-                                                        desc: string
-                                                        gtfsId: string
-                                                        name: string
-                                                        parentStation?: string
-                                                        platform?: string
-                                                        routes: string
-                                                        type: string
-                                                    }
-
-                                                    if (isHsl) {
-                                                        const props = f.properties as HslProperties
-                                                        return (<div key={i} className='p-1 font-a'>
-                                                            <Link className='decoration-none text-sm' href={`/stop/HSL:${props.stopId}/?hsl`}>
-                                                                <IconItem icon={{ className: stations.length ? "m-[3px]" : "", children: IconTable[props.mode] }}>
-                                                                    {`${props.nameFi} ${props.platform && "pl. " + props.platform || ""} ${props.shortId && "(" + props.shortId.replaceAll(" ", "") + ")" || ""}`}
-                                                                </IconItem>
-                                                            </Link>
-                                                        </div>)
-                                                    } else {
-                                                        const props = f.properties as FinlandProperties
-                                                        return (<div key={i} className='p-1 font-a'>
-                                                            <Link className='decoration-none text-sm' href={`/stop/${props.gtfsId}/`}>
-                                                                <IconItem icon={{ className: stations.length ? "m-[3px]" : "", children: getIconFromRoutesString(props.routes) }}>
-                                                                    {`${props.name} ${props.platform && "pl. " + props.platform || ""} ${props.code && "(" + props.code + ")" || ""}`}
-                                                                </IconItem>
-                                                            </Link>
-                                                        </div>)
-                                                    }
-                                                })}
-                                            </div>),
-                                    })
-                                }}
-                                ref={map}
-                                initialViewState={{
-                                    longitude: 24.94,
-                                    latitude: 60.18,
-                                    zoom: 13
-                                }}
-                                style={{ width: "100%", height: "100%" }}
-                                mapStyle={isHsl ? "/map_style_hsl.json" : "/map_style.json"}
-                                attributionControl={false}
-                            >
-                                {popup && <Popup {...popup}></Popup>}
-                                <div
-                                    ref={setOverlay}
-                                    style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}
-                                />
-                            </Map>
                         </div>
                     </main>
                     {children}
@@ -275,3 +144,171 @@ export function MapOverlay({ children }: { children: React.ReactNode }) {
     if (!overlay) return null
     return createPortal(<div style={{ pointerEvents: 'auto' }}>{children}</div>, overlay)
 }
+
+
+
+interface MapProps {
+    isHsl: boolean;
+    map: RefObject<MapRef | null>;
+    setFocus: Dispatch<SetStateAction<boolean>>;
+    setOverlay: Dispatch<SetStateAction<HTMLDivElement | null>>;
+    setPopup: Dispatch<SetStateAction<PopupProps | null>>;
+    popup: PopupProps | null
+}
+
+
+const MapContainer = memo(function MapC({ isHsl,
+    map,
+    setFocus,
+    setOverlay,
+    setPopup,
+    popup }: MapProps) {
+    return (
+        <Map
+            onClick={(e) => {
+                setFocus(false)
+                if (!map.current) return
+                const pxBoxSize = 16
+
+                const distance = map.current.getZoom() > 10 ? 125 : 500
+
+                const stations =
+                    isHsl
+                        ? map.current.querySourceFeatures("terminals", { sourceLayer: "terminals" }).filter(s => e.lngLat.distanceTo(new LngLat(...(s.geometry as GeoJSON.Point).coordinates as [number, number])) < distance)
+                        : map.current.querySourceFeatures("poi_transit", { sourceLayer: "stations" }).filter(s => e.lngLat.distanceTo(new LngLat(...(s.geometry as GeoJSON.Point).coordinates as [number, number])) < distance && s.properties.routes && JSON.parse(s.properties.routes).length > 1)
+
+                const feats = map.current.queryRenderedFeatures([
+                    [e.point.x - pxBoxSize, e.point.y - pxBoxSize],
+                    [e.point.x + pxBoxSize, e.point.y + pxBoxSize]
+                ], {
+                    layers:
+                        isHsl
+                            ? ["stops_rail", "stops_bus", "stops_trunk", "stops_ferry", "stops_tram", "stops_lrail", "stops_subway"]
+                            : ["stops_airplane", "stops_rail", "stops_unknown", "stops_bus", "stops_trunk", "stops_ferry", "stops_tram", "stops_lrail", "stops_subway"]
+                })
+                const combined = [...feats, ...stations];
+                if (combined.length == 0) return
+                if (combined.length == 1) {
+                    const first = combined[0]
+                    const isStation = stations.length == 1
+                    if (isHsl) {
+                        redirect(`/${isStation ? "station" : "stop"}/HSL:${isStation ? first.properties.terminalId : first.properties.stopId}/?hsl`)
+                    } else {
+                        redirect(`/${isStation ? "station" : "stop"}/${first.properties.gtfsId}/`)
+                    }
+                }
+
+
+                setPopup({
+                    latitude: e.lngLat.lat,
+                    longitude: e.lngLat.lng,
+                    anchor: "bottom",
+                    onClose: () => setPopup(null),
+                    children:
+                        (<div className='max-h-100 overflow-scroll font-medium'>
+                            {stations.filter((value, index, self) =>
+                                index === self.findIndex((t) => (
+                                    t.properties.name === value.properties.name && t.properties.gtfsId === value.properties.gtfsId && t.properties.stopId === value.properties.stopId && t.properties.terminalId === value.properties.terminalId
+                                ))
+                            ).map((s, i) => {
+                                interface HslProperties {
+                                    mode: Mode
+                                    nameFi: string
+                                    nameSe: string
+                                    terminalId: string
+                                }
+
+                                interface FinlandProperties {
+                                    gtfsId: string
+                                    name: string
+                                    routes: string
+                                    stops: string
+                                    type: string
+                                }
+
+                                if (isHsl) {
+                                    const props = s.properties as HslProperties
+                                    return (<div key={i} className='p-1 font-a'>
+                                        <Link className='decoration-none text-sm' href={`/station/HSL:${props.terminalId}/?hsl`}>
+                                            <IconItem icon={{ boxed: true, children: IconTable[props.mode] }}>
+                                                {`${props.nameFi}`}
+                                            </IconItem>
+                                        </Link>
+                                    </div>)
+                                } else {
+                                    const props = s.properties as FinlandProperties
+                                    return (<div key={i} className='p-1 font-a'>
+                                        <Link className='decoration-none text-sm' href={`/station/${props.gtfsId}/`}>
+                                            <IconItem icon={{ boxed: true, children: getIconFromRoutesString(props.routes) }}>
+                                                {`${props.name}`}
+                                            </IconItem>
+                                        </Link>
+                                    </div>)
+                                }
+
+
+
+                            })}
+                            {feats.map((f, i) => {
+                                interface HslProperties {
+                                    isTrunkStop: boolean
+                                    mode: Mode
+                                    nameFi: string
+                                    nameSe: string
+                                    shortId: string
+                                    platform: string
+                                    stopId: string
+                                    terminalId?: string
+                                }
+                                interface FinlandProperties {
+                                    code: string
+                                    desc: string
+                                    gtfsId: string
+                                    name: string
+                                    parentStation?: string
+                                    platform?: string
+                                    routes: string
+                                    type: string
+                                }
+
+                                if (isHsl) {
+                                    const props = f.properties as HslProperties
+                                    return (<div key={i} className='p-1 font-a'>
+                                        <Link className='decoration-none text-sm' href={`/stop/HSL:${props.stopId}/?hsl`}>
+                                            <IconItem icon={{ className: stations.length ? "m-[3px]" : "", children: IconTable[props.mode] }}>
+                                                {`${props.nameFi} ${props.platform && "pl. " + props.platform || ""} ${props.shortId && "(" + props.shortId.replaceAll(" ", "") + ")" || ""}`}
+                                            </IconItem>
+                                        </Link>
+                                    </div>)
+                                } else {
+                                    const props = f.properties as FinlandProperties
+                                    return (<div key={i} className='p-1 font-a'>
+                                        <Link className='decoration-none text-sm' href={`/stop/${props.gtfsId}/`}>
+                                            <IconItem icon={{ className: stations.length ? "m-[3px]" : "", children: getIconFromRoutesString(props.routes) }}>
+                                                {`${props.name} ${props.platform && "pl. " + props.platform || ""} ${props.code && "(" + props.code + ")" || ""}`}
+                                            </IconItem>
+                                        </Link>
+                                    </div>)
+                                }
+                            })}
+                        </div>),
+                })
+            }}
+            ref={map}
+            initialViewState={{
+                longitude: 24.94,
+                latitude: 60.18,
+                zoom: 13
+            }}
+            style={{ width: "100%", height: "100%" }}
+            mapStyle={isHsl ? "/map_style_hsl.json" : "/map_style.json"}
+            attributionControl={false}
+        >
+            {popup && <Popup {...popup}></Popup>}
+            <div
+                ref={setOverlay}
+                style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}
+            />
+        </Map>
+    );
+})

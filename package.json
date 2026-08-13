@@ -16,6 +16,7 @@
   "dependencies": {
     "@apollo/client": "^4.2.10",
     "@date-fns/tz": "github:date-fns/tz",
+    "@mapbox/polyline": "^1.2.1",
     "@material-symbols-svg/react": "^0.12.0",
     "@vinext/cloudflare": "^1.0.0-beta.2",
     "@vis.gl/react-maplibre": "^8.1.1",
@@ -41,6 +42,7 @@
     "@graphql-codegen/typescript": "^6.1.0",
     "@graphql-codegen/typescript-operations": "^6.1.5",
     "@tailwindcss/postcss": "^4",
+    "@types/mapbox__polyline": "^1.0.5",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
