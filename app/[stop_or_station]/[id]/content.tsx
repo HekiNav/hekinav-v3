@@ -41,6 +41,7 @@ export default function Content({ data,
             <div className="text-sm">{data.desc && <Label className="bg-gray">{data.desc}</Label>} {data.code && <Label className="bg-gray">{data.code}</Label>}</div>
             <h2 className="text-xl flex justify-between"><span>Departures</span><span className="flex flex-nowrap text-lg">Advanced<Toggle state={config.advancedDepartures} setState={(value) => setConfig("advancedDepartures", value)}></Toggle></span></h2>
             {data.stoptimesWithoutPatterns && data.stoptimesWithoutPatterns.length ? <table><tbody>
+                <tr><th className="text-start text-sm font-medium text-[#777]">Route</th><th className="text-start text-sm font-medium text-[#777]">Destination</th><th className="text-center text-sm font-medium text-[#777]">Time</th>{stop_or_station == "station" && <th className="text-center text-sm font-medium text-[#777]">Plat.</th>}</tr>
                 {
                     data.stoptimesWithoutPatterns?.reduce((p, s, i, a) => {
                         const delay = s ? (s.realtimeDeparture && s.scheduledDeparture ? s.realtimeDeparture - s.scheduledDeparture : s.realtimeArrival && s.scheduledArrival ? s.realtimeArrival - s.scheduledArrival : 0) : 0
@@ -49,7 +50,7 @@ export default function Content({ data,
 
                         return [...p, (last && last.serviceDay != s?.serviceDay) ? (
                             <tr key={`h${i}`} className={`px-1 border-t-10 border-white`}>
-                                <th className="text-start" colSpan={3}><Day day={s?.serviceDay as number || 0}></Day></th>
+                                <th className="text-start" colSpan={stop_or_station == "station" ? 4 : 3}><Day day={s?.serviceDay as number || 0}></Day></th>
                             </tr>) : [], (
                             <tr key={i} className={`px-1 border-t-3 border-white`}>
                                 <td className={`${i % 2 == 1 ? "bg-[#eee]" : "bg-white"} rounded-l-lg ps-[2px]`}>
@@ -60,9 +61,13 @@ export default function Content({ data,
                                 <td className={`${i % 2 == 1 ? "bg-[#eee]" : "bg-white"} td-truncate`}>
                                     {s?.pickupType == "NONE" ? "Arriving / Terminus" : s?.headsign}
                                 </td>
-                                <td className={`${i % 2 == 1 ? "bg-[#eee]" : "bg-white"} rounded-r-lg items-center justify-end pr-1 flex flex-row flex-nowrap ${s?.realtime ? config.advancedDepartures ? getColorFromDelay(delay) : "text-green" : "text-black"}`}>
+                                <td className={`${i % 2 == 1 ? "bg-[#eee]" : "bg-white"} ${stop_or_station == "station" ? "" : "rounded-r-lg"} items-center justify-end pr-1 flex flex-row flex-nowrap ${s?.realtime ? config.advancedDepartures ? getColorFromDelay(delay) : "text-green" : "text-black"}`}>
                                     <Date approx={!s?.realtime} showScheduled={config.advancedDepartures && (delay < -120 || delay > 120)} scheduledTime={s?.scheduledDeparture || s?.scheduledArrival || 0} time={s?.realtimeDeparture || s?.scheduledDeparture || s?.realtimeArrival || s?.scheduledArrival || 0} day={s?.serviceDay as number || 0}></Date>
                                 </td>
+                                {stop_or_station == "station" && <td className={`${i % 2 == 1 ? "bg-[#eee]" : "bg-white"} rounded-r-lg items-center justify-end pl-2 pr-1 text-center`}>
+                                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                                    {(s as any).stop.platformCode ? <Label>{(s as any).stop.platformCode}</Label> : "-"}
+                                </td>}
                             </tr>)
                         ].flat()
                     }, new Array<ReactElement>())
