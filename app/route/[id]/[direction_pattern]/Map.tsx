@@ -12,8 +12,9 @@ export function Map({ data }: { data: NonNullable<PatternQueryQuery["pattern"]> 
   useEffect(() => {
     if (!map) return
     const m = map.getMap()
+
     function loop(i: number) {
-      if (i > 10) return
+      if (i > 1000) return
       if (m.loaded()) {
         initMap()
       } else {
