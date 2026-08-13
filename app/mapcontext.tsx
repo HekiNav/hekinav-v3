@@ -48,10 +48,6 @@ export function MapLayoutProvider({ children }: { children: React.ReactNode }) {
     
 
     useEffect(() => {
-        console.log("HSL CHNAGE")
-    }, [popup])
-
-    useEffect(() => {
         if (!sidebar) return
         sidebar.addEventListener("click", focusSidebar)
         sidebar.addEventListener("mouseenter", focusSidebar)

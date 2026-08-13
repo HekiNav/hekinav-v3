@@ -61,7 +61,7 @@ export default function Content({ data,
                                     {s?.pickupType == "NONE" ? "Arriving / Terminus" : s?.headsign}
                                 </td>
                                 <td className={`${i % 2 == 1 ? "bg-[#eee]" : "bg-white"} rounded-r-lg items-center justify-end pr-1 flex flex-row flex-nowrap ${s?.realtime ? config.advancedDepartures ? getColorFromDelay(delay) : "text-green" : "text-black"}`}>
-                                    <Date approx={!s?.realtime} showScheduled={config.advancedDepartures && (delay < -300 || delay > 180)} scheduledTime={s?.scheduledDeparture || s?.scheduledArrival || 0} time={s?.realtimeDeparture || s?.scheduledDeparture || s?.realtimeArrival || s?.scheduledArrival || 0} day={s?.serviceDay as number || 0}></Date>
+                                    <Date approx={!s?.realtime} showScheduled={config.advancedDepartures && (delay < -120 || delay > 120)} scheduledTime={s?.scheduledDeparture || s?.scheduledArrival || 0} time={s?.realtimeDeparture || s?.scheduledDeparture || s?.realtimeArrival || s?.scheduledArrival || 0} day={s?.serviceDay as number || 0}></Date>
                                 </td>
                             </tr>)
                         ].flat()
@@ -76,9 +76,9 @@ export default function Content({ data,
 function getColorFromDelay(delay: number) {
     if (delay > 900) {
         return "text-red"
-    } else if (delay > 180) {
+    } else if (delay > 120) {
         return "text-orange"
-    } else if (delay < -300) {
+    } else if (delay < -120) {
         return "text-cyan"
     } else {
         return "text-green"
