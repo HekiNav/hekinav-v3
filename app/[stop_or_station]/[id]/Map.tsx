@@ -10,11 +10,16 @@ export function Map({ data }: { data: NonNullable<StopQueryQuery["stop"]> }) {
   useEffect(() => {
     if (!map) return
     const m = map.getMap()
-    if (m.loaded()) {
-      initMap()
-    } else {
-      setTimeout(() => initMap(),100)
+    function loop(i: number) {
+      if (i > 1000) return
+      if (m.loaded()) {
+        initMap()
+      } else {
+        setTimeout(() => loop(i + 1), 100)
+      }
     }
+
+    loop(0)
     return () => {
       if (m.getLayer("stop")) m.removeLayer("stop")
       if (m.getLayer("stop-outline")) m.removeLayer("stop-outline")
