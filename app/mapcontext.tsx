@@ -101,6 +101,7 @@ function getIconFromRoutesString(json: string): ReactElement {
             return (<Train className="text-green border-green"></Train>)
         case 701:
         case 704:
+        case 715:
         case 700:
         case 3:
             return (<DirectionsBus className="text-blue border-blue"></DirectionsBus>)

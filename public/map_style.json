@@ -22,7 +22,7 @@
       "url": "https://cdn.digitransit.fi/map/v3/finland/fi/rentalStations/tilejson.json?digitransit-subscription-key=bbc7a56df1674c59822889b1bc84e7ad"
     }
   },
-  "sprite": "https://routing.storage.hekinav.dev/img/sprites",
+  "sprite": "https://routing.storage.hekinav.dev/img/sprite",
   "glyphs": "https://routing.storage.hekinav.dev/font-pbf/{fontstack}/{range}.pbf",
   "layers": [
     {

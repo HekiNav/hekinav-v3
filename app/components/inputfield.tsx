@@ -1,13 +1,14 @@
 "use client"
 import IconItem from "./iconitem";
-import { ChangeEvent, HTMLAttributes, ReactElement, useEffect, useState } from "react"
+import { ChangeEvent, HTMLAttributes, ReactElement, ReactNode, useEffect, useState } from "react"
 import Skeleton from "react-loading-skeleton";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface Suggestion<T = any> {
     icon: ReactElement,
     text: string,
-    desc?: string,
+    name?: ReactNode,
+    desc?: ReactNode,
     id: string,
     properties?: T
 }
@@ -24,14 +25,17 @@ export interface InputFieldProps extends HTMLAttributes<HTMLDivElement> {
 }
 export default function InputField({ icon, focusClear, suggestionFunction, onFocus , onValueSet, name, onlySuggestions = true, placeholder, initialValue = "", className, ...props }: InputFieldProps) {
     const [focus, setFocus] = useState(false)
-    const [value, setValue] = useState(initialValue)
+    const [value, setValue] = useState<string>(initialValue)
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         if (initialValue != value) setValue(initialValue)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [initialValue])
     const [suggestions, setSuggestions] = useState(new Array<Suggestion | "skeleton">())
 
     useEffect(() => {
         if (focusClear && focus) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setValue("")
         }
     }, [focus])
@@ -90,7 +94,7 @@ export default function InputField({ icon, focusClear, suggestionFunction, onFoc
                         <div key={`search-suggestion-${i}`} onMouseDown={() => !sk && suggestionSelected(s)}>
                             <IconItem icon={{ children: sk ? <Skeleton inline width={16} /> : s.icon }} >
                                 <div className="flex flex-col">
-                                    {sk ? <Skeleton inline width={Math.floor(Math.random() * 200) + 20} /> : s.text}
+                                    {sk ? <Skeleton inline width={Math.floor(Math.random() * 200) + 20} /> : s.name || s.text}
                                     <div hidden={!sk && !s.desc} className="text-xs text text-gray-500">{sk ? <Skeleton inline width={Math.floor(Math.random() * 200) + 20} /> : s.desc}</div>
                                 </div>
                             </IconItem>

@@ -13,6 +13,7 @@ import { LocalTaxiW700 as LocalTaxi } from '@material-symbols-svg/react/icons/lo
 import { MonorailW700 as Monorail } from '@material-symbols-svg/react/icons/monorail';
 import { QuestionMarkW700 as QuestionMark } from '@material-symbols-svg/react/icons/question-mark';
 import { ScooterW700 as Scooter } from '@material-symbols-svg/react/icons/scooter';
+import { SnowflakeW700 as Snowflake } from '@material-symbols-svg/react/icons/snowflake';
 
 export type Mode = "BUS" | "RAIL" | "BUS-EXPRESS" | "SUBWAY" | "SPEEDTRAM" | "TRAM" | "FERRY" | "AIRPLANE"
 
@@ -98,6 +99,7 @@ export const IconTable = {
     "FLEXIBLE": (<QuestionMark className="text-black border-black"></QuestionMark>),
     "LEG_SWITCH": (<QuestionMark className="text-black border-black"></QuestionMark>),
     "WALK": (<DirectionsWalk className="text-black border-black"></DirectionsWalk>),
+    "SNOW_AND_ICE": (<Snowflake className="text-cyan border-cyan"></Snowflake>),
 }
 
 export const gtfsIdRegex = /^(.*)\:(\d|[A-Z]|\Ä|\Ö|\Å|_|-)+$/
@@ -107,10 +109,12 @@ export function getRouteColor(type: "bg" | "border", mode: number, stringMode?: 
         case 109:
             return type == "border" ? "border-purple" : "bg-purple"
         case 102:
+        case 1501:
             return type == "border" ? "border-green" : "bg-green"
         case 701:
         case 704:
         case 700:
+        case 715:
         case 3:
             return type == "border" ? "border-blue" : "bg-blue"
         case 702:
@@ -171,6 +175,7 @@ export function getColor(mode: number, stringMode?: string) {
         case 701:
         case 704:
         case 700:
+        case 715:
         case 3:
             return '#115ee3'
         case 702:

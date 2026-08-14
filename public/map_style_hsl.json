@@ -30,7 +30,7 @@
             "type": "vector"
         }
     },
-    "sprite": "https://routing.storage.hekinav.dev/img/sprites",
+    "sprite": "https://routing.storage.hekinav.dev/img/sprite",
     "glyphs": "https://routing.storage.hekinav.dev/font-pbf/{fontstack}/{range}.pbf",
     "layers": [
         {
