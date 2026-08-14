@@ -146,12 +146,10 @@ export default function Home() {
     <>
       <Modal className='bg-white max-w-8/10 w-120 max-h-8/10' cardTitle="Settings" open={settingsOpen} close={() => setSettingsOpen(false)}>
         <div className="px-4 overflow-y-scroll">
-          
+
         </div>
       </Modal>
       <Sidebar>
-
-        <h2 className='text-2xl'>Routing</h2>
         <InputField initialValue={origin?.text} suggestionFunction={(t) => placeSearch(t, map?.getCenter() || new LngLat(24.94, 60.18), isHsl)} onlySuggestions placeholder='Origin' name='origin' onValueSet={(t, v) => setOrigin(typeof v == "string" ? null : v)} icon={<LocationOn className='text-blue'></LocationOn>}></InputField>
         <InputField initialValue={destination?.text} suggestionFunction={(t) => placeSearch(t, map?.getCenter() || new LngLat(24.94, 60.18), isHsl)} onlySuggestions placeholder='Destination' name='destination' onValueSet={(t, v) => setDestination(typeof v == "string" ? null : v)} icon={<LocationOn className='text-red'></LocationOn>}></InputField>
         <div className="flex flex-row gap-2">
@@ -161,6 +159,8 @@ export default function Home() {
           <Button onClick={() => setSettingsOpen(true)} className="w-min text-center text-darkgray h-min p-1.5!"><Icon><Settings height={28} width={28}></Settings></Icon></Button>
         </div>
         <Button className='text-green text-2xl p-0.5!'>Search</Button>
+      </Sidebar>
+      <Sidebar>
         <h2 className='text-2xl mt-4'>Stations and routes</h2>
         <InputField name='search' suggestionFunction={(t) => searchStopStation(t, isHsl, map?.getCenter() || new LngLat(24.94, 60.18))} onValueSet={(t, v) => setSearch(typeof v == "string" ? null : v)} icon={<Search className='text-black'></Search>}></InputField>
       </Sidebar>
