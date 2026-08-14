@@ -78,7 +78,7 @@ export default function RootLayout({
               }
             }} position="top-right" containerStyle={{ marginTop: "64px" }} />
 
-          <MapLayoutProvider>{children}</MapLayoutProvider>;
+          <MapLayoutProvider>{children}</MapLayoutProvider>
         </ConfigContext>
       </body>
     </html>

@@ -11,7 +11,7 @@ export default function Button(propsWithOnPress: ButtonProps) {
         {...{
             ...props,
             onClick: (e) => { if(props.onClick) props.onClick(e); if(onPress) onPress(e) },
-            onKeyDown: (e) => { if(props.onKeyDown) props.onKeyDown(e); if(e.key == "Enter" && onPress) onPress(e) }, className: ` border-3 rounded-xl font-a bg-white cursor-pointer rounded p-2 hover:border-green ${props.className}`
+            onKeyDown: (e) => { if(props.onKeyDown) props.onKeyDown(e); if(e.key == "Enter" && onPress) onPress(e) }, className: ` border-3 border-black rounded-xl font-a bg-white cursor-pointer rounded p-2 hover:border-green ${props.className}`
         }}
     >
         {props.children}

@@ -28,6 +28,8 @@ import { getRouteColor, IconTable } from './lib/digitransit';
 import Label from './components/label';
 import MiniSearch from 'minisearch';
 import { redirect } from 'next/navigation';
+import { SettingsW700 as Settings } from '@material-symbols-svg/react/icons/settings';
+import Modal from './components/modal';
 
 const timeOptions: Suggestion<object>[] = []
 
@@ -60,6 +62,7 @@ export default function Home() {
   const [time, setTime] = useState<TZDate>(new TZDate(1970, 0, 1, new Date().getHours(), Math.ceil(new Date().getMinutes() / 15) * 15).withTimeZone("Europe/Helsinki"))
   const [pickedLocation, setPickedLocation] = useState<LngLat | null | boolean>(null)
   const [pickedLocationTarget, setPickedLocationTarget] = useState<"origin" | "destination" | null>(null)
+  const [settingsOpen, setSettingsOpen] = useState<boolean>(false)
 
   const { setSidebarHidden } = useContext(FocusContext)
 
@@ -141,7 +144,13 @@ export default function Home() {
 
   return (
     <>
+      <Modal className='bg-white max-w-8/10 w-120 max-h-8/10' cardTitle="Settings" open={settingsOpen} close={() => setSettingsOpen(false)}>
+        <div className="px-4 overflow-y-scroll">
+          
+        </div>
+      </Modal>
       <Sidebar>
+
         <h2 className='text-2xl'>Routing</h2>
         <InputField initialValue={origin?.text} suggestionFunction={(t) => placeSearch(t, map?.getCenter() || new LngLat(24.94, 60.18), isHsl)} onlySuggestions placeholder='Origin' name='origin' onValueSet={(t, v) => setOrigin(typeof v == "string" ? null : v)} icon={<LocationOn className='text-blue'></LocationOn>}></InputField>
         <InputField initialValue={destination?.text} suggestionFunction={(t) => placeSearch(t, map?.getCenter() || new LngLat(24.94, 60.18), isHsl)} onlySuggestions placeholder='Destination' name='destination' onValueSet={(t, v) => setDestination(typeof v == "string" ? null : v)} icon={<LocationOn className='text-red'></LocationOn>}></InputField>
@@ -149,7 +158,9 @@ export default function Home() {
           <Button className="w-70 text-center h-min" onClick={() => setDepArr(depArr == "dep" ? "arr" : "dep")}>{depArr == "dep" ? "Departure" : "Arrival"}</Button>
           <InputField className="h-min" name="date" initialValue={"Today"} suggestionFunction={async () => dateOptions} onlySuggestions onValueSet={(n, v) => typeof v != "string" && setDate(new TZDate(v.id))} icon={<CalendarToday></CalendarToday>}></InputField>
           <InputField className="h-min" name="time" focusClear initialValue={format(time, "H:mm")} suggestionFunction={async (t) => timeOptions.filter(o => o.text.includes(t))} onlySuggestions onValueSet={(n, v) => typeof v != "string" && setTime(new TZDate(v.id))} icon={<Schedule></Schedule>}></InputField>
+          <Button onClick={() => setSettingsOpen(true)} className="w-min text-center text-darkgray h-min p-1.5!"><Icon><Settings height={28} width={28}></Settings></Icon></Button>
         </div>
+        <Button className='text-green text-2xl p-0.5!'>Search</Button>
         <h2 className='text-2xl mt-4'>Stations and routes</h2>
         <InputField name='search' suggestionFunction={(t) => searchStopStation(t, isHsl, map?.getCenter() || new LngLat(24.94, 60.18))} onValueSet={(t, v) => setSearch(typeof v == "string" ? null : v)} icon={<Search className='text-black'></Search>}></InputField>
       </Sidebar>
@@ -170,7 +181,7 @@ export default function Home() {
 export type PlaceSuggestion = Suggestion<{ lat: number, lng: number }>
 export type SearchSuggestion = Suggestion<{ type: "stop" | "station" | "route", gtfsId: string }>
 
-const miniSearch = new MiniSearch<SearchSuggestion>({fields: ["text"], storeFields: ["icon","id","name","desc","properties"]})
+const miniSearch = new MiniSearch<SearchSuggestion>({ fields: ["text"], storeFields: ["icon", "id", "name", "desc", "properties"] })
 let searchIndex = 0
 
 async function placeSearch(text: string, focusPoint: LngLat, isHsl: boolean): Promise<PlaceSuggestion[]> {
@@ -204,35 +215,36 @@ async function searchStopStation(text: string, isHsl: boolean, focusPoint: LngLa
 
   const parsed = [
     ...stops.features.map<SearchSuggestion>(s => ({
-      icon: IconTable[s.properties.addendum?.GTFS.modes?.reduce((p,c) => c) || "BUS"], id: `s${s.properties.gid}${s.properties.id}`, text: s.properties.name || "unnamed route", name: <span>
+      icon: IconTable[s.properties.addendum?.GTFS.modes?.reduce((p, c) => c) || "BUS"], id: `s${s.properties.gid}${s.properties.id}`, text: s.properties.name || "unnamed route", name: <span>
         <span className='ml-1 truncate mr-2'>{s.properties.name}</span>
         {s.properties.addendum?.GTFS.code && <Label>{s.properties.addendum.GTFS.code}</Label>}
         {s.properties.addendum?.GTFS.platform && <Label>{s.properties.addendum.GTFS.platform}</Label>}
       </span>,
       properties: {
-        gtfsId: (regex.exec(s.properties.source_id) || [0,""])[1],
+        gtfsId: (regex.exec(s.properties.source_id) || [0, ""])[1],
         type: s.properties.layer == "station" ? "station" : "stop"
       }
     })),
     ...routes.map<SearchSuggestion>(r => {
       const [feed, routeId, direction, patternId] = r?.patterns![0]?.code.split(":")!
       return {
-      icon: IconTable[r?.mode || "BUS"], id: `r${r?.gtfsId}`, text: r?.shortName || "" + r?.longName || "", name: <span>
-        {r?.shortName && <Label className={`${getRouteColor("bg", r?.type || -1, r?.mode || "")} font-bold text-white`}>{r?.shortName}</Label>}
-        <span className='ml-1 truncate mr-2'>{r?.longName}</span>
-      </span>,
-      desc: !isHsl ? r?.agency?.name : undefined,
-      properties: {
-        type: "route",
-        gtfsId: `${feed || r?.gtfsId.split(":")[1]}:${routeId || r?.gtfsId.split(":")[1]}/${direction || ""}-${patternId || ""}`
+        icon: IconTable[r?.mode || "BUS"], id: `r${r?.gtfsId}`, text: r?.shortName || "" + r?.longName || "", name: <span>
+          {r?.shortName && <Label className={`${getRouteColor("bg", r?.type || -1, r?.mode || "")} font-bold text-white`}>{r?.shortName}</Label>}
+          <span className='ml-1 truncate mr-2'>{r?.longName}</span>
+        </span>,
+        desc: !isHsl ? r?.agency?.name : undefined,
+        properties: {
+          type: "route",
+          gtfsId: `${feed || r?.gtfsId.split(":")[1]}:${routeId || r?.gtfsId.split(":")[1]}/${direction || ""}-${patternId || ""}`
+        }
       }
-    }})
+    })
   ]
   if (index < searchIndex) {
     return []
   }
   await miniSearch.addAllAsync(parsed)
-  const results = miniSearch.search(text, {fuzzy: 0.8})
+  const results = miniSearch.search(text, { fuzzy: 0.8 })
 
   return results as any
 }
