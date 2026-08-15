@@ -5,7 +5,7 @@ import { GlobeW700 as Globe } from '@material-symbols-svg/react/icons/globe';
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useRegion } from "../hooks/useHsl";
-
+import Image from "next/image"
 
 export default function NavBar() {
 
@@ -14,8 +14,9 @@ export default function NavBar() {
 
     return (
         <div className="w-full flex flex-row justify-between items-center bg-green p-2">
-            <div className="flex flex-row w-full h-full font-medium justify-between">
-                <Link className="decoration-none text-white" href={region == "hsl" ? "/?hsl" : "/"}><h1 className='text-black pr-2 flex flex-nowrap font-thin! text-white'><img src="/logo_full.svg" alt="Hekinav Logo" /> Routing</h1></Link>
+            <div className="flex flex-row w-full h-full font-medium">
+                <Link className="decoration-none text-white" href={region == "hsl" ? "/?hsl" : "/"}><h1 className='text-black pr-2 flex flex-nowrap font-thin! text-white'><Image className="hidden md:block" src="/logo_full.svg" alt="Hekinav Logo" /><Image src="/logo.svg" alt="Logo" className="md:hidden" /><span className="hidden md:inline">Routing</span></h1></Link>
+                <div className="grow"></div>
                 <div className="px-4">
                     <IconItem className="h-full" icon={{children: <Globe className="text-white h-full"></Globe>}}>
                         <NavItem onClick={() => changeRegion("hsl")} className={region == "hsl" ? "active" : ""}>HSL</NavItem>
