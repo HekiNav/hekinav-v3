@@ -10,7 +10,7 @@ When running, it is recommended to update /public/map_style.json and /public/map
 
 ### Development
 
-1. Create a `.dev.vars` file based on `.dev.vars.template`
+1. Create a `.dev.vars` file based on `.dev.vars.template` (Instructions in file)
 
 2. Install dependencies: `npm install`
 
@@ -20,7 +20,9 @@ When running, it is recommended to update /public/map_style.json and /public/map
 
 ### Production
 
-1. Update secrets for each secret in .dev.vars:`npx wrangler secret put <SECRET_NAME>`
+1. Update secrets (if changed):
+
+For each secret in .dev.vars: `npx wrangler secret put <SECRET_NAME>`, then paste the value
 
 2. Build: `npm run build:vinext`
 

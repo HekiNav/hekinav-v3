@@ -32,7 +32,7 @@ export default function RootLayout({
   function setConfigKey<K extends keyof HekinavConfig>(key: K, value: HekinavConfig[K]) {
     setConfig({ ...config, [key]: value })
   }
-
+  // this is maybe not needed anymore
   /* useEffect(() => {
     const vv = window.visualViewport;
     if (!vv) return;
