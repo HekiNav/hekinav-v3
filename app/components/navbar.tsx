@@ -13,7 +13,7 @@ export default function NavBar() {
     const router = useRouter()
 
     return (
-        <div className="w-full flex flex-row justify-between items-center bg-green p-2">
+        <div className="h-max w-full flex flex-row justify-between items-center bg-green p-2">
             <div className="flex flex-row w-full h-full font-medium">
                 <Link className="decoration-none text-white" href={region == "hsl" ? "/?hsl" : "/"}><h1 className='text-black pr-2 flex flex-nowrap font-thin! text-white'><Image className="hidden md:block" src="/logo_full.svg" alt="Hekinav Logo" /><Image src="/logo.svg" alt="Logo" className="md:hidden" /><span className="hidden md:inline">Routing</span></h1></Link>
                 <div className="grow"></div>

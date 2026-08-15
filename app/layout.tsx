@@ -33,7 +33,7 @@ export default function RootLayout({
     setConfig({ ...config, [key]: value })
   }
 
-  useEffect(() => {
+  /* useEffect(() => {
     const vv = window.visualViewport;
     if (!vv) return;
 
@@ -48,7 +48,7 @@ export default function RootLayout({
       vv.removeEventListener('resize', handleResize);
       vv.removeEventListener('scroll', handleResize);
     };
-  }, []);
+  }, []); */
   return (
     <html
       lang="en"

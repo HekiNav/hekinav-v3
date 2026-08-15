@@ -1,6 +1,5 @@
 "use client";
 import { createContext } from "react";
-import {TransitMode} from "./lib/__generated__/graphql.ts"
 
 export interface RoutingOption<T extends string> {
   name: string,
@@ -17,7 +16,7 @@ export interface HekinavConfig {
   advancedDepartures: boolean;
   routingOptions: {
     modes: {
-      [TransitMode]: IconToggleRoutingOption
+      [k: TransitMode]: IconToggleRoutingOption
     }
   }
 }

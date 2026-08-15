@@ -10,20 +10,20 @@ When running, it is recommended to update /public/map_style.json and /public/map
 
 ### Development
 
-1. Create a .dev.vars file based on .dev.vars.template
+1. Create a `.dev.vars` file based on `.dev.vars.template`
 
-2. Install dependencies: npm install
+2. Install dependencies: `npm install`
 
-3. Start dev server: npm run dev:vinext
+3. Start dev server: `npm run dev:vinext`
 
 4. Open http://localhost:3001
 
 ### Production
 
-1. Update secrets for each secret in .dev.vars: npx wrangler secret put <SECRET_NAME>
+1. Update secrets for each secret in .dev.vars:`npx wrangler secret put <SECRET_NAME>`
 
-2. Build: npm run build:vinext
+2. Build: `npm run build:vinext`
 
-3. Preview: npm run start:vinext
+3. Preview: `npm run start:vinext`
 
-4. Deploy to Cloudflare Workers: npm run deploy:vinext
+4. Deploy to Cloudflare Workers: `npm run deploy:vinext`
