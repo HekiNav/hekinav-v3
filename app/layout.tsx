@@ -8,7 +8,7 @@ import { Toaster } from "react-hot-toast";
 import { useEffect, useState } from "react";
 import { MapLayoutProvider } from "./mapcontext";
 import Navbar from "./components/navbar";
-import { HekinavConfig, defaultConfig, ConfigContext } from "./HekinavConfig";
+import { HekinavConfig, defaultConfig, ConfigContext, SetHekinavConfigKey } from "./HekinavConfig";
 
 const hostGrotesk = Host_Grotesk({
   variable: "--font-a",
@@ -29,8 +29,19 @@ export default function RootLayout({
 
   const [config, setConfig] = useState<HekinavConfig>(defaultConfig)
 
-  function setConfigKey<K extends keyof HekinavConfig>(key: K, value: HekinavConfig[K]) {
-    setConfig({ ...config, [key]: value })
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const setConfigKey: SetHekinavConfigKey = function (...args: any[]) {
+    const [value, ...keys] = args
+    const newObj = { ...config }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let target: any = newObj
+
+    for (let i = 0; i < keys.length - 1; i++) {
+      target = target[keys[i]];
+    }
+    target[keys[keys.length - 1]] = value;
+    console.log(value,keys)
+    setConfig(newObj)
   }
   // this is maybe not needed anymore
   /* useEffect(() => {

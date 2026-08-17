@@ -6,7 +6,8 @@ const nextConfig: NextConfig = {
   experimental: {
     globalNotFound: true
   },
-  trailingSlash: true
+  trailingSlash: true,
+  reactStrictMode: true
 };
 
 export default nextConfig;

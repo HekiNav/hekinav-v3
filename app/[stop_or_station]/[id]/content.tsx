@@ -39,7 +39,7 @@ export default function Content({ data,
         <>
             <IconItem icon={{ boxed: stop_or_station == "station", children: IconTable[data.vehicleMode || "BUS"] }} className="text-lg"><span className="text-2xl">{data.name}</span> {data.platformCode && <Label className="bg-gray">{data.platformCode}</Label>}</IconItem>
             <div className="text-sm">{data.desc && <Label className="bg-gray">{data.desc}</Label>} {data.code && <Label className="bg-gray">{data.code}</Label>}</div>
-            <h2 className="text-xl flex justify-between"><span>Departures</span><span className="flex flex-nowrap text-lg">Advanced<Toggle state={config.advancedDepartures} setState={(value) => setConfig("advancedDepartures", value)}></Toggle></span></h2>
+            <h2 className="text-xl flex justify-between"><span>Departures</span><span className="flex flex-nowrap text-lg">Advanced<Toggle state={config.advancedDepartures} setState={(value) => setConfig(value,"advancedDepartures")}></Toggle></span></h2>
             {data.stoptimesWithoutPatterns && data.stoptimesWithoutPatterns.length ? <table><tbody>
                 <tr><th className="text-start text-sm font-medium text-darkgray">Route</th><th className="text-start text-sm font-medium text-darkgray">Destination</th><th className="text-center text-sm font-medium text-darkgray">Time</th>{stop_or_station == "station" && <th className="text-center text-sm font-medium text-darkgray">Plat.</th>}</tr>
                 {
