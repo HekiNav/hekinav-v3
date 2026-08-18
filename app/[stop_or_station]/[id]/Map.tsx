@@ -28,7 +28,6 @@ export function Map({ data }: { data: NonNullable<StopQueryQuery["stop"]> }) {
 
     function initMap() {
       if (!map) return;
-      console.log()
       const geojson: GeoJSON.FeatureCollection = {
         type: "FeatureCollection", features: [{
           type: "Feature",

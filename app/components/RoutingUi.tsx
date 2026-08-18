@@ -25,6 +25,7 @@ import { search } from '../lib/search';
 import { AnyRoutingOption, ConfigContext, HekinavConfig, RoutingNode, RoutingOption } from '../HekinavConfig';
 import { typedEntries } from '../lib/typedEntries';
 import Toggle from './toggle';
+import { redirect, useRouter } from 'next/navigation';
 
 
 const timeOptions: Suggestion<object>[] = []
@@ -52,13 +53,13 @@ for (let i = 0; i < 28; i++) {
 export type PlaceSuggestion = Suggestion<{ lat: number, lng: number }>
 
 
-export default function RoutingUi() {
+export default function RoutingUi({iDateTime = new Date(), iDestination = null, iOrigin = null}: {iOrigin?: PlaceSuggestion | null, iDestination?: PlaceSuggestion | null, iDateTime?: Date}) {
 
-    const [origin, setOrigin] = useState<PlaceSuggestion | null>(null)
-    const [destination, setDestination] = useState<PlaceSuggestion | null>(null)
+    const [origin, setOrigin] = useState<PlaceSuggestion | null>(iOrigin)
+    const [destination, setDestination] = useState<PlaceSuggestion | null>(iDestination)
     const [depArr, setDepArr] = useState<"dep" | "arr">("dep")
-    const [date, setDate] = useState<TZDate>(new TZDate(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()).withTimeZone("Europe/Helsinki"))
-    const [time, setTime] = useState<TZDate>(new TZDate(1970, 0, 1, new Date().getHours(), Math.ceil(new Date().getMinutes() / 15) * 15).withTimeZone("Europe/Helsinki"))
+    const [date, setDate] = useState<TZDate>(new TZDate(iDateTime.getFullYear(), iDateTime.getMonth(), iDateTime.getDate()).withTimeZone("Europe/Helsinki"))
+    const [time, setTime] = useState<TZDate>(new TZDate(1970, 0, 1, iDateTime.getHours(), Math.ceil(iDateTime.getMinutes() / 15) * 15).withTimeZone("Europe/Helsinki"))
     const [pickedLocation, setPickedLocation] = useState<LngLat | null | boolean>(null)
     const [pickedLocationTarget, setPickedLocationTarget] = useState<"origin" | "destination" | null>(null)
     const [settingsOpen, setSettingsOpen] = useState<boolean>(false)
@@ -68,6 +69,7 @@ export default function RoutingUi() {
 
 
     const { default: map } = useMap()
+    const router = useRouter()
     const isHsl = useIsHsl()
     const { config, setConfig } = useContext(ConfigContext)
 
@@ -136,11 +138,14 @@ export default function RoutingUi() {
             setPickedLocationTarget(null)
         });
         if (setSidebarHidden) setSidebarHidden(false)
-    }, [pickedLocation, pickedLocationTarget, setSidebarHidden])
+    })
 
-    useEffect(() => {
-        console.log(config.routingOptions)
-    }, [config])
+    function plan () {
+        if (!origin || !destination) return
+        const start = {label: origin.text, location: {coordinate: {latitude: origin.properties?.lat, longitude: origin.properties?.lng}}}
+        const end = {label: destination.text, location: {coordinate: {latitude: destination.properties?.lat, longitude: destination.properties?.lng}}}
+        router.push(`/plan/${JSON.stringify(start)}/${JSON.stringify(end)}/${isHsl ? "?hsl" : ""}`)
+    }
 
     return (
         <>
@@ -187,7 +192,7 @@ export default function RoutingUi() {
                     <InputField className="h-min" name="time" focusClear initialValue={format(time, "H:mm")} suggestionFunction={async (t) => timeOptions.filter(o => o.text.includes(t))} onlySuggestions onValueSet={(_n, v) => typeof v != "string" && setTime(new TZDate(v.id))} icon={<Schedule></Schedule>}></InputField>
                     <Button onClick={() => setSettingsOpen(true)} className="w-min text-center text-darkgray h-min p-1.5!"><Icon><Settings height={28} width={28}></Settings></Icon></Button>
                 </div>
-                <Button className='text-green text-2xl p-0.5!'>Search</Button>
+                <Button onClick={plan} className='text-green text-2xl p-0.5!'>Search</Button>
             </Sidebar>
             <MapOverlay>
                 {pickedLocation == false && <>

@@ -65,8 +65,8 @@ export function MapLayoutProvider({ children }: { children: React.ReactNode }) {
         <MapProvider>
             <SlotContext.Provider value={{ overlay, sidebar }}>
                 <FocusContext.Provider value={{ setSidebarHidden }}>
-                    <main className="w-full md:flex md:flex-row md:h-screen relative">
-                        <div ref={setSidebar} className={`absolute ${focus ? "top-2/10" : "top-7/10"} ${focus ? "overflow-scroll" : "overflow-hidden!"} md:overflow-scroll ${sidebarHidden && "top-10/10"} left-5 right-5 
+                    <main className="w-full md:flex md:flex-row relative grow" style={{height: "calc(100vh - 5em)"}}>
+                        <div ref={setSidebar} className={`absolute ${focus ? "top-2/10" : "top-7/10"} ${focus ? "overflow-scroll" : "overflow-hidden!"} md:overflow-scroll! ${sidebarHidden && "top-10/10"} left-5 right-5 
        z-100 bg-white rounded-t-2xl shadow-[0_0_10px_#0008] md:shadow-none p-4 flex flex-col gap-2
        md:static md:h-full! md:w-120 transition-all ease-in-out duration-1000 md:rounded-none overflow-scroll bottom-0 md:pb-4! pb-200`}>
                         </div>

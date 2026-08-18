@@ -1,6 +1,6 @@
 "use server"
 import { ApolloClient, HttpLink, InMemoryCache, TypedDocumentNode, gql } from "@apollo/client";
-import { PlanQueryQuery,PlanQueryQueryVariables } from "./page.generated";
+import { PlanQueryQuery, PlanQueryQueryVariables } from "./page.generated";
 import Toast from "@/app/components/toast";
 import Content from "./content";
 import { Map } from "./Map";
@@ -15,6 +15,11 @@ const GET_PLAN:
       origin: $origin,
       destination: $destination
     ) {
+      routingErrors {
+        code
+        description
+        inputField
+      }
       edges {
         cursor
         node {
@@ -190,6 +195,8 @@ export default async function StopOrStation({
       <Sidebar>
 
         <Content
+          destination={destination}
+          origin={origin}
           data={data as NonNullable<PlanQueryQuery["planConnection"]>}
           isHsl={isHsl}
         />

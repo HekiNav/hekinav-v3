@@ -1,11 +1,11 @@
 "use client"
 import { useMap } from "@vis.gl/react-maplibre"
-import { StopQueryQuery } from "./page.generated"
+import { PlanQueryQuery } from "./page.generated"
 import { useEffect } from "react"
 import { GeoJSONSource } from "maplibre-gl"
 import { getColor, Mode } from "@/app/lib/digitransit"
 
-export function Map({ data }: { data: NonNullable<StopQueryQuery["stop"]> }) {
+export function Map({ data }: { data: NonNullable<PlanQueryQuery["planConnection"]> }) {
   const { default: map } = useMap()
   useEffect(() => {
     if (!map) return
@@ -28,8 +28,8 @@ export function Map({ data }: { data: NonNullable<StopQueryQuery["stop"]> }) {
 
     function initMap() {
       if (!map) return;
-      console.log()
-      const geojson: GeoJSON.FeatureCollection = {
+      
+      /* const geojson: GeoJSON.FeatureCollection = {
         type: "FeatureCollection", features: [{
           type: "Feature",
           geometry: {
@@ -112,7 +112,7 @@ export function Map({ data }: { data: NonNullable<StopQueryQuery["stop"]> }) {
             ],
           }
         })
-      }
+      } */
       return () => {
         if (m.getLayer("stop")) m.removeLayer("stop")
         if (m.getLayer("stop-outline")) m.removeLayer("stop-outline")

@@ -157,7 +157,7 @@ export function getRouteColor(type: "bg" | "border", mode: number, stringMode?: 
                 case "FLEX": return type == "border" ? "border-black" : "bg-black"
                 case "FLEXIBLE": return type == "border" ? "border-black" : "bg-black"
                 case "LEG_SWITCH": return type == "border" ? "border-black" : "bg-black"
-                case "WALK": return type == "border" ? "border-black" : "bg-black"
+                case "WALK": return type == "border" ? "border-gray" : "bg-gray"
             }
         default:
             console.log(mode)

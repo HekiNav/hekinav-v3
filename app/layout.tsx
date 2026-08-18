@@ -40,7 +40,6 @@ export default function RootLayout({
       target = target[keys[i]];
     }
     target[keys[keys.length - 1]] = value;
-    console.log(value,keys)
     setConfig(newObj)
   }
   // this is maybe not needed anymore
@@ -69,7 +68,7 @@ export default function RootLayout({
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, height=device-height"></meta>
         <title>Hekinav Routing</title>
       </head>
-      <body className="h-screen overflow-hidden">
+      <body className="h-screen overflow-hidden flex flex-col">
         <ConfigContext value={{ config, setConfig: setConfigKey }}>
           <Navbar></Navbar>
           <Toaster
