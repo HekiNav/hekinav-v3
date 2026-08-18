@@ -22,10 +22,10 @@ import { MapOverlay, Sidebar } from '../mapcontext';
 import Button from './button';
 import Icon from './icon';
 import { search } from '../lib/search';
-import { AnyRoutingOption, ConfigContext, HekinavConfig, RoutingNode, RoutingOption } from '../HekinavConfig';
-import { typedEntries } from '../lib/typedEntries';
+import { AdvancedRoutingOptions, ConfigContext, RoutingNode, RoutingOptionsUiConfig } from '../HekinavConfig';
 import Toggle from './toggle';
-import { redirect, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
+import Dropdown from './dropdown';
 
 
 const timeOptions: Suggestion<object>[] = []
@@ -71,7 +71,7 @@ export default function RoutingUi({iDateTime = new Date(), iDestination = null, 
     const { default: map } = useMap()
     const router = useRouter()
     const isHsl = useIsHsl()
-    const { config, setConfig } = useContext(ConfigContext)
+    const { config, setConfig, getConfig } = useContext(ConfigContext)
 
     function getUserLocation(fn: Dispatch<SetStateAction<PlaceSuggestion | null>>) {
         if ("geolocation" in navigator) {
@@ -141,7 +141,10 @@ export default function RoutingUi({iDateTime = new Date(), iDestination = null, 
     })
 
     function plan () {
-        if (!origin || !destination) return
+        if (!origin) return toast("Select a valid origin")
+        if (!destination) return toast("Select a valid destination")
+        const dateTime = date.getTime() + time.getTime()
+        console.log(new Date(dateTime))
         const start = {label: origin.text, location: {coordinate: {latitude: origin.properties?.lat, longitude: origin.properties?.lng}}}
         const end = {label: destination.text, location: {coordinate: {latitude: destination.properties?.lat, longitude: destination.properties?.lng}}}
         router.push(`/plan/${JSON.stringify(start)}/${JSON.stringify(end)}/${isHsl ? "?hsl" : ""}`)
@@ -151,13 +154,13 @@ export default function RoutingUi({iDateTime = new Date(), iDestination = null, 
         <>
             <Modal className='bg-white max-w-8/10 w-120 max-h-8/10' cardTitle={
                 <div className="flex justify-between items-center">
-                    <span>Settings</span><span className='text-nowrap flex flex-nowrap h-full items-center'><span className='text-lg font-normal text-black'>Advanced</span> <Toggle state={config.advancedRoutingOptionsEnabled} setState={(v) => setConfig(v, "advancedRoutingOptionsEnabled")}></Toggle></span>
+                    <span>Settings</span><span className='text-nowrap flex flex-nowrap h-full items-center'><span className='text-lg font-normal text-black'>Advanced</span> <Toggle state={config.advancedRoutingOptionsEnabled} setState={(v) => setConfig(v, ["advancedRoutingOptionsEnabled"])}></Toggle></span>
                 </div>
             } open={settingsOpen} close={() => setSettingsOpen(false)}>
-                <div className="px-4 overflow-y-scroll">
+                <div className="px-4 overflow-y-scroll flex flex-col gap-2">
                     {
-                        ...typedEntries((config.advancedRoutingOptionsEnabled ? config.advancedRoutingOptions : config.routingOptions)).map(([k, v], i) => {
-                            const parse = <O extends RoutingNode>(option: O, setValue: <T extends O>(value: T) => void, i?: number) => {
+                        ...(config.advancedRoutingOptionsEnabled ? AdvancedRoutingOptions : RoutingOptionsUiConfig).map((v, i) => {
+                            const parse = <O extends RoutingNode>(option: O, i?: number) => {
                                 switch (option.type) {
                                     case "group":
                                         return <div key={i}>
@@ -165,20 +168,26 @@ export default function RoutingUi({iDateTime = new Date(), iDestination = null, 
                                             <div className={`flex ${option.direction == "horizontal" ? "flex-row" : "flex-col"} w-full gap-1`}>
                                                 {
                                                     // @ts-expect-error idk
-                                                    ...option.items.map((o, i) => <div key={i}>{parse<O, A>(o, (newO) => { const a: typeof option.items = [...option.items]; a.splice(i,1,newO); console.log(newO); setValue({ ...option, items: a }) }, i)}</div>)
+                                                    ...option.items.map((o, i) => <div key={i}>{parse<O, A>(o, (newO) => { const a: typeof option.items = [...option.items]; a.splice(i, 1, newO); console.log(newO); setValue({ ...option, items: a }) }, i)}</div>)
                                                 }
                                             </div>
                                         </div>
                                     case "toggle":
-                                        return <div className="flex justify-between"><span>{option.name}</span><Toggle state={option.value} setState={(v) => setValue({...option, value: v})}></Toggle></div>
+                                        return <div className="flex justify-between"><span>{option.name}</span><Toggle state={getConfig(...option.value).every(v => v)} setState={(v) => setConfig(v, ...option.value)}></Toggle></div>
                                     case "icon_toggle":
-                                        return <Button className='p-0' title={option.name} key={i} onClick={() => setValue({ ...option, value: !option.value })}><Icon className={`${option.value ? "text-gray!" : ""}`}>{{...option.icon, props: {...(option.icon.props as object), height: 32, width: 32, className: `${(option.icon.props as any).className} ${option.value ? "text-gray!": ""}`}}}</Icon></Button>
+                                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                        return <Button className='p-0' title={option.name} key={i} onClick={() => setConfig(getConfig(...option.value).every(v => v), ...option.value)}><Icon className={`${option.value ? "text-gray!" : ""}`}>{{ ...option.icon, props: { ...(option.icon.props as object), height: 28, width: 28, className: `${(option.icon.props as any).className} ${option.value ? "text-gray!" : ""}` } }}</Icon></Button>
+                                    case "dropdown":
+                                        return <div>
+                                            <div className="text-lg font-medium">{option.name}</div>
+                                            <Dropdown<number> initial={option.options.find(o => getConfig(...option.value).every(v => v == o.id))?.content} items={option.options}></Dropdown>
+                                        </div>
                                     default:
                                         return <div key={i}></div>
                                 }
                             }
 
-                            return <div key={i}>{parse<typeof v>(v, (v) => setConfig(v, config.advancedRoutingOptionsEnabled ? "advancedRoutingOptions" : "routingOptions", k), i)}</div>
+                            return <div key={i}>{parse<typeof v>(v, i)}</div>
                         })
                     }
                 </div>

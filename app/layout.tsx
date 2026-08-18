@@ -5,10 +5,10 @@ import "react-loading-skeleton/dist/skeleton.css";
 import type { Metadata } from "next";
 import { Host_Grotesk } from "next/font/google";
 import { Toaster } from "react-hot-toast";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { MapLayoutProvider } from "./mapcontext";
 import Navbar from "./components/navbar";
-import { HekinavConfig, defaultConfig, ConfigContext, SetHekinavConfigKey } from "./HekinavConfig";
+import { HekinavConfig, defaultConfig, ConfigContext, SetHekinavConfigKey, GetHekinavConfigKey } from "./HekinavConfig";
 
 const hostGrotesk = Host_Grotesk({
   variable: "--font-a",
@@ -29,18 +29,33 @@ export default function RootLayout({
 
   const [config, setConfig] = useState<HekinavConfig>(defaultConfig)
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const setConfigKey: SetHekinavConfigKey = function (...args: any[]) {
+  const setConfigKey: SetHekinavConfigKey = function (...args: (readonly PropertyKey[])[]) {
     const [value, ...keys] = args
     const newObj = { ...config }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let target: any = newObj
+    keys.forEach((k) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let target: any = newObj
 
-    for (let i = 0; i < keys.length - 1; i++) {
-      target = target[keys[i]];
-    }
-    target[keys[keys.length - 1]] = value;
+      for (let i = 0; i < k.length - 1; i++) {
+        target = target[k[i]];
+      }
+      target[k[k.length - 1]] = value
+    })
     setConfig(newObj)
+  }
+  const getConfigKey: GetHekinavConfigKey = function (...args: (readonly PropertyKey[])[]) {
+    const [...keys] = args
+    const newObj = { ...config }
+
+    return keys.map((k) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let target: any = newObj
+
+      for (let i = 0; i < k.length - 1; i++) {
+        target = target[k[i]];
+      }
+      return target[k[k.length - 1]]
+    })
   }
   // this is maybe not needed anymore
   /* useEffect(() => {
@@ -69,7 +84,7 @@ export default function RootLayout({
         <title>Hekinav Routing</title>
       </head>
       <body className="h-screen overflow-hidden flex flex-col">
-        <ConfigContext value={{ config, setConfig: setConfigKey }}>
+        <ConfigContext value={{ config, setConfig: setConfigKey, getConfig: getConfigKey }}>
           <Navbar></Navbar>
           <Toaster
             toastOptions={{

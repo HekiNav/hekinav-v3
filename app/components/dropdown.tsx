@@ -5,18 +5,18 @@ import React, { ReactNode, useState } from 'react';
 import Icon from './icon';
 import { ArrowDropDownW700 as ArrowDropDown } from '@material-symbols-svg/react/icons/arrow-drop-down';
 
-export interface DropdownProps<T extends string | number> extends React.HTMLAttributes<HTMLDivElement> {
+export interface DropdownProps<T> extends React.HTMLAttributes<HTMLDivElement> {
     items: DropdownItem<T>[],
     initial: ReactNode,
     small?: boolean,
     onSet?: (item: DropdownItem<T>) => void
 }
-export interface DropdownItem<T extends string | number> {
+export interface DropdownItem<T> {
     id: T | null,
     content: ReactNode
 }
 
-export default function Dropdown<T extends string | number>(props: DropdownProps<T>) {
+export default function Dropdown<T = string>(props: DropdownProps<T>) {
     const {small = false, items, initial, onSet, ...otherProps} = props
 
     const [isOpen, setIsOpen] = useState(false);
