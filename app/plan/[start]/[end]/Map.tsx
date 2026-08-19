@@ -2,9 +2,10 @@
 import { useMap } from "@vis.gl/react-maplibre"
 import { PlanQueryQuery } from "./page.generated"
 import { useEffect } from "react"
-import { GeoJSONSource } from "maplibre-gl"
+import { GeoJSONSource, LngLatBounds } from "maplibre-gl"
 import { getColor, Mode } from "@/app/lib/digitransit"
 import { PlanLabeledLocationInput } from "@/app/lib/__generated__/graphql"
+import polyline from "@mapbox/polyline"
 
 export function Map({ data, selectedRoute = null, destination, origin }: { data: NonNullable<PlanQueryQuery["planConnection"]>, selectedRoute?: number | null, destination: PlanLabeledLocationInput, origin: PlanLabeledLocationInput }) {
   const { default: map } = useMap()
@@ -29,7 +30,14 @@ export function Map({ data, selectedRoute = null, destination, origin }: { data:
     }
 
     function initMap() {
-      if (!map) return;
+      if (!map || !data.edges) return;
+      const lines: [number, number][][] = data.edges.map(e => (e?.node.legs.map(l => polyline.decode(l?.legGeometry?.points as string).map<[number,number]>(([lat, lng]) => [lng, lat])) || []).flat())
+
+      const bounds = lines.length > 0 && lines.flat().reduce((bounds, coord) => {
+        return bounds.extend(coord)
+      }, new LngLatBounds(lines[0][0], lines[0][1]))
+
+      if (bounds) m.fitBounds(bounds, { padding: 100 })
 
       const geojson: GeoJSON.FeatureCollection = {
         type: "FeatureCollection", features: [{
@@ -63,7 +71,45 @@ export function Map({ data, selectedRoute = null, destination, origin }: { data:
           type: "symbol",
           layout: {
             "icon-image": "pin_blue",
-            "icon-size": 25,
+            "icon-size": [
+              "interpolate",
+              [
+                 "exponential",
+                 1.15
+               ],
+               [
+                 "zoom"
+               ],
+               1,
+               0.1,
+               22,
+               1
+            ],
+            "icon-overlap": "always"
+          }
+          
+        })
+        m.addLayer({
+          id: "destination",
+          source: "itinerary",
+          filter: ["==", ["get", "type"], "destination"],
+          type: "symbol",
+          layout: {
+            "icon-image": "pin_red",
+            "icon-size": [
+              "interpolate",
+              [
+                 "exponential",
+                 1.15
+               ],
+               [
+                 "zoom"
+               ],
+               1,
+               0.1,
+               22,
+               1
+            ],
             "icon-overlap": "always"
           }
           

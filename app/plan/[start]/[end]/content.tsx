@@ -46,7 +46,7 @@ export default function Content({ data,
                             </div>
                             <div className="w-full h-5 flex flex-row gap-1">
                                 {e?.node.legs.map((l, j) => (
-                                    <div key={j} style={{ width: `${l?.duration}%` }} className={`h-5 w-20 rounded-md text-white flex items-center justify-start px-1 font-bold ${getRouteColor("bg", l?.trip?.route.type || -1, l?.mode || "")}`}>{l?.trip?.route.shortName || ""}{l?.mode == "WALK" && <><Icon><DirectionsWalk className="text-black -ml-0.5" height={16} width={16}></DirectionsWalk></Icon><span className="text-black font-normal">{Math.round((l.distance as number) / 60)}</span></>}</div>
+                                    <div key={j} style={{ width: `${l?.duration}%` }} className={`h-5 w-20 rounded-md text-white flex items-center justify-start px-1 font-bold ${getRouteColor("bg", l?.trip?.route.type || -1, l?.mode || "")}`}>{l?.trip?.route.shortName || ""}{l?.mode == "WALK" && <><Icon><DirectionsWalk className="text-black -ml-0.5" height={16} width={16}></DirectionsWalk></Icon><span className="text-black font-normal">{Math.ceil((l.distance as number) / 60)}</span></>}</div>
                                 ))}
                             </div>
                             <div className="w-full flex justify-between items-end">

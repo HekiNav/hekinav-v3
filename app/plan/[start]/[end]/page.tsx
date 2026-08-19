@@ -214,6 +214,7 @@ export default async function StopOrStation({
       origin
     }
   })
+  console.log(result.data?.planConnection?.routingErrors, result.data?.planConnection?.edges)
 
   if (result.error || !result.data) {
     return (
