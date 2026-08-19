@@ -11,6 +11,8 @@ import { DirectionsWalkW700 as DirectionsWalk } from "@material-symbols-svg/reac
 import { HourglassW700 as Hourglass } from "@material-symbols-svg/react/hourglass";
 import { getRouteColor } from "@/app/lib/digitransit";
 import Icon from "@/app/components/icon";
+import { MapOverlay } from "@/app/mapcontext";
+import { Map } from "./Map";
 
 interface ContentProps {
     data: NonNullable<PlanQueryQuery["planConnection"]>
@@ -43,8 +45,8 @@ export default function Content({ data,
                                 <span className="gap-0! text-md font-medium">{Math.round((e?.node.duration as number) / 60)} min</span>
                             </div>
                             <div className="w-full h-5 flex flex-row gap-1">
-                                {e?.node.legs.map(l => (
-                                    <div style={{width: `${l?.duration}%`}} className={`h-5 w-20 rounded-md text-white flex items-center justify-start px-1 font-bold ${getRouteColor("bg", l?.trip?.route.type || -1, l?.mode || "")}`}>{l?.trip?.route.shortName || ""}{l?.mode == "WALK" && <><Icon><DirectionsWalk className="text-black -ml-0.5" height={16} width={16}></DirectionsWalk></Icon><span className="text-black font-normal">{Math.round((l.distance as number) / 60)}</span></>}</div>
+                                {e?.node.legs.map((l, j) => (
+                                    <div key={j} style={{ width: `${l?.duration}%` }} className={`h-5 w-20 rounded-md text-white flex items-center justify-start px-1 font-bold ${getRouteColor("bg", l?.trip?.route.type || -1, l?.mode || "")}`}>{l?.trip?.route.shortName || ""}{l?.mode == "WALK" && <><Icon><DirectionsWalk className="text-black -ml-0.5" height={16} width={16}></DirectionsWalk></Icon><span className="text-black font-normal">{Math.round((l.distance as number) / 60)}</span></>}</div>
                                 ))}
                             </div>
                             <div className="w-full flex justify-between items-end">
@@ -60,6 +62,12 @@ export default function Content({ data,
                     )
                 })}
             </div>
+            <MapOverlay>
+                <Map data={data as NonNullable<PlanQueryQuery["planConnection"]>}
+                    destination={destination}
+                    origin={origin}
+                />
+            </MapOverlay>
         </>
     );
 }

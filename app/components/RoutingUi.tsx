@@ -176,11 +176,11 @@ export default function RoutingUi({iDateTime = new Date(), iDestination = null, 
                                         return <div className="flex justify-between"><span>{option.name}</span><Toggle state={getConfig(...option.value).every(v => v)} setState={(v) => setConfig(v, ...option.value)}></Toggle></div>
                                     case "icon_toggle":
                                         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                                        return <Button className='p-0' title={option.name} key={i} onClick={() => setConfig(getConfig(...option.value).every(v => v), ...option.value)}><Icon className={`${option.value ? "text-gray!" : ""}`}>{{ ...option.icon, props: { ...(option.icon.props as object), height: 28, width: 28, className: `${(option.icon.props as any).className} ${option.value ? "text-gray!" : ""}` } }}</Icon></Button>
+                                        return <Button className='p-0' title={option.name} key={i} onClick={() => setConfig(!getConfig(...option.value).every(v => v), ...option.value)}><Icon>{{ ...option.icon, props: { ...(option.icon.props as object), height: 28, width: 28, className: `${(option.icon.props as any).className} ${getConfig(...option.value).every(v => v) ? "" : "text-gray!"}` } }}</Icon></Button>
                                     case "dropdown":
                                         return <div>
                                             <div className="text-lg font-medium">{option.name}</div>
-                                            <Dropdown<number> initial={option.options.find(o => getConfig(...option.value).every(v => v == o.id))?.content} items={option.options}></Dropdown>
+                                            <Dropdown<number | string> key={i} initial={option.options.find(o => getConfig(...option.value).every(v => v == o.id))?.content} items={option.options}></Dropdown>
                                         </div>
                                     default:
                                         return <div key={i}></div>

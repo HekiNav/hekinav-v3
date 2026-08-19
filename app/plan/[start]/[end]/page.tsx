@@ -5,6 +5,7 @@ import Toast from "@/app/components/toast";
 import Content from "./content";
 import { Map } from "./Map";
 import { MapOverlay, Sidebar } from "@/app/mapcontext";
+import { Metadata, ResolvingMetadata } from "next";
 
 
 const GET_PLAN:
@@ -132,6 +133,41 @@ const GET_PLAN:
     `
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 
+export  async function generateMetadata({
+  params,
+  searchParams
+}: {
+  params: Promise<{
+    start: string
+    end: string
+  }>,
+  searchParams: SearchParams;
+},
+  parent: ResolvingMetadata
+): Promise<Metadata> {
+  const { end, start } = await params
+
+  const isHsl = (await searchParams).hsl != undefined
+  function parseParam(t: string) {
+    try {
+      return JSON.parse(decodeURIComponent(t))
+    } catch {
+      return null
+    }
+  }
+  const origin = parseParam(start)
+  const destination = parseParam(end)
+
+  if (!origin || !destination) {
+    return {title: "Failed to load routes - Hekinav Routing"}
+
+  }
+  
+  return {
+    title: `Routes from ${origin.label} to ${destination.label}`,
+    description: `View routes and directions from ${origin.label} to ${destination.label} in Hekinav Routing`
+  }
+}
 
 export default async function StopOrStation({
   params,
@@ -202,11 +238,6 @@ export default async function StopOrStation({
         />
 
       </Sidebar>
-      <MapOverlay>
-        <Map data={data as NonNullable<PlanQueryQuery["planConnection"]>}
-
-        />
-      </MapOverlay>
     </>
   );
 }

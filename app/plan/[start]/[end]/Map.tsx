@@ -4,8 +4,9 @@ import { PlanQueryQuery } from "./page.generated"
 import { useEffect } from "react"
 import { GeoJSONSource } from "maplibre-gl"
 import { getColor, Mode } from "@/app/lib/digitransit"
+import { PlanLabeledLocationInput } from "@/app/lib/__generated__/graphql"
 
-export function Map({ data }: { data: NonNullable<PlanQueryQuery["planConnection"]> }) {
+export function Map({ data, selectedRoute = null, destination, origin }: { data: NonNullable<PlanQueryQuery["planConnection"]>, selectedRoute?: number | null, destination: PlanLabeledLocationInput, origin: PlanLabeledLocationInput }) {
   const { default: map } = useMap()
   useEffect(() => {
     if (!map) return
@@ -21,23 +22,31 @@ export function Map({ data }: { data: NonNullable<PlanQueryQuery["planConnection
 
     loop(0)
     return () => {
-      if (m.getLayer("stop")) m.removeLayer("stop")
-      if (m.getLayer("stop-outline")) m.removeLayer("stop-outline")
-      if (m.getSource("stop")) m.removeSource("stop")
+      if (m.getLayer("itinerary")) m.removeLayer("itinerary")
+      if (m.getSource("itinerary")) m.removeSource("itinerary")
     }
 
     function initMap() {
       if (!map) return;
-      
-      /* const geojson: GeoJSON.FeatureCollection = {
+
+      const geojson: GeoJSON.FeatureCollection = {
         type: "FeatureCollection", features: [{
           type: "Feature",
           geometry: {
             type: "Point",
-            coordinates: [data.lon || 0, data.lat || 0]
+            coordinates: [origin.location.coordinate?.longitude as number || 0, origin.location.coordinate?.latitude as number || 0]
           },
           properties: {
-            type: "stop"
+            type: "origin"
+          }
+        }, {
+          type: "Feature",
+          geometry: {
+            type: "Point",
+            coordinates: [destination.location.coordinate?.longitude as number || 0, destination.location.coordinate?.latitude as number || 0]
+          },
+          properties: {
+            type: "destination"
           }
         }]
       }
@@ -45,78 +54,77 @@ export function Map({ data }: { data: NonNullable<PlanQueryQuery["planConnection
         m.getSource<GeoJSONSource>("stop")!.setData(geojson)
       } else {
         m.addSource("stop", { type: "geojson", data: geojson })
-        m.addLayer({
-          id: "stop-outline", type: "circle", source: "stop", filter: ["==", ["get", "type"], "stop"], paint: {
-            "circle-radius": [
-              "interpolate",
-              [
-                "exponential",
-                1.15
-              ],
-              [
-                "zoom"
-              ],
-              10,
-              8,
-              22,
-              36
-            ],
-            "circle-stroke-width": [
-              "interpolate",
-              [
-                "exponential",
-                1.15
-              ],
-              [
-                "zoom"
-              ],
-              10,
-              5,
-              22,
-              10
-            ],
-            "circle-stroke-color": "white",
-          }
-        })
-        m.addLayer({
-          id: "stop", type: "circle", source: "stop", filter: ["==", ["get", "type"], "stop"], paint: {
-            "circle-radius": [
-              "interpolate",
-              [
-                "exponential",
-                1.15
-              ],
-              [
-                "zoom"
-              ],
-              10,
-              6,
-              22,
-              30
-            ],
-            "circle-color": "white",
-            "circle-stroke-color": getColor(-1, data.vehicleMode as Mode),
-            "circle-stroke-width": [
-              "interpolate",
-              [
-                "exponential",
-                1.15
-              ],
-              [
-                "zoom"
-              ],
-              10,
-              5,
-              22,
-              10
-            ],
-          }
-        })
-      } */
+        /*  m.addLayer({
+           id: "stop-outline", type: "circle", source: "stop", filter: ["==", ["get", "type"], "stop"], paint: {
+             "circle-radius": [
+               "interpolate",
+               [
+                 "exponential",
+                 1.15
+               ],
+               [
+                 "zoom"
+               ],
+               10,
+               8,
+               22,
+               36
+             ],
+             "circle-stroke-width": [
+               "interpolate",
+               [
+                 "exponential",
+                 1.15
+               ],
+               [
+                 "zoom"
+               ],
+               10,
+               5,
+               22,
+               10
+             ],
+             "circle-stroke-color": "white",
+           }
+         })
+         m.addLayer({
+           id: "stop", type: "circle", source: "stop", filter: ["==", ["get", "type"], "stop"], paint: {
+             "circle-radius": [
+               "interpolate",
+               [
+                 "exponential",
+                 1.15
+               ],
+               [
+                 "zoom"
+               ],
+               10,
+               6,
+               22,
+               30
+             ],
+             "circle-color": "white",
+             "circle-stroke-color": getColor(-1, data.vehicleMode as Mode),
+             "circle-stroke-width": [
+               "interpolate",
+               [
+                 "exponential",
+                 1.15
+               ],
+               [
+                 "zoom"
+               ],
+               10,
+               5,
+               22,
+               10
+             ],
+           }
+         }) */
+      }
       return () => {
-        if (m.getLayer("stop")) m.removeLayer("stop")
-        if (m.getLayer("stop-outline")) m.removeLayer("stop-outline")
-        if (m.getSource("stop")) m.removeSource("stop")
+        if (m.getLayer("itinerary")) m.removeLayer("itinerary")
+        if (m.getSource("itinerary")) m.removeSource("itinerary")
       }
     }
   }, [map, data])

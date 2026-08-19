@@ -5,7 +5,7 @@ import "react-loading-skeleton/dist/skeleton.css";
 import type { Metadata } from "next";
 import { Host_Grotesk } from "next/font/google";
 import { Toaster } from "react-hot-toast";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { MapLayoutProvider } from "./mapcontext";
 import Navbar from "./components/navbar";
 import { HekinavConfig, defaultConfig, ConfigContext, SetHekinavConfigKey, GetHekinavConfigKey } from "./HekinavConfig";
@@ -14,7 +14,6 @@ const hostGrotesk = Host_Grotesk({
   variable: "--font-a",
   subsets: ["latin"],
 });
-
 
 export const metadata: Metadata = {
   title: "Hekinav Routing",
@@ -28,6 +27,25 @@ export default function RootLayout({
 }>) {
 
   const [config, setConfig] = useState<HekinavConfig>(defaultConfig)
+  const [configFromLocalStorageGotten, setConfigFromLocalStorageGotten] = useState<boolean>(false)
+
+  useEffect(() => {
+    if (configFromLocalStorageGotten) return
+    if (!window) return
+    const configData = localStorage.getItem("hekinav:global-config")
+    if (!configData) return
+    try {
+      setConfig(JSON.parse(configData))
+    } catch {
+      return
+    }
+    setConfigFromLocalStorageGotten(true)
+  })
+
+  useEffect(() => {
+    if (!window) return
+    localStorage.setItem("hekinav:global-config", JSON.stringify(config))
+  }, [config])
 
   const setConfigKey: SetHekinavConfigKey = function (...args: (readonly PropertyKey[])[]) {
     const [value, ...keys] = args
@@ -79,10 +97,6 @@ export default function RootLayout({
       lang="en"
       className={`${hostGrotesk.variable} h-screen antialiased`}
     >
-      <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, height=device-height"></meta>
-        <title>Hekinav Routing</title>
-      </head>
       <body className="h-screen overflow-hidden flex flex-col">
         <ConfigContext value={{ config, setConfig: setConfigKey, getConfig: getConfigKey }}>
           <Navbar></Navbar>

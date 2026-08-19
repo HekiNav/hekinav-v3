@@ -16,7 +16,7 @@ export interface DropdownItem<T> {
     content: ReactNode
 }
 
-export default function Dropdown<T = string>(props: DropdownProps<T>) {
+export default function Dropdown<T extends string | number>(props: DropdownProps<T>) {
     const {small = false, items, initial, onSet, ...otherProps} = props
 
     const [isOpen, setIsOpen] = useState(false);

@@ -1,0 +1,324 @@
+{
+  "airport": {
+    "height": 64,
+    "pixelRatio": 2,
+    "width": 64,
+    "x": 304,
+    "y": 192
+  },
+  "bike": {
+    "height": 64,
+    "pixelRatio": 2,
+    "width": 64,
+    "x": 368,
+    "y": 192
+  },
+  "bus": {
+    "height": 64,
+    "pixelRatio": 2,
+    "width": 64,
+    "x": 400,
+    "y": 0
+  },
+  "elevator": {
+    "height": 64,
+    "pixelRatio": 2,
+    "width": 64,
+    "x": 400,
+    "y": 64
+  },
+  "ferry": {
+    "height": 64,
+    "pixelRatio": 2,
+    "width": 64,
+    "x": 400,
+    "y": 128
+  },
+  "harbour": {
+    "height": 64,
+    "pixelRatio": 2,
+    "width": 64,
+    "x": 432,
+    "y": 192
+  },
+  "letter_0": {
+    "height": 64,
+    "pixelRatio": 2,
+    "width": 64,
+    "x": 432,
+    "y": 256
+  },
+  "letter_a": {
+    "height": 64,
+    "pixelRatio": 2,
+    "width": 64,
+    "x": 432,
+    "y": 320
+  },
+  "letter_b": {
+    "height": 64,
+    "pixelRatio": 2,
+    "width": 64,
+    "x": 480,
+    "y": 384
+  },
+  "letter_c": {
+    "height": 64,
+    "pixelRatio": 2,
+    "width": 64,
+    "x": 480,
+    "y": 448
+  },
+  "letter_d": {
+    "height": 64,
+    "pixelRatio": 2,
+    "width": 64,
+    "x": 464,
+    "y": 0
+  },
+  "letter_e": {
+    "height": 64,
+    "pixelRatio": 2,
+    "width": 64,
+    "x": 464,
+    "y": 64
+  },
+  "letter_f": {
+    "height": 64,
+    "pixelRatio": 2,
+    "width": 64,
+    "x": 464,
+    "y": 128
+  },
+  "letter_g": {
+    "height": 64,
+    "pixelRatio": 2,
+    "width": 64,
+    "x": 496,
+    "y": 192
+  },
+  "letter_h": {
+    "height": 64,
+    "pixelRatio": 2,
+    "width": 64,
+    "x": 496,
+    "y": 256
+  },
+  "letter_i": {
+    "height": 64,
+    "pixelRatio": 2,
+    "width": 64,
+    "x": 496,
+    "y": 320
+  },
+  "letter_j": {
+    "height": 64,
+    "pixelRatio": 2,
+    "width": 64,
+    "x": 544,
+    "y": 384
+  },
+  "letter_k": {
+    "height": 64,
+    "pixelRatio": 2,
+    "width": 64,
+    "x": 544,
+    "y": 448
+  },
+  "letter_l": {
+    "height": 64,
+    "pixelRatio": 2,
+    "width": 64,
+    "x": 528,
+    "y": 0
+  },
+  "letter_m": {
+    "height": 64,
+    "pixelRatio": 2,
+    "width": 64,
+    "x": 528,
+    "y": 64
+  },
+  "letter_n": {
+    "height": 64,
+    "pixelRatio": 2,
+    "width": 64,
+    "x": 528,
+    "y": 128
+  },
+  "letter_o": {
+    "height": 64,
+    "pixelRatio": 2,
+    "width": 64,
+    "x": 560,
+    "y": 192
+  },
+  "letter_p": {
+    "height": 64,
+    "pixelRatio": 2,
+    "width": 64,
+    "x": 560,
+    "y": 256
+  },
+  "letter_q": {
+    "height": 64,
+    "pixelRatio": 2,
+    "width": 64,
+    "x": 560,
+    "y": 320
+  },
+  "letter_r": {
+    "height": 64,
+    "pixelRatio": 2,
+    "width": 64,
+    "x": 608,
+    "y": 384
+  },
+  "letter_s": {
+    "height": 64,
+    "pixelRatio": 2,
+    "width": 64,
+    "x": 608,
+    "y": 448
+  },
+  "letter_t": {
+    "height": 64,
+    "pixelRatio": 2,
+    "width": 64,
+    "x": 592,
+    "y": 0
+  },
+  "letter_u": {
+    "height": 64,
+    "pixelRatio": 2,
+    "width": 64,
+    "x": 592,
+    "y": 64
+  },
+  "letter_v": {
+    "height": 64,
+    "pixelRatio": 2,
+    "width": 64,
+    "x": 592,
+    "y": 128
+  },
+  "letter_w": {
+    "height": 64,
+    "pixelRatio": 2,
+    "width": 64,
+    "x": 624,
+    "y": 192
+  },
+  "letter_x": {
+    "height": 64,
+    "pixelRatio": 2,
+    "width": 64,
+    "x": 624,
+    "y": 256
+  },
+  "letter_y": {
+    "height": 64,
+    "pixelRatio": 2,
+    "width": 64,
+    "x": 624,
+    "y": 320
+  },
+  "letter_z": {
+    "height": 64,
+    "pixelRatio": 2,
+    "width": 64,
+    "x": 672,
+    "y": 384
+  },
+  "letter_ä": {
+    "height": 68,
+    "pixelRatio": 2,
+    "width": 64,
+    "x": 288,
+    "y": 432
+  },
+  "letter_å": {
+    "height": 68,
+    "pixelRatio": 2,
+    "width": 64,
+    "x": 352,
+    "y": 432
+  },
+  "letter_ö": {
+    "height": 68,
+    "pixelRatio": 2,
+    "width": 64,
+    "x": 416,
+    "y": 432
+  },
+  "metro": {
+    "height": 64,
+    "pixelRatio": 2,
+    "width": 64,
+    "x": 672,
+    "y": 448
+  },
+  "metro_entrance": {
+    "height": 192,
+    "pixelRatio": 2,
+    "width": 96,
+    "x": 304,
+    "y": 0
+  },
+  "pin_blue": {
+    "height": 160,
+    "pixelRatio": 2,
+    "width": 160,
+    "x": 0,
+    "y": 0
+  },
+  "pin_red": {
+    "height": 160,
+    "pixelRatio": 2,
+    "width": 160,
+    "x": 0,
+    "y": 160
+  },
+  "rail": {
+    "height": 64,
+    "pixelRatio": 2,
+    "width": 64,
+    "x": 656,
+    "y": 0
+  },
+  "zone_a": {
+    "height": 144,
+    "pixelRatio": 2,
+    "width": 144,
+    "x": 0,
+    "y": 320
+  },
+  "zone_b": {
+    "height": 144,
+    "pixelRatio": 2,
+    "width": 144,
+    "x": 144,
+    "y": 320
+  },
+  "zone_c": {
+    "height": 144,
+    "pixelRatio": 2,
+    "width": 144,
+    "x": 160,
+    "y": 0
+  },
+  "zone_d": {
+    "height": 144,
+    "pixelRatio": 2,
+    "width": 144,
+    "x": 160,
+    "y": 144
+  },
+  "zone_e": {
+    "height": 144,
+    "pixelRatio": 2,
+    "width": 144,
+    "x": 288,
+    "y": 288
+  }
+}

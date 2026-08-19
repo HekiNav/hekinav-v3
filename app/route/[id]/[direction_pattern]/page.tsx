@@ -6,7 +6,7 @@ import { ApolloClient, gql, HttpLink, InMemoryCache, TypedDocumentNode } from "@
 import Toast from "@/app/components/toast";
 import Link from "next/link";
 import { Sidebar } from "@/app/mapcontext";
-import { PatternQueryQuery, PatternQueryQueryVariables } from "./page.generated";
+import { PatternMetadataQueryQuery, PatternQueryQuery, PatternQueryQueryVariables } from "./page.generated";
 import Label from "@/app/components/label";
 import Icon from "@/app/components/icon";
 import { ArrowRightAltW700 as ArrowRightAlt } from '@material-symbols-svg/react/icons/arrow-right-alt';
@@ -14,6 +14,7 @@ import Dropdown, { DropdownItem } from "@/app/components/dropdown";
 import { SyncAltW700 as SyncAlt } from '@material-symbols-svg/react/icons/sync-alt';
 import DateEl from "@/app/components/Date";
 import { Map } from "./Map";
+import { Metadata, ResolvingMetadata } from "next";
 
 const GET_PATTERN:
   TypedDocumentNode<PatternQueryQuery, PatternQueryQueryVariables> =
@@ -65,7 +66,71 @@ query PatternQuery($patternId: String!) {
 
     `
 
+const GET_PATTERN_METADATA:
+    TypedDocumentNode<PatternMetadataQueryQuery, PatternQueryQueryVariables> =
+    gql`
+  query PatternMetadataQuery($patternId: String!) {
+    pattern(id: $patternId) {
+      name
+      code
+      route {
+        shortName
+        longName
+      }
+    }
+  }
+  
+  
+      `
+
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
+
+export  async function generateMetadata({
+  params,
+  searchParams
+}: {
+  params: Promise<{
+    direction_pattern: string
+    id: string
+  }>,
+  searchParams: SearchParams;
+},
+  parent: ResolvingMetadata
+): Promise<Metadata> {
+  const { id, direction_pattern } = await params
+
+  const [direction, pattern] = direction_pattern.split("-")
+
+  const isHsl = (await searchParams).hsl != undefined
+
+  if (!gtfsIdRegex.test(decodeURIComponent(id))) {
+    return {title: "Unknown Route - Hekinav Routing"}
+  }
+
+  const client = new ApolloClient({
+    link: new HttpLink({ uri: `https://api.digitransit.fi/routing/v2/${isHsl ? "hsl" : "finland"}/gtfs/v1/`, headers: { "digitransit-subscription-key": process.env.DIGITRANSIT_KEY || "" } }),
+    cache: new InMemoryCache(),
+  });
+
+  const query = GET_PATTERN_METADATA
+  const result = await client.query({
+    query: query,
+    variables: {
+      patternId: `${decodeURIComponent(id)}:${direction}:${pattern}`
+    }
+  })
+
+  if (result.error || !result.data) {
+    return {title: "Unknown Route - Hekinav Routing"}
+  }
+  const data = result.data.pattern
+  if (!data) return {title: "Unknown Route - Hekinav Routing"}
+
+  return {
+    title: `${data.route.shortName ? `[${data.route.shortName}]` : ""} ${data.route.longName || ""}`,
+    description: `View stops and trips of ${data.route.shortName || ""} ${data.route.longName || ""} in Hekinav Routing`
+  }
+}
 
 
 export default async function Route({
