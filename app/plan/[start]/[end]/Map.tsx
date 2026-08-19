@@ -22,6 +22,8 @@ export function Map({ data, selectedRoute = null, destination, origin }: { data:
 
     loop(0)
     return () => {
+      if (m.getLayer("origin")) m.removeLayer("origin")
+      if (m.getLayer("destination")) m.removeLayer("destination")
       if (m.getLayer("itinerary")) m.removeLayer("itinerary")
       if (m.getSource("itinerary")) m.removeSource("itinerary")
     }
@@ -50,10 +52,22 @@ export function Map({ data, selectedRoute = null, destination, origin }: { data:
           }
         }]
       }
-      if (m.getSource<GeoJSONSource>("stop")) {
-        m.getSource<GeoJSONSource>("stop")!.setData(geojson)
+      if (m.getSource<GeoJSONSource>("itinerary")) {
+        m.getSource<GeoJSONSource>("itinerary")!.setData(geojson)
       } else {
-        m.addSource("stop", { type: "geojson", data: geojson })
+        m.addSource("itinerary", { type: "geojson", data: geojson })
+        m.addLayer({
+          id: "origin",
+          source: "itinerary",
+          filter: ["==", ["get", "type"], "origin"],
+          type: "symbol",
+          layout: {
+            "icon-image": "pin_blue",
+            "icon-size": 25,
+            "icon-overlap": "always"
+          }
+          
+        })
         /*  m.addLayer({
            id: "stop-outline", type: "circle", source: "stop", filter: ["==", ["get", "type"], "stop"], paint: {
              "circle-radius": [
@@ -121,10 +135,6 @@ export function Map({ data, selectedRoute = null, destination, origin }: { data:
              ],
            }
          }) */
-      }
-      return () => {
-        if (m.getLayer("itinerary")) m.removeLayer("itinerary")
-        if (m.getSource("itinerary")) m.removeSource("itinerary")
       }
     }
   }, [map, data])
