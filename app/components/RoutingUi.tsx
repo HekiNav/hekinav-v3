@@ -168,7 +168,7 @@ export default function RoutingUi({iDateTime = new Date(), iDestination = null, 
                                             <div className={`flex ${option.direction == "horizontal" ? "flex-row" : "flex-col"} w-full gap-1`}>
                                                 {
                                                     // @ts-expect-error idk
-                                                    ...option.items.map((o, i) => <div key={i}>{parse<O, A>(o, (newO) => { const a: typeof option.items = [...option.items]; a.splice(i, 1, newO); console.log(newO); setValue({ ...option, items: a }) }, i)}</div>)
+                                                    ...option.items.map((o, i) => <div key={i}>{parse<O, A>(o, (newO) => { const a: typeof option.items = [...option.items]; a.splice(i, 1, newO); setValue({ ...option, items: a }) }, i)}</div>)
                                                 }
                                             </div>
                                         </div>

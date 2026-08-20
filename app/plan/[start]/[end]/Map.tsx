@@ -17,7 +17,6 @@ export function Map({ data, selectedRoute = null, destination, origin }: { data:
     let cancelled = false
 
     const ensureLayers = () => {
-      console.log(m.getSource("itinerary"), cancelled)
       if (cancelled) return
 
       if (m.getSource("itinerary")) return
@@ -200,7 +199,6 @@ export function Map({ data, selectedRoute = null, destination, origin }: { data:
     if (!map || !data.edges) return
     const m = map.getMap()
 
-    console.log(m.getSource("itinerary"))
 
     const lines: [number, number][][][] = data.edges.map(e =>
       e?.node.legs.map(l =>
@@ -247,7 +245,6 @@ function generateGeoJSON(origin: PlanLabeledLocationInput, destination: PlanLabe
         const stopLabels = []
         if (selected && leg && (j == legs?.findIndex(l => l?.transitLeg) || leg?.trip?.route.type == 702)) stopLabels.push(leg.from)
         if (selected && leg && leg.transitLeg) stopLabels.push(leg.to)
-        if (stopLabels.length) console.log(stopLabels, selected, leg?.transitLeg)
         return [
           ...stopLabels.map<GeoJSON.Feature<GeoJSON.Point>>(l => ({
             type: "Feature",

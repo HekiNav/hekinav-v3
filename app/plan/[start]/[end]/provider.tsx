@@ -21,6 +21,7 @@ export function PlanData({ children, value }: PropsWithChildren & { value: PlanQ
     if (!data) return (
         "failed to load"
     )
+    console.log(data)
     return (
         <PlanContext value={{ ...value, data: data }}>
             {children}

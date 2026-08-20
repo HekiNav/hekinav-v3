@@ -24,6 +24,8 @@ export default function Content() {
     const { config, setConfig } = useContext(ConfigContext)
     const stuff = useContext(PlanContext)
 
+    console.log(stuff)
+
     if (!stuff) return <>
         failed to load
     </>

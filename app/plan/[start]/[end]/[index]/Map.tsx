@@ -17,14 +17,12 @@ export function Map({ data, selectedRoute, destination, origin }: { data: NonNul
     let cancelled = false
 
     const ensureLayers = () => {
-      console.log(m.getSource("itinerary-s"), cancelled)
       if (cancelled) return
       if (m.getSource("itinerary-s")) return
 
       const lines: [number, number][][] = data.edges![selectedRoute]?.node.legs.map(l =>
         polyline.decode(l?.legGeometry?.points as string).map<[number, number]>(([lat, lng]) => [lng, lat])
       ) || []
-      console.log(lines, selectedRoute, data.edges)
       const bounds = lines.length > 0 && lines.flat().reduce((bounds, coord) => bounds.extend(coord), new LngLatBounds(lines[0][0], lines[0][1]))
       if (bounds) m.fitBounds(bounds, { padding: 20 })
 
@@ -186,7 +184,6 @@ export function Map({ data, selectedRoute, destination, origin }: { data: NonNul
 
     if (!m.getSource("itinerary-s")) return
 
-    console.log("dhd")
 
     const geojson: GeoJSON.FeatureCollection = {
       type: "FeatureCollection",

@@ -236,7 +236,6 @@ export async function getPlan(origin: PlanLabeledLocationInput, destination: Pla
       origin
     }
   })
-  console.log(result.data?.planConnection?.routingErrors, result.data?.planConnection?.edges)
 
   if (result.error || !result.data) {
     return null
