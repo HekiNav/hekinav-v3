@@ -40,7 +40,7 @@ export function Map({ data }: { data: NonNullable<PatternQueryQuery["pattern"]> 
         return bounds.extend(coord)
       }, new LngLatBounds(line[0], line[0]))
 
-      m.fitBounds(bounds, { padding: 100 })
+      m.fitBounds(bounds, { padding: 20 })
 
       const geojson: GeoJSON.FeatureCollection = {
         type: "FeatureCollection", features: [{

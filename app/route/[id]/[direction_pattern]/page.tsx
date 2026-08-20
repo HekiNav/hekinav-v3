@@ -67,8 +67,8 @@ query PatternQuery($patternId: String!) {
     `
 
 const GET_PATTERN_METADATA:
-    TypedDocumentNode<PatternMetadataQueryQuery, PatternQueryQueryVariables> =
-    gql`
+  TypedDocumentNode<PatternMetadataQueryQuery, PatternQueryQueryVariables> =
+  gql`
   query PatternMetadataQuery($patternId: String!) {
     pattern(id: $patternId) {
       name
@@ -85,7 +85,7 @@ const GET_PATTERN_METADATA:
 
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 
-export  async function generateMetadata({
+export async function generateMetadata({
   params,
   searchParams
 }: {
@@ -104,7 +104,7 @@ export  async function generateMetadata({
   const isHsl = (await searchParams).hsl != undefined
 
   if (!gtfsIdRegex.test(decodeURIComponent(id))) {
-    return {title: "Unknown Route - Hekinav Routing"}
+    return { title: "Unknown Route - Hekinav Routing" }
   }
 
   const client = new ApolloClient({
@@ -121,10 +121,10 @@ export  async function generateMetadata({
   })
 
   if (result.error || !result.data) {
-    return {title: "Unknown Route - Hekinav Routing"}
+    return { title: "Unknown Route - Hekinav Routing" }
   }
   const data = result.data.pattern
-  if (!data) return {title: "Unknown Route - Hekinav Routing"}
+  if (!data) return { title: "Unknown Route - Hekinav Routing" }
 
   return {
     title: `${data.route.shortName ? `[${data.route.shortName}]` : ""} ${data.route.longName || ""}`,
@@ -214,6 +214,7 @@ export default async function Route({
                   <div className={`mx-4 w-3 relative h-full flex ${i == 0 ? "items-end" : i == a.length - 1 ? "items-start" : ""}`}>
                     <div className={`w-full ${i == 0 || i == a.length - 1 ? "h-5/10" : "h-full"} ${getRouteColor("bg", data.route.type || -1, data.route.mode || "")}`}></div>
                     <div className="absolute -left-1.5 -right-1.5 top-0 bottom-0 flex justify-center items-center">
+                      <div className={`bg-white border-white absolute border-[.25rem] bg-white h-7 w-7 rounded-full z-100`}></div>
                       <div className={`${getRouteColor("border", data.route.type || -1, data.route.mode || "")} border-[.25rem] bg-white h-6 w-6 rounded-full z-100`}></div>
                     </div>
                   </div>
@@ -233,7 +234,7 @@ export default async function Route({
           })
         }
       </div>
-        <Map data={data}/>
+      <Map data={data} />
     </Sidebar>
   )
 }
