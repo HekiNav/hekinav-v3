@@ -1,251 +1,99 @@
-"use server"
-import { ApolloClient, HttpLink, InMemoryCache, TypedDocumentNode, gql } from "@apollo/client";
-import { PlanQueryQuery, PlanQueryQueryVariables } from "./page.generated";
-import Toast from "@/app/components/toast";
-import Content from "./content";
+"use client"
+import { useContext, useState } from "react";
+import { ConfigContext } from "@/app/HekinavConfig";
+import { PlanQueryQuery } from "./page.generated";
+import { useMap } from "@vis.gl/react-maplibre";
+import RoutingUi from "@/app/components/RoutingUi";
+import { TZDate } from "@date-fns/tz";
+import { format } from "date-fns-tz";
+import IconItem from "@/app/components/iconitem";
+import { DirectionsWalkW700 as DirectionsWalk } from "@material-symbols-svg/react/directions-walk";
+import { HourglassW700 as Hourglass } from "@material-symbols-svg/react/hourglass";
+import { getRouteColor } from "@/app/lib/digitransit";
+import Icon from "@/app/components/icon";
+import { MapOverlay } from "@/app/mapcontext";
 import { Map } from "./Map";
-import { MapOverlay, Sidebar } from "@/app/mapcontext";
-import { Metadata, ResolvingMetadata } from "next";
+import { PlanContext } from "./provider";
+import { ArrowForwardIosW700 } from "@material-symbols-svg/react/icons/arrow-forward-ios";
+import Link from "next/link";
+import { useIsHsl } from "@/app/hooks/useHsl";
 
 
-const GET_PLAN:
-  TypedDocumentNode<PlanQueryQuery, PlanQueryQueryVariables> =
-  gql`
-  query PlanQuery($origin: PlanLabeledLocationInput!, $destination: PlanLabeledLocationInput!) {
-    planConnection(
-      origin: $origin,
-      destination: $destination
-    ) {
-      routingErrors {
-        code
-        description
-        inputField
-      }
-      edges {
-        cursor
-        node {
-          start 
-          end
-          waitingTime
-          walkDistance
-          walkTime
-          duration
-          numberOfTransfers
-          legs {
-            transitLeg
-            interlineWithPreviousLeg
-            duration
-            distance
-            mode
-            realTime
-            realtimeState
-            start {
-              estimated {
-                delay
-                time
-              }
-              scheduledTime
-            }
-            end {
-              estimated {
-                delay
-                time
-              }
-              scheduledTime
-            }
-            trip {
-              pattern{
-                code
-                directionId
-              }
-              route {
-                shortName
-                longName
-                gtfsId
-                mode
-                type
-              }
-            }
-            legGeometry {
-              length
-              points
-            }
-            from {
-              arrival {
-                estimated {
-                  delay
-                  time
-                }
-                scheduledTime
-              }
-              departure {
-                estimated {
-                  delay
-                  time
-                }
-                scheduledTime
-              }
-              stop {
-                name
-                platformCode
-                code
-                gtfsId
-                locationType
-              }
-              lat
-              lon
-              name
-              viaLocationType
-            }
-            to {
-              arrival {
-                estimated {
-                  delay
-                  time
-                }
-                scheduledTime
-              }
-              departure {
-                estimated {
-                  delay
-                  time
-                }
-                scheduledTime
-              }
-              stop {
-                name
-                platformCode
-                code
-                gtfsId
-                locationType
-              }
-              lat
-              lon
-              name
-              viaLocationType
-            }
-          }
-        }
-      }
-    }
-  }
-  
-    `
-type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
+export default function Content() {
 
-export  async function generateMetadata({
-  params,
-  searchParams
-}: {
-  params: Promise<{
-    start: string
-    end: string
-  }>,
-  searchParams: SearchParams;
-},
-  parent: ResolvingMetadata
-): Promise<Metadata> {
-  const { end, start } = await params
+    const { config, setConfig } = useContext(ConfigContext)
+    const stuff = useContext(PlanContext)
 
-  const isHsl = (await searchParams).hsl != undefined
-  function parseParam(t: string) {
-    try {
-      return JSON.parse(decodeURIComponent(t))
-    } catch {
-      return null
-    }
-  }
-  const origin = parseParam(start)
-  const destination = parseParam(end)
-
-  if (!origin || !destination) {
-    return {title: "Failed to load routes - Hekinav Routing"}
-
-  }
-  
-  return {
-    title: `Routes from ${origin.label} to ${destination.label}`,
-    description: `View routes and directions from ${origin.label} to ${destination.label} in Hekinav Routing`
-  }
-}
-
-export default async function StopOrStation({
-  params,
-  searchParams
-}: {
-  params: Promise<{
-    start: string
-    end: string
-  }>,
-  searchParams: SearchParams;
-}) {
-  const { start, end } = await params
-
-  const isHsl = (await searchParams).hsl != undefined
-
-  function parseParam(t: string) {
-    try {
-      return JSON.parse(decodeURIComponent(t))
-    } catch {
-      return null
-    }
-  }
-  const origin = parseParam(start)
-  const destination = parseParam(end)
-
-  if (!origin || !destination) {
-    return (
-      <Sidebar>
-        Failed to load
-        <Toast type="error" message={`Failed to get data: Invalid start or end`}></Toast>
-      </Sidebar>
-    )
-  }
-
-  const client = new ApolloClient({
-    link: new HttpLink({ uri: `https://api.digitransit.fi/routing/v2/${isHsl ? "hsl" : "finland"}/gtfs/v1/`, headers: { "digitransit-subscription-key": process.env.DIGITRANSIT_KEY || "" } }),
-    cache: new InMemoryCache(),
-  });
-
-  const result = await client.query({
-    query: GET_PLAN,
-    variables: {
-      destination,
-      origin
-    }
-  })
-  console.log(result.data?.planConnection?.routingErrors, result.data?.planConnection?.edges)
-
-  if (result.error || !result.data) {
-    return (
-      <Sidebar>
-        Failed to load stop
-        <Toast type="error" message={`Failed to get stop data: ${result.error?.message || "Unknown error"}`}></Toast>
-      </Sidebar>
-    )
-  }
-  const data = result.data.planConnection
-  if (!data) return
-
-  return (
-    <>
-      <Sidebar>
-
-        <Content
-          destination={destination}
-          origin={origin}
-          data={data as NonNullable<PlanQueryQuery["planConnection"]>}
-          isHsl={isHsl}
-        />
-
-      </Sidebar>
+    if (!stuff) return <>
+        failed to load
     </>
-  );
+    const { data, destination, origin } = stuff
+
+    const { default: map } = useMap()
+
+    const isHsl = useIsHsl()
+
+
+    const [selectedRoute, setSelectedRoute] = useState<number | null>(null)
+
+    return (
+        <>
+            <RoutingUi iOrigin={{ icon: <></>, id: "origin", text: origin.label || "origin", properties: { lat: origin.location.coordinate?.latitude as number || 0, lng: origin.location.coordinate?.longitude as number || 0 } }} iDestination={{ icon: <></>, id: "origin", text: destination.label || "origin", properties: { lat: destination.location.coordinate?.latitude as number || 0, lng: destination.location.coordinate?.longitude as number || 0 } }}></RoutingUi>
+            <div className="flex flex-col gap-2">
+                {data.edges?.map((e, i) => {
+                    const walkDistance = (e?.node.walkDistance as number)
+                    const firstTransitLeg = e?.node.legs.find(l => l?.transitLeg)
+                    const duration = e?.node.duration as number || 0
+                    return (
+                        <div onMouseEnter={() => setSelectedRoute(i)} key={i} className="border-3 focus:border-green rounded-xl flex flex-row gap-1">
+                            <div className="flex flex-col gap-1 shrink w-full py-1 px-2">
+                                <div className="w-full flex justify-between">
+                                    <span className="font-medium">{format(new TZDate(e?.node.start as number), "HH:mm")} - {format(new TZDate(e?.node.end as number), "HH:mm")}</span>
+                                    <span className="gap-0! text-md font-medium">{duration >= 3600 && `${Math.floor(duration / 3600)}h `}{Math.floor(duration / 60 % 60)}min</span>
+                                </div>
+                                <div className="w-full h-5 flex flex-row gap-1">
+                                    {e?.node.legs.map((l, j) => (
+                                        <div key={j} style={{ width: `${l?.duration}%` }} title={l?.trip?.route.shortName || l?.trip?.route.longName || ""} className={`h-5 w-20 rounded-md text-white flex items-center truncate justify-start px-1 font-bold ${getRouteColor("bg", l?.trip?.route.type || -1, l?.mode || "")}`}>{l?.trip?.route.shortName || l?.trip?.route.longName || ""}{l?.mode == "WALK" && <><Icon><DirectionsWalk className="text-black -ml-0.5" height={16} width={16}></DirectionsWalk></Icon><span className="text-black font-normal">{Math.ceil((l.distance as number) / 60)}</span></>}</div>
+                                    ))}
+                                </div>
+                                <div className="w-full flex justify-between items-end">
+                                    {firstTransitLeg
+                                        ? <span className="text-darkgray text-sm">Leaves at <span className={firstTransitLeg.start.estimated ? "text-green" : ""}>{format(new TZDate(firstTransitLeg.start.estimated?.time as number || firstTransitLeg.start.scheduledTime as number || 0), "HH:mm")}</span> from {firstTransitLeg.from.stop?.name} {firstTransitLeg.from.stop?.platformCode ? `pl. ${firstTransitLeg.from.stop?.platformCode}` : ""} {firstTransitLeg.from.stop?.code ? `(${firstTransitLeg.from.stop?.code})` : ""}</span>
+                                        : <span className="text-darkgray text-sm">Leave whenever</span>
+                                    }<span className="flex gap-1">
+                                        {(e?.node.waitingTime as number) > 600 && <IconItem className="gap-1! text-md text-nowrap" icon={{ children: <Hourglass width={16} height={16}></Hourglass> }}>{Math.round((e?.node.waitingTime as number) / 60)} min</IconItem>}
+                                        <IconItem className="gap-0! text-md text-nowrap" icon={{ children: <DirectionsWalk width={16} height={16}></DirectionsWalk> }}>{walkDistance >= 1100 ? Math.round(walkDistance / 100) / 10 + " km" : Math.round(walkDistance) + " m"}</IconItem>
+                                    </span>
+                                </div>
+                            </div>
+                            <Link prefetch={true} className="h-full" href={`/plan/${JSON.stringify(origin)}/${JSON.stringify(destination)}/i${i}/${isHsl ? "?hsl" : ""}`}>
+                            <div className="flex items-center justify-center border-l-3 h-full">
+                                    <Icon><ArrowForwardIosW700 height={32} width={32}></ArrowForwardIosW700></Icon>
+                            </div>
+                            </Link>
+                        </div>
+                    )
+                })}
+            </div>
+            <MapOverlay>
+                <Map data={data as NonNullable<PlanQueryQuery["planConnection"]>}
+                    destination={destination}
+                    origin={origin}
+                    selectedRoute={selectedRoute}
+                />
+            </MapOverlay>
+        </>
+    );
 }
 
-
-
-
-
-
-
+function getColorFromDelay(delay: number) {
+    if (delay > 900) {
+        return "text-red"
+    } else if (delay > 120) {
+        return "text-orange"
+    } else if (delay < -120) {
+        return "text-cyan"
+    } else {
+        return "text-green"
+    }
+}

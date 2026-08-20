@@ -7,7 +7,7 @@ import { Map, MapProvider, MapRef, Popup, PopupProps } from "@vis.gl/react-mapli
 import IconItem from './components/iconitem';
 import { IconTable, Mode } from './lib/digitransit';
 import { NotListedLocationW700 as NotListedLocation } from '@material-symbols-svg/react/icons/not-listed-location';
-import { redirect, usePathname } from 'next/navigation';
+import { redirect, usePathname, useRouter } from 'next/navigation';
 import { DirectionsBusW700 as DirectionsBus } from '@material-symbols-svg/react/icons/directions-bus';
 import { TramW700 as Tram } from '@material-symbols-svg/react/icons/tram';
 import { MetroW700 as Metro } from '@material-symbols-svg/react/icons/metro';
@@ -18,6 +18,8 @@ import { LngLat } from 'maplibre-gl';
 import { FocusContext } from './FocusContext';
 import Link from 'next/link';
 import { useIsHsl } from './hooks/useHsl';
+import Button from './components/button';
+import { ArrowBackIosW700 } from '@material-symbols-svg/react/icons/arrow-back-ios';
 
 type Slots = {
     overlay: HTMLDivElement | null
@@ -29,6 +31,7 @@ const SlotContext = createContext<Slots>({ overlay: null, sidebar: null })
 export function MapLayoutProvider({ children }: { children: React.ReactNode }) {
 
     const path = usePathname()
+    const router = useRouter()
 
     const [overlay, setOverlay] = useState<HTMLDivElement | null>(null)
     const [sidebar, setSidebar] = useState<HTMLDivElement | null>(null)
@@ -66,9 +69,11 @@ export function MapLayoutProvider({ children }: { children: React.ReactNode }) {
             <SlotContext.Provider value={{ overlay, sidebar }}>
                 <FocusContext.Provider value={{ setSidebarHidden }}>
                     <main className="w-full md:flex md:flex-row relative grow" style={{height: "calc(100vh - 5em)"}}>
-                        <div ref={setSidebar} className={`absolute ${focus ? "top-2/10" : "top-7/10"} ${focus ? "overflow-scroll" : "overflow-hidden!"} md:overflow-scroll! ${sidebarHidden && "top-10/10"} left-5 right-5 
-       z-100 bg-white rounded-t-2xl shadow-[0_0_10px_#0008] md:shadow-none p-4 flex flex-col gap-2
+                        <div className={`absolute ${focus ? "top-2/10" : "top-7/10"} ${focus ? "overflow-scroll" : "overflow-hidden!"} md:overflow-scroll! ${sidebarHidden && "top-10/10"} left-5 right-5 
+       z-100 bg-white rounded-t-2xl shadow-[0_0_10px_#0008] md:shadow-none p-4 flex flex-col
        md:static md:h-full! md:w-120 transition-all ease-in-out duration-1000 md:rounded-none overflow-scroll bottom-0 md:pb-4! pb-200`}>
+                            {path != "/" && <Button onClick={() => router.back()} className='w-10 h-10 overlay-hidden flex items-center justify-center mb-2 rounded-full!'><ArrowBackIosW700 className='-mr-[8px]'></ArrowBackIosW700></Button>}
+                            <div className="w-full h-full flex flex-col gap-2" ref={setSidebar}></div>
                         </div>
                         <div className='h-screen' style={{ position: 'relative', flex: 1 }}>
 

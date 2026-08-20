@@ -215,11 +215,13 @@ export function getColor(mode: number, stringMode?: string) {
                 case "TAXI": return '#0f8c0f'
                 case "CARPOOL": return '#0f8c0f'
                 case "SCOOTER": return '#0f8c0f'
-                case "FLEX": return '#111111'
-                case "FLEXIBLE": return '#111111'
-                case "LEG_SWITCH": return '#111111'
-                case "WALK": return '#111111'
+                case "FLEX": return '#777'
+                case "FLEXIBLE": return '#777'
+                case "LEG_SWITCH": return '#777'
+                case "WALK": return '#777'
+                default: return "#777"
             }
+            break
         default:
             console.log(mode)
             return '#ccc'

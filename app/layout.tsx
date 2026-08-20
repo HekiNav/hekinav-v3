@@ -35,12 +35,13 @@ export default function RootLayout({
     const configData = localStorage.getItem("hekinav:global-config")
     if (!configData) return
     try {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setConfig(JSON.parse(configData))
     } catch {
       return
     }
     setConfigFromLocalStorageGotten(true)
-  })
+  }, [configFromLocalStorageGotten])
 
   useEffect(() => {
     if (!window) return

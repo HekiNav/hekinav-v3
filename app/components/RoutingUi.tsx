@@ -141,8 +141,8 @@ export default function RoutingUi({iDateTime = new Date(), iDestination = null, 
     })
 
     function plan () {
-        if (!origin) return toast("Select a valid origin")
-        if (!destination) return toast("Select a valid destination")
+        if (!origin || !origin.properties) return toast("Select a valid origin")
+        if (!destination || !destination.properties) return toast("Select a valid destination")
         const dateTime = date.getTime() + time.getTime()
         console.log(new Date(dateTime))
         const start = {label: origin.text, location: {coordinate: {latitude: origin.properties?.lat, longitude: origin.properties?.lng}}}
