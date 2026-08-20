@@ -1,7 +1,7 @@
 "use client"
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { ConfigContext } from "@/app/HekinavConfig";
-import { PlanQueryQuery } from "./page.generated";
+import { PlanQueryQuery } from "./layout.generated";
 import { useMap } from "@vis.gl/react-maplibre";
 import RoutingUi from "@/app/components/RoutingUi";
 import { TZDate } from "@date-fns/tz";
@@ -20,18 +20,18 @@ import { useIsHsl } from "@/app/hooks/useHsl";
 
 
 export default function Content() {
-
-    const { config, setConfig } = useContext(ConfigContext)
     const stuff = useContext(PlanContext)
 
-    console.log(stuff)
+    useEffect(() => {
+        console.log(stuff)
+    }, [stuff])
 
     if (!stuff) return <>
         failed to load
     </>
+
     const { data, destination, origin } = stuff
 
-    const { default: map } = useMap()
 
     const isHsl = useIsHsl()
 

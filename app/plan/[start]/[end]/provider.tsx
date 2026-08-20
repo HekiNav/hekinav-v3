@@ -1,7 +1,7 @@
 "use client"
 
-import { PropsWithChildren, Suspense, createContext, use } from "react";
-import { PlanQueryQuery, PlanQueryQueryVariables } from "./page.generated";
+import { PropsWithChildren, Suspense, createContext, use, useEffect } from "react";
+import { PlanQueryQuery, PlanQueryQueryVariables } from "./layout.generated";
 import { getPlan } from "./layout";
 import Loading from "./loading";
 
@@ -21,6 +21,9 @@ export function PlanData({ children, value }: PropsWithChildren & { value: PlanQ
     if (!data) return (
         "failed to load"
     )
+    useEffect(() => {
+        console.log(data)
+    }, [data])
     console.log(data)
     return (
         <PlanContext value={{ ...value, data: data }}>

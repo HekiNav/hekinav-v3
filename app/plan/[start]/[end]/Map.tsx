@@ -1,6 +1,6 @@
 "use client"
 import { useMap } from "@vis.gl/react-maplibre"
-import { PlanQueryQuery } from "./page.generated"
+import { PlanQueryQuery } from "./layout.generated"
 import { useEffect } from "react"
 import { GeoJSONSource, LngLatBounds } from "maplibre-gl"
 import { getColor } from "@/app/lib/digitransit"
@@ -243,8 +243,11 @@ function generateGeoJSON(origin: PlanLabeledLocationInput, destination: PlanLabe
       return e.flatMap((l, j) => {
         const leg = edge?.node.legs![j]
         const stopLabels = []
-        if (selected && leg && (j == legs?.findIndex(l => l?.transitLeg) || leg?.trip?.route.type == 702)) stopLabels.push(leg.from)
-        if (selected && leg && leg.transitLeg) stopLabels.push(leg.to)
+        //if (selected && leg && (j == legs?.findIndex(l => l?.transitLeg) || leg?.trip?.route.type == 702)) stopLabels.push(leg.from)
+        if (selected && leg && leg.transitLeg) {
+          stopLabels.push(leg.to)
+          stopLabels.push(leg.from)
+        }
         return [
           ...stopLabels.map<GeoJSON.Feature<GeoJSON.Point>>(l => ({
             type: "Feature",

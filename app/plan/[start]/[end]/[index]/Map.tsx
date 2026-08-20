@@ -5,12 +5,10 @@ import { GeoJSONSource, LngLatBounds } from "maplibre-gl"
 import { getColor } from "@/app/lib/digitransit"
 import { LocationType, Mode, PlanLabeledLocationInput, RealtimeState, TransitMode, ViaLocationType } from "@/app/lib/__generated__/graphql"
 import polyline from "@mapbox/polyline"
-import { redirect, useRouter } from "next/navigation"
-import { PlanQueryQuery } from "../page.generated"
+import { PlanQueryQuery } from "../layout.generated"
 
 export function Map({ data, selectedRoute, destination, origin }: { data: NonNullable<PlanQueryQuery["planConnection"]>, selectedRoute: number, destination: PlanLabeledLocationInput, origin: PlanLabeledLocationInput }) {
   const { default: map } = useMap()
-  const router = useRouter()
   useEffect(() => {
     if (!map) return
     const m = map.getMap()
@@ -216,8 +214,11 @@ function generateGeoJSON(origin: PlanLabeledLocationInput, destination: PlanLabe
       const legs = data.edges![selectedRoute]?.node.legs
       const leg = legs![i]
       const stopLabels = []
-      if (leg && (i == legs?.findIndex(l => l?.transitLeg) || leg?.trip?.route.type == 702)) stopLabels.push(leg.from)
-      if (leg && leg.transitLeg) stopLabels.push(leg.to)
+      //if (leg && (i == legs?.findIndex(l => l?.transitLeg) || leg?.trip?.route.type == 702)) stopLabels.push(leg.from)
+      if (leg && leg.transitLeg) {
+        stopLabels.push(leg.to)
+        stopLabels.push(leg.from)
+      }
       return [
         ...stopLabels.map<GeoJSON.Feature<GeoJSON.Point>>(l => ({
           type: "Feature",

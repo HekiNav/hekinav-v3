@@ -1,6 +1,6 @@
 "use server"
 import { ApolloClient, HttpLink, InMemoryCache, TypedDocumentNode, gql } from "@apollo/client";
-import { PlanQueryQuery, PlanQueryQueryVariables } from "./page.generated";
+import { PlanQueryQuery, PlanQueryQueryVariables } from "./layout.generated";
 import { Sidebar } from "@/app/mapcontext";
 import { Metadata, ResolvingMetadata } from "next";
 import Context from "./provider";
@@ -32,6 +32,7 @@ const GET_PLAN:
           duration
           numberOfTransfers
           legs {
+            headsign
             transitLeg
             interlineWithPreviousLeg
             duration
@@ -87,6 +88,7 @@ const GET_PLAN:
               }
               stop {
                 name
+                desc
                 platformCode
                 code
                 gtfsId
@@ -113,6 +115,7 @@ const GET_PLAN:
                 scheduledTime
               }
               stop {
+                desc
                 name
                 platformCode
                 code
@@ -221,6 +224,7 @@ export default async function StopOrStation({
 
 export async function getPlan(origin: PlanLabeledLocationInput, destination: PlanLabeledLocationInput, isHsl: boolean) {
   if (!origin || !destination) {
+    console.log("NO ORIGIN OR DESTINATION")
     return null
   }
 
@@ -238,11 +242,14 @@ export async function getPlan(origin: PlanLabeledLocationInput, destination: Pla
   })
 
   if (result.error || !result.data) {
+    console.log(result.error)
     return null
   }
   const data = result.data.planConnection
-  if (!data) return null
-
+  if (!data) {
+    console.log("NO DATA")
+    return null
+  }
   return data
 }
 
