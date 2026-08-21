@@ -22,7 +22,7 @@ export function Map({ data, selectedRoute, destination, origin }: { data: NonNul
         polyline.decode(l?.legGeometry?.points as string).map<[number, number]>(([lat, lng]) => [lng, lat])
       ) || []
       const bounds = lines.length > 0 && lines.flat().reduce((bounds, coord) => bounds.extend(coord), new LngLatBounds(lines[0][0], lines[0][1]))
-      if (bounds) m.fitBounds(bounds, { padding: 20 })
+      if (bounds) m.fitBounds(bounds, { padding: 40 })
 
 
 

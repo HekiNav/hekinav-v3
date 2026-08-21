@@ -20,6 +20,8 @@ import Link from 'next/link';
 import { useIsHsl } from './hooks/useHsl';
 import Button from './components/button';
 import { ArrowBackIosW700 } from '@material-symbols-svg/react/icons/arrow-back-ios';
+import { Connector } from "mqtt-react-hooks";
+import Status from './mqttstatus';
 
 type Slots = {
     overlay: HTMLDivElement | null
@@ -48,7 +50,7 @@ export function MapLayoutProvider({ children }: { children: React.ReactNode }) {
 
     const focusSidebar = () => !map.current?.isMoving() && setFocus(true)
     const blurSidebar = () => setFocus(false)
-    
+
 
     useEffect(() => {
         if (!sidebar) return
@@ -66,31 +68,34 @@ export function MapLayoutProvider({ children }: { children: React.ReactNode }) {
 
     return (
         <MapProvider>
-            <SlotContext.Provider value={{ overlay, sidebar }}>
-                <FocusContext.Provider value={{ setSidebarHidden }}>
-                    <main className="w-full md:flex md:flex-row relative grow" style={{height: "calc(100vh - 5em)"}}>
-                        <div className={`absolute ${focus ? "top-2/10" : "top-7/10"} ${focus ? "overflow-scroll" : "overflow-hidden!"} md:overflow-scroll! ${sidebarHidden && "top-10/10"} left-5 right-5 
+            <Connector brokerUrl={isHsl ? "wss://mqtt.hsl.fi:443/" : `wss://mqtt.digitransit.fi/?digitransit-subscription-key=bbc7a56df1674c59822889b1bc84e7ad`}>
+                <Status />
+                <SlotContext.Provider value={{ overlay, sidebar }}>
+                    <FocusContext.Provider value={{ setSidebarHidden }}>
+                        <main className="w-full md:flex md:flex-row relative grow" style={{ height: "calc(100vh - 5em)" }}>
+                            <div className={`absolute ${focus ? "top-2/10" : "top-7/10"} ${focus ? "overflow-scroll" : "overflow-hidden!"} md:overflow-scroll! ${sidebarHidden && "top-10/10"} left-5 right-5 
        z-100 bg-white rounded-t-2xl shadow-[0_0_10px_#0008] md:shadow-none p-4 flex flex-col
        md:static md:h-full! md:w-120 transition-all ease-in-out duration-1000 md:rounded-none overflow-scroll bottom-0 md:pb-4! pb-200`}>
-                            {path != "/" && <Button onClick={() => router.back()} className='w-10 h-10 overlay-hidden absolute flex items-center justify-center mb-2 rounded-full!'><ArrowBackIosW700 className='-mr-[8px]'></ArrowBackIosW700></Button>}
-                            <div className="w-full h-full flex flex-col gap-2" ref={setSidebar}></div>
-                        </div>
-                        <div className='h-screen' style={{ position: 'relative', flex: 1 }}>
+                                {path != "/" && <Button onClick={() => router.back()} className='w-10 h-10 overlay-hidden absolute z-2000 flex items-center justify-center mb-2 rounded-full!'><ArrowBackIosW700 className='-mr-[8px]'></ArrowBackIosW700></Button>}
+                                <div className="w-full h-full flex flex-col gap-2" ref={setSidebar}></div>
+                            </div>
+                            <div className='h-screen' style={{ position: 'relative', flex: 1 }}>
 
-                            <MapContainer
-                                isHsl={isHsl}
-                                map={map}
-                                setFocus={setFocus}
-                                setOverlay={setOverlay}
-                                setPopup={setPopup}
-                                popup={popup}
-                            />
+                                <MapContainer
+                                    isHsl={isHsl}
+                                    map={map}
+                                    setFocus={setFocus}
+                                    setOverlay={setOverlay}
+                                    setPopup={setPopup}
+                                    popup={popup}
+                                />
 
-                        </div>
-                    </main>
-                    {children}
-                </FocusContext.Provider>
-            </SlotContext.Provider>
+                            </div>
+                        </main>
+                        {children}
+                    </FocusContext.Provider>
+                </SlotContext.Provider>
+            </Connector>
         </MapProvider>
     )
 }

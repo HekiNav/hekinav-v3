@@ -4,6 +4,20 @@ The third generation of the HekiNav routing UI. This version has a new look, mor
 
 View the production version at [routing.hekinav.dev](https://routing.hekinav.dev/)
 
+## Two modes
+
+The routing has two different modes: HSL and Finland.
+
+### Feature comparison
+
+| Feature                                        | HSL             | Finland                  |
+|------------------------------------------------|-----------------|--------------------------|
+| Region                                         | Helsinki Region | All of Finland & Estonia |
+| Real-time position                             | ✅              | ❌                       |
+| A more consistent and polished user experience | ✅              | ❌                       |
+
+The reason for these differences is that as a single coordinated organization, HSL's data has a standardized fromat, unlike the combined Finland dataset. For any trips in the HSL region, it is recommended to use the HSL mode. HSL also produces good quality real-time vehicle position data.
+
 ## Usage
 
 When running, it is recommended to update /public/map_style.json and /public/map_style_hsl.json to use your own API keys for tiles and your own object storage for sprites. My keys will not work on sites other than mine.

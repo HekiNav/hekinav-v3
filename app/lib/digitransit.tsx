@@ -102,6 +102,13 @@ export const IconTable = {
     "SNOW_AND_ICE": (<Snowflake className="text-cyan border-cyan"></Snowflake>),
 }
 
+export interface VPos {
+    lat: number
+    lng: number
+    id: string
+    name: string
+}
+
 export const IconTableLarge = {
     "BUS-EXPRESS": (<DirectionsBus width={32} height={32} className="text-darkblue border-darkblue"></DirectionsBus>),
     "COACH": (<DirectionsBus width={32} height={32} className="text-darkblue border-darkblue"></DirectionsBus>),

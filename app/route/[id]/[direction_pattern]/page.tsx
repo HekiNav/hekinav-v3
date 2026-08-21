@@ -234,7 +234,7 @@ export default async function Route({
           })
         }
       </div>
-      <Map data={data} />
+      <Map data={data} routeId={id} direction={Number(direction)} />
     </Sidebar>
   )
 }
