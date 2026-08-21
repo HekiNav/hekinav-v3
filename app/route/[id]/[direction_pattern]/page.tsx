@@ -198,7 +198,7 @@ export default async function Route({
 
   return (
     <Sidebar>
-      <span className="flex justify-start items-center gap-2 mb-4">
+      <span className="flex justify-start items-center gap-2 mb-2 ml-14 mt-1">
         <Label className={`text-2xl w-min ${getRouteColor("bg", data.route.type || -1, data.route.mode || "")} text-white font-bold`}>{data.route.shortName || data.route.longName}</Label>
         <Pattern data={data}></Pattern> {(patternOptions.length == 1 && firstPattern) && <Link className="decoration-none ml-auto" href={`/route/${id}/${firstPattern.directionId}-${firstPattern.code.split(":")[3]}/${isHsl ? "?hsl" : ""}`}><Icon boxed><SyncAlt></SyncAlt></Icon></Link>}
       </span>

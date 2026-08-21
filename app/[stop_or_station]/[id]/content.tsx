@@ -1,5 +1,5 @@
 "use client"
-import { IconTable, getRouteColor } from "@/app/lib/digitransit";
+import { IconTableLarge, getRouteColor } from "@/app/lib/digitransit";
 import Label from "@/app/components/label";
 import IconItem from "@/app/components/iconitem";
 import Date from "../../components/Date";
@@ -37,7 +37,7 @@ export default function Content({ data,
 
     return (
         <>
-            <IconItem icon={{ boxed: stop_or_station == "station", children: IconTable[data.vehicleMode || "BUS"] }} className="text-lg"><span className="text-2xl">{data.name}</span> {data.platformCode && <Label className="bg-gray">{data.platformCode}</Label>}</IconItem>
+            <IconItem icon={{ boxed: stop_or_station == "station", children: IconTableLarge[data.vehicleMode || "BUS"],}} className="ml-12 mt-1"><span className="text-3xl">{data.name}</span> {data.platformCode && <Label className="bg-gray">{data.platformCode}</Label>}</IconItem>
             <div className="text-sm">{data.desc && <Label className="bg-gray">{data.desc}</Label>} {data.code && <Label className="bg-gray">{data.code}</Label>}</div>
             <h2 className="text-xl flex justify-between"><span>Departures</span><span className="flex flex-nowrap text-lg">Advanced<Toggle state={config.advancedDepartures} setState={(value) => setConfig(value,["advancedDepartures"])}></Toggle></span></h2>
             {data.stoptimesWithoutPatterns && data.stoptimesWithoutPatterns.length ? <table><tbody>

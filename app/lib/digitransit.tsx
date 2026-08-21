@@ -102,6 +102,34 @@ export const IconTable = {
     "SNOW_AND_ICE": (<Snowflake className="text-cyan border-cyan"></Snowflake>),
 }
 
+export const IconTableLarge = {
+    "BUS-EXPRESS": (<DirectionsBus width={32} height={32} className="text-darkblue border-darkblue"></DirectionsBus>),
+    "COACH": (<DirectionsBus width={32} height={32} className="text-darkblue border-darkblue"></DirectionsBus>),
+    "SPEEDTRAM": (<Tram width={32} height={32} className="text-turqoise border-turqoise"></Tram>),
+    "BUS": (<DirectionsBus width={32} height={32} className="text-blue border-blue"></DirectionsBus>),
+    "TRANSIT": (<DirectionsBus width={32} height={32} className="text-blue border-blue"></DirectionsBus>),
+    "RAIL": (<Train width={32} height={32} className="text-purple border-purple"></Train>),
+    "SUBWAY": (<Metro width={32} height={32} className="text-orange border-orange"></Metro>),
+    "TRAM": (<Tram width={32} height={32} className="text-green border-green"></Tram>),
+    "TROLLEYBUS": (<Tram width={32} height={32} className="text-green border-green"></Tram>),
+    "FERRY": (<DirectionsBoat width={32} height={32} className="text-cyan border-cyan"></DirectionsBoat>),
+    "AIRPLANE": (<Flight width={32} height={32} className="text-darkblue border-darkblue"></Flight>),
+    "BICYCLE": (<PedalBike width={32} height={32} className="text-yellow border-yellow"></PedalBike>),
+    "CABLE_CAR": (<GondolaLift width={32} height={32} className="text-green border-green"></GondolaLift>),
+    "GONDOLA": (<GondolaLift width={32} height={32} className="text-green border-green"></GondolaLift>),
+    "FUNICULAR": (<Funicular width={32} height={32} className="text-green border-green"></Funicular>),
+    "MONORAIL": (<Monorail width={32} height={32} className="text-green border-green"></Monorail>),
+    "CAR": (<DirectionsCar width={32} height={32} className="text-green border-green"></DirectionsCar>),
+    "TAXI": (<LocalTaxi width={32} height={32} className="text-green border-green"></LocalTaxi>),
+    "CARPOOL": (<DirectionsCar width={32} height={32} className="text-green border-green"></DirectionsCar>),
+    "SCOOTER": (<Scooter width={32} height={32} className="text-green border-green"></Scooter>),
+    "FLEX": (<QuestionMark width={32} height={32} className="text-black border-black"></QuestionMark>),
+    "FLEXIBLE": (<QuestionMark width={32} height={32} className="text-black border-black"></QuestionMark>),
+    "LEG_SWITCH": (<QuestionMark width={32} height={32} className="text-black border-black"></QuestionMark>),
+    "WALK": (<DirectionsWalk width={32} height={32} className="text-black border-black"></DirectionsWalk>),
+    "SNOW_AND_ICE": (<Snowflake width={32} height={32} className="text-cyan border-cyan"></Snowflake>),
+}
+
 export const gtfsIdRegex = /^(.*)\:(\d|[A-Z]|\Ä|\Ö|\Å|_|-)+$/
 
 export function getRouteColor(type: "bg" | "border", mode: number, stringMode?: string) {

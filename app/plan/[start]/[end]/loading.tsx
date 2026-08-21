@@ -33,6 +33,7 @@ function SkeletonItinerary() {
     const legs: FakeLeg[] = []
 
     while (legs.reduce((p, c) => p + c.duration, 0) < 200) {
+        // eslint-disable-next-line react-hooks/purity
         legs.push({ duration: (legs[legs.length - 1] || { duration: 200 }).duration < 30 ? 20 + Math.random() * 150 : 5 + Math.random() * 40 })
     }
 

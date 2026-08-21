@@ -34,6 +34,7 @@ export default function Context({ children }: PropsWithChildren) {
     const origin = parseParam(start)
     const destination = parseParam(end)
 
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const planPromise = useMemo(() => getPlan(origin, destination, isHsl), [a])
 
     return (<Suspense fallback={<Loading></Loading>}><PlanData destination={destination} origin={origin} promise={planPromise}>{children}</PlanData></Suspense>)
