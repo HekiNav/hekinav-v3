@@ -5,7 +5,7 @@ import { GeoJSONSource, LngLatBounds } from "maplibre-gl"
 import { getColor } from "@/app/lib/digitransit"
 import { LocationType, Mode, PlanLabeledLocationInput, RealtimeState, TransitMode, ViaLocationType } from "@/app/lib/__generated__/graphql"
 import polyline from "@mapbox/polyline"
-import { PlanQueryQuery } from "../layout.generated"
+import { PlanQueryQuery } from "../../layout.generated"
 
 export function Map({ data, selectedRoute, destination, origin }: { data: NonNullable<PlanQueryQuery["planConnection"]>, selectedRoute: number, destination: PlanLabeledLocationInput, origin: PlanLabeledLocationInput }) {
   const { default: map } = useMap()

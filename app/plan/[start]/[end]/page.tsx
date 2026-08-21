@@ -11,7 +11,7 @@ import { DirectionsWalkW700 as DirectionsWalk } from "@material-symbols-svg/reac
 import { HourglassW700 as Hourglass } from "@material-symbols-svg/react/hourglass";
 import { getRouteColor } from "@/app/lib/digitransit";
 import Icon from "@/app/components/icon";
-import { MapOverlay } from "@/app/mapcontext";
+import { MapOverlay, Sidebar } from "@/app/mapcontext";
 import { Map } from "./Map";
 import { PlanContext } from "./provider";
 import { ArrowForwardIosW700 } from "@material-symbols-svg/react/icons/arrow-forward-ios";
@@ -21,10 +21,10 @@ import { useIsHsl } from "@/app/hooks/useHsl";
 
 export default function Content() {
     const stuff = useContext(PlanContext)
+    const isHsl = useIsHsl()
 
-    useEffect(() => {
-        console.log(stuff)
-    }, [stuff])
+
+    const [selectedRoute, setSelectedRoute] = useState<number | null>(null)
 
     if (!stuff) return <>
         failed to load
@@ -33,13 +33,14 @@ export default function Content() {
     const { data, destination, origin } = stuff
 
 
-    const isHsl = useIsHsl()
 
-
-    const [selectedRoute, setSelectedRoute] = useState<number | null>(null)
 
     return (
         <>
+            <Sidebar>
+                <h2 className="m-0 w-full text-center text-3xl my-1">Routing options</h2>
+            </Sidebar>
+
             <RoutingUi iOrigin={{ icon: <></>, id: "origin", text: origin.label || "origin", properties: { lat: origin.location.coordinate?.latitude as number || 0, lng: origin.location.coordinate?.longitude as number || 0 } }} iDestination={{ icon: <></>, id: "origin", text: destination.label || "origin", properties: { lat: destination.location.coordinate?.latitude as number || 0, lng: destination.location.coordinate?.longitude as number || 0 } }}></RoutingUi>
             <div className="flex flex-col gap-2">
                 {data.edges?.map((e, i) => {
@@ -68,10 +69,10 @@ export default function Content() {
                                     </span>
                                 </div>
                             </div>
-                            <Link prefetch={true} className="h-full" href={`/plan/${JSON.stringify(origin)}/${JSON.stringify(destination)}/i${i}/${isHsl ? "?hsl" : ""}`}>
-                            <div className="flex items-center justify-center border-l-3 h-full">
+                            <Link prefetch={true} className="h-full" href={`/plan/${JSON.stringify(origin)}/${JSON.stringify(destination)}/i/i${i}/${isHsl ? "?hsl" : ""}`}>
+                                <div className="flex items-center justify-center border-l-3 h-full">
                                     <Icon><ArrowForwardIosW700 height={32} width={32}></ArrowForwardIosW700></Icon>
-                            </div>
+                                </div>
                             </Link>
                         </div>
                     )

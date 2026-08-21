@@ -1,6 +1,7 @@
 "use client"
 import RoutingUi from "@/app/components/RoutingUi";
 import Icon from "@/app/components/icon";
+import { Sidebar } from "@/app/mapcontext";
 import { ArrowForwardIosW700 } from "@material-symbols-svg/react/icons/arrow-forward-ios";
 import Skeleton from "react-loading-skeleton";
 
@@ -8,6 +9,9 @@ import Skeleton from "react-loading-skeleton";
 export default function Loading() {
     return (
         <>
+            <Sidebar>
+                <h2 className="m-0 w-full text-center text-3xl my-1">Routing options</h2>
+            </Sidebar>
             <RoutingUi iOrigin={{ icon: <></>, id: "origin", text: "Loading..." }} iDestination={{ icon: <></>, id: "origin", text: "Loading..." }}></RoutingUi>
             <div className="flex flex-col gap-2">
                 <SkeletonItinerary></SkeletonItinerary>
@@ -29,7 +33,7 @@ function SkeletonItinerary() {
     const legs: FakeLeg[] = []
 
     while (legs.reduce((p, c) => p + c.duration, 0) < 200) {
-        legs.push({ duration: (legs[legs.length - 1] || {duration: 200}).duration < 30 ? 20 + Math.random() * 150 : 5 + Math.random() * 40 })
+        legs.push({ duration: (legs[legs.length - 1] || { duration: 200 }).duration < 30 ? 20 + Math.random() * 150 : 5 + Math.random() * 40 })
     }
 
 

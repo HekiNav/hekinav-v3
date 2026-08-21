@@ -1,14 +1,14 @@
 "use server"
-import { ApolloClient, HttpLink, InMemoryCache, TypedDocumentNode, gql } from "@apollo/client";
+import { TypedDocumentNode, gql } from "@apollo/client";
 import { PlanQueryQuery, PlanQueryQueryVariables } from "./layout.generated";
 import { Sidebar } from "@/app/mapcontext";
 import { Metadata, ResolvingMetadata } from "next";
 import Context from "./provider";
 import { headers } from "next/headers";
-import { PlanLabeledLocationInput } from "@/app/lib/__generated__/graphql";
+import { getPlan } from "./getPlan";
 
 
-const GET_PLAN:
+export const GET_PLAN:
   TypedDocumentNode<PlanQueryQuery, PlanQueryQueryVariables> =
   gql`
   query PlanQuery($origin: PlanLabeledLocationInput!, $destination: PlanLabeledLocationInput!) {
@@ -150,9 +150,6 @@ export async function generateMetadata({
 ): Promise<Metadata> {
   const { end, start } = await params
 
-  const h = await headers()
-
-  const isHsl = h.get("hsl") != undefined
   function parseParam(t: string) {
     try {
       return JSON.parse(decodeURIComponent(t))
@@ -174,45 +171,17 @@ export async function generateMetadata({
   }
 }
 
-export default async function StopOrStation({
-  params,
-  searchParams,
+export default async function PlanLayout({
   children,
 }: {
-  params: Promise<{
-    start: string
-    end: string
-  }>,
-  searchParams: SearchParams;
   children: React.ReactNode;
 }) {
-  const { start, end } = await params
-
-  const h = await headers()
-  const isHsl = h.get("hsl") != undefined
-
-
-  function parseParam(t: string) {
-    try {
-      return JSON.parse(decodeURIComponent(t))
-    } catch {
-      return null
-    }
-  }
-  const origin = parseParam(start)
-  const destination = parseParam(end)
-
-  const planPromise = getPlan(origin, destination, isHsl)
 
   return (
     <>
       <Sidebar>
 
         <Context
-          destination={destination}
-          origin={origin}
-          isHsl={isHsl}
-          planPromise={planPromise}
         >
           {children}
         </Context>
@@ -221,39 +190,5 @@ export default async function StopOrStation({
     </>
   );
 }
-
-export async function getPlan(origin: PlanLabeledLocationInput, destination: PlanLabeledLocationInput, isHsl: boolean) {
-  if (!origin || !destination) {
-    console.log("NO ORIGIN OR DESTINATION")
-    return null
-  }
-
-  const client = new ApolloClient({
-    link: new HttpLink({ uri: `https://api.digitransit.fi/routing/v2/${isHsl ? "hsl" : "finland"}/gtfs/v1/`, headers: { "digitransit-subscription-key": process.env.DIGITRANSIT_KEY || "" } }),
-    cache: new InMemoryCache(),
-  });
-
-  const result = await client.query({
-    query: GET_PLAN,
-    variables: {
-      destination,
-      origin
-    }
-  })
-
-  if (result.error || !result.data) {
-    console.log(result.error)
-    return null
-  }
-  const data = result.data.planConnection
-  if (!data) {
-    console.log("NO DATA")
-    return null
-  }
-  return data
-}
-
-
-
 
 

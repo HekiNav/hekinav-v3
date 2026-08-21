@@ -72,7 +72,7 @@ export function MapLayoutProvider({ children }: { children: React.ReactNode }) {
                         <div className={`absolute ${focus ? "top-2/10" : "top-7/10"} ${focus ? "overflow-scroll" : "overflow-hidden!"} md:overflow-scroll! ${sidebarHidden && "top-10/10"} left-5 right-5 
        z-100 bg-white rounded-t-2xl shadow-[0_0_10px_#0008] md:shadow-none p-4 flex flex-col
        md:static md:h-full! md:w-120 transition-all ease-in-out duration-1000 md:rounded-none overflow-scroll bottom-0 md:pb-4! pb-200`}>
-                            {path != "/" && <Button onClick={() => router.back()} className='w-10 h-10 overlay-hidden flex items-center justify-center mb-2 rounded-full!'><ArrowBackIosW700 className='-mr-[8px]'></ArrowBackIosW700></Button>}
+                            {path != "/" && <Button onClick={() => router.back()} className='w-10 h-10 overlay-hidden absolute flex items-center justify-center mb-2 rounded-full!'><ArrowBackIosW700 className='-mr-[8px]'></ArrowBackIosW700></Button>}
                             <div className="w-full h-full flex flex-col gap-2" ref={setSidebar}></div>
                         </div>
                         <div className='h-screen' style={{ position: 'relative', flex: 1 }}>
