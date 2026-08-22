@@ -2,10 +2,8 @@
 import { TypedDocumentNode, gql } from "@apollo/client";
 import { PlanQueryQuery, PlanQueryQueryVariables } from "./layout.generated";
 import { Sidebar } from "@/app/mapcontext";
-import { Metadata, ResolvingMetadata } from "next";
+import { Metadata } from "next";
 import Context from "./provider";
-import { headers } from "next/headers";
-import { getPlan } from "./getPlan";
 
 
 export const GET_PLAN:
@@ -55,6 +53,10 @@ export const GET_PLAN:
               scheduledTime
             }
             trip {
+              departureStoptime {
+                scheduledDeparture
+              }
+              gtfsId
               pattern{
                 code
                 directionId
@@ -137,17 +139,13 @@ export const GET_PLAN:
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 
 export async function generateMetadata({
-  params,
-  searchParams
-}: {
+  params}: {
   params: Promise<{
     start: string
     end: string
   }>,
   searchParams: SearchParams;
-},
-  parent: ResolvingMetadata
-): Promise<Metadata> {
+}): Promise<Metadata> {
   const { end, start } = await params
 
   function parseParam(t: string) {
@@ -173,15 +171,23 @@ export async function generateMetadata({
 
 export default async function PlanLayout({
   children,
+  params
 }: {
   children: React.ReactNode;
+  params: Promise<{
+    start: string
+    end: string
+  }>,
 }) {
+  const { end, start } = await params
 
   return (
     <>
       <Sidebar>
 
         <Context
+        end={end}
+        start={start}
         >
           {children}
         </Context>

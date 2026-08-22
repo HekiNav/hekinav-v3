@@ -26,6 +26,7 @@ import { AdvancedRoutingOptions, ConfigContext, RoutingNode, RoutingOptionsUiCon
 import Toggle from './toggle';
 import { useRouter } from 'next/navigation';
 import Dropdown from './dropdown';
+import { SyncAltW700 } from '@material-symbols-svg/react/icons/sync-alt';
 
 
 const timeOptions: Suggestion<object>[] = []
@@ -144,7 +145,7 @@ export default function RoutingUi({iDateTime = new Date(), iDestination = null, 
         if (!origin || !origin.properties) return toast("Select a valid origin")
         if (!destination || !destination.properties) return toast("Select a valid destination")
         const dateTime = date.getTime() + time.getTime()
-        console.log(new Date(dateTime))
+        console.log(new Date(dateTime), origin, destination)
         const start = {label: origin.text, location: {coordinate: {latitude: origin.properties?.lat, longitude: origin.properties?.lng}}}
         const end = {label: destination.text, location: {coordinate: {latitude: destination.properties?.lat, longitude: destination.properties?.lng}}}
         router.push(`/plan/${JSON.stringify(start)}/${JSON.stringify(end)}/${isHsl ? "?hsl" : ""}`)
@@ -193,8 +194,14 @@ export default function RoutingUi({iDateTime = new Date(), iDestination = null, 
                 </div>
             </Modal>
             <Sidebar>
-                <InputField initialValue={origin?.text} suggestionFunction={(t) => placeSearch(t, map?.getCenter() || new LngLat(24.94, 60.18), isHsl)} onlySuggestions placeholder='Origin' name='origin' onValueSet={(_t, v) => setOrigin(typeof v == "string" ? null : v)} icon={<LocationOn className='text-blue'></LocationOn>}></InputField>
+                <div className='flex flex-row gap-2'>
+                    <InputField initialValue={origin?.text} suggestionFunction={(t) => placeSearch(t, map?.getCenter() || new LngLat(24.94, 60.18), isHsl)} onlySuggestions placeholder='Origin' name='origin' onValueSet={(_t, v) => setOrigin(typeof v == "string" ? null : v)} icon={<LocationOn className='text-blue'></LocationOn>}></InputField>
+                    <Button onClick={() => {const tempOrigin = origin; setOrigin(destination); setDestination(tempOrigin)}} className="w-min text-center text-darkgray h-min p-1.5!"><Icon><SyncAltW700 style={{transform: "rotate(90deg)"}} height={28} width={28}></SyncAltW700></Icon></Button>
+                    
+                </div>
+                <div className='flex flex-row gap-2'>
                 <InputField initialValue={destination?.text} suggestionFunction={(t) => placeSearch(t, map?.getCenter() || new LngLat(24.94, 60.18), isHsl)} onlySuggestions placeholder='Destination' name='destination' onValueSet={(_t, v) => setDestination(typeof v == "string" ? null : v)} icon={<LocationOn className='text-red'></LocationOn>}></InputField>
+                </div>
                 <div className="flex flex-row gap-2">
                     <Button className="w-70 text-center h-min" onClick={() => setDepArr(depArr == "dep" ? "arr" : "dep")}>{depArr == "dep" ? "Departure" : "Arrival"}</Button>
                     <InputField className="h-min" name="date" initialValue={"Today"} suggestionFunction={async () => dateOptions} onlySuggestions onValueSet={(_n, v) => typeof v != "string" && setDate(new TZDate(v.id))} icon={<CalendarToday></CalendarToday>}></InputField>

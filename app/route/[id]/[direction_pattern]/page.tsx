@@ -94,9 +94,7 @@ export async function generateMetadata({
     id: string
   }>,
   searchParams: SearchParams;
-},
-  parent: ResolvingMetadata
-): Promise<Metadata> {
+}): Promise<Metadata> {
   const { id, direction_pattern } = await params
 
   const [direction, pattern] = direction_pattern.split("-")

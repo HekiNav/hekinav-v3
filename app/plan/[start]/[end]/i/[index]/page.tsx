@@ -10,6 +10,8 @@ import Image from "next/image";
 import Label from "@/app/components/label";
 import { format } from "date-fns-tz";
 import { TZDate } from "@date-fns/tz";
+import Link from "next/link";
+import { useIsHsl } from "@/app/hooks/useHsl";
 
 
 export default function Content() {
@@ -17,6 +19,7 @@ export default function Content() {
     const stuff = useContext(PlanContext)
 
     const { index } = useParams()
+    const isHsl = useIsHsl()
 
     const selectedRoute = Number(index?.slice(1, index.length))
 
@@ -64,10 +67,10 @@ export default function Content() {
                                     </div>
                                     </>)}
                                 </div>
-                                {l?.transitLeg ? <div className="p-2 flex flex-col font-medium my-2">
+                                {l?.transitLeg ? <Link className="decoration-none" href={`/stop/${l.from.stop?.gtfsId}/${isHsl ? "?hsl" : ""}`}><div className="p-2 flex flex-col font-medium my-2">
                                     <div><span className="text-lg font-medium">{l.from.stop?.name}</span> {l.from.stop?.platformCode && <Label className="w-min bg-gray">pl. {l.from.stop?.platformCode}</Label>}</div>
                                     <div><span className="text-sm">{l.from.stop?.desc}</span> {l.from.stop?.code && <Label className="text-xs bg-gray">{l.from.stop?.code}</Label>}</div>
-                                </div> : <div className="p-2 flex flex-col font-medium my-2">
+                                </div></Link> : <div className="p-2 flex flex-col font-medium my-2">
                                     <div><span className="text-lg font-medium">{l?.from.name}</span></div>
                                 </div>}
                             </div>}
@@ -81,7 +84,7 @@ export default function Content() {
                                 </div>
                                 <div className="p-2 flex flex-row gap-2 font-medium items-center h-full">
                                     {l?.transitLeg ? <>
-                                        <Label className={`font-bold text-white ${getRouteColor("bg", route?.type || -1, route?.mode || "")}`}>{route?.shortName || route?.longName || ""}</Label> {l.headsign}
+                                        <Link className="decoration-none" href={`/route/${l.trip?.route.gtfsId}/${l.trip?.pattern?.code.split(":")[2] || ""}-${l.trip?.pattern?.code.split(":")[3] || ""}/${isHsl ? "?hsl" : ""}`}><Label className={`font-bold text-white ${getRouteColor("bg", route?.type || -1, route?.mode || "")}`}>{route?.shortName || route?.longName || ""}</Label> {l.headsign}</Link>
                                     </> : <>
                                         Walk {walkDistance >= 1100 ? Math.round(walkDistance / 100) / 10 + " km " : Math.round(walkDistance) + " m "}({duration >= 3600 && `${Math.floor(duration / 3600)} h `}{Math.floor(duration / 60 % 60)} min)
                                     </>}
@@ -100,10 +103,10 @@ export default function Content() {
                                         <div className={`${getRouteColor("border", route?.type || -1, route?.mode || "")} border-[.25rem] bg-white h-6 w-6 rounded-full z-100`}></div>
                                     </div></>)}
                                 </div>
-                                {l?.transitLeg ? <div className="p-2 flex flex-col font-medium my-2">
+                                {l?.transitLeg ? <Link className="decoration-none" href={`/stop/${l.to.stop?.gtfsId}/${isHsl ? "?hsl" : ""}`}><div className="p-2 flex flex-col font-medium my-2">
                                     <div><span className="text-lg font-medium">{l.to.stop?.name}</span> {l.to.stop?.platformCode && <Label className="w-min bg-gray">pl. {l.to.stop?.platformCode}</Label>}</div>
                                     <div><span className="text-sm">{l.to.stop?.desc}</span> {l.to.stop?.code && <Label className="text-xs bg-gray">{l.to.stop?.code}</Label>}</div>
-                                </div> : <div className="p-2 flex flex-col font-medium my-2">
+                                </div></Link> : <div className="p-2 flex flex-col font-medium my-2">
                                     <div><span className="text-lg font-medium">{l?.to.name}</span></div>
                                 </div>}
                             </div>}
@@ -123,14 +126,4 @@ export default function Content() {
     );
 }
 
-function getColorFromDelay(delay: number) {
-    if (delay > 900) {
-        return "text-red"
-    } else if (delay > 120) {
-        return "text-orange"
-    } else if (delay < -120) {
-        return "text-cyan"
-    } else {
-        return "text-green"
-    }
-}
+

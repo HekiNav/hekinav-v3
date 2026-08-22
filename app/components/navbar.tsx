@@ -28,7 +28,7 @@ export default function NavBar() {
     )
     function changeRegion(newRegion: "hsl" | "finland") {
         if (newRegion == region) return
-        router.push(newRegion == "hsl" ? "./?hsl" : "./")
+        router.push(newRegion == "hsl" ? "/?hsl" : "/")
     }
 }
 

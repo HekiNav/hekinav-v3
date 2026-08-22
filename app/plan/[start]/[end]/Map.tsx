@@ -6,11 +6,9 @@ import { GeoJSONSource, LngLatBounds } from "maplibre-gl"
 import { getColor } from "@/app/lib/digitransit"
 import { LocationType, Mode, PlanLabeledLocationInput, RealtimeState, TransitMode, ViaLocationType } from "@/app/lib/__generated__/graphql"
 import polyline from "@mapbox/polyline"
-import { redirect, useRouter } from "next/navigation"
 
 export function Map({ data, selectedRoute = null, destination, origin }: { data: NonNullable<PlanQueryQuery["planConnection"]>, selectedRoute?: number | null, destination: PlanLabeledLocationInput, origin: PlanLabeledLocationInput }) {
   const { default: map } = useMap()
-  const router = useRouter()
   useEffect(() => {
     if (!map) return
     const m = map.getMap()
@@ -238,7 +236,6 @@ function generateGeoJSON(origin: PlanLabeledLocationInput, destination: PlanLabe
     },
     ...lines.flatMap<GeoJSON.Feature<GeoJSON.LineString | GeoJSON.Point>>((e, i) => {
       const edge = data.edges![i]
-      const legs = edge?.node.legs
       const selected = i == selectedRoute
       return e.flatMap((l, j) => {
         const leg = edge?.node.legs![j]

@@ -27,7 +27,6 @@ export default function DotNavigationThingy({ onSet, amount, selected }: DotNavi
         const isSelected = i == selected
         const isEdge = toomany && ((i == first && i != 0) || (i == last && i != amount - 1))
         const size = isSelected ? 16 : isEdge ? 8 : 12
-        console.log(size)
         circles.push(
             <motion.div
                 key={i}

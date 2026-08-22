@@ -1,7 +1,5 @@
 "use client"
-import { useMqttState } from "mqtt-react-hooks"
-import { useEffect } from "react";
-import toast from "react-hot-toast";
+//import { useMqttState } from "mqtt-react-hooks"
 
 export default function Status() {
   /*
@@ -12,11 +10,11 @@ export default function Status() {
    * - Offline
    * - Error
    */
-  const { connectionStatus } = useMqttState();
+  //const { connectionStatus } = useMqttState();
 
-  useEffect(() => {
+  /* useEffect(() => {
     toast(`MQTT Status: ${connectionStatus}`)
-  }, [connectionStatus])
+  }, [connectionStatus]) */
 
   return <></>;
 }

@@ -17,6 +17,7 @@ import { PlanContext } from "./provider";
 import { ArrowForwardIosW700 } from "@material-symbols-svg/react/icons/arrow-forward-ios";
 import Link from "next/link";
 import { useIsHsl } from "@/app/hooks/useHsl";
+import { useRouter } from "next/navigation";
 
 
 export default function Content() {
@@ -25,6 +26,7 @@ export default function Content() {
 
 
     const [selectedRoute, setSelectedRoute] = useState<number | null>(null)
+
 
     if (!stuff) return <>
         failed to load

@@ -12,7 +12,7 @@ import { searchRoutes, searchStopsStations } from './lib/searchStopsStations';
 import { getRouteColor, IconTable } from './lib/digitransit';
 import Label from './components/label';
 import MiniSearch from 'minisearch';
-import { redirect } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import RoutingUi from './components/RoutingUi';
 import { Metadata } from "next";
 
@@ -30,9 +30,11 @@ export default function HomeContent() {
 
   const isHsl = useIsHsl()
 
+  const router = useRouter()
+
   useEffect(() => {
     if (!search || !search.properties) return
-    redirect(`${search.properties.type}/${search.properties.gtfsId}/${isHsl ? "?hsl" : ""}`)
+    router.push(`${search.properties.type}/${search.properties.gtfsId}/${isHsl ? "?hsl" : ""}`)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search])
 

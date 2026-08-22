@@ -5,7 +5,7 @@ import { useEffect, useState } from "react"
 import { GeoJSONSource, LngLatBounds } from "maplibre-gl"
 import polyline from "@mapbox/polyline"
 import { getColor, VPos } from "@/app/lib/digitransit"
-import { redirect } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { useSubscription } from "mqtt-react-hooks"
 import { useIsHsl } from "@/app/hooks/useHsl"
 
@@ -13,10 +13,12 @@ export function Map({ data, direction, routeId }: { data: NonNullable<PatternQue
   const { default: map } = useMap()
   const isHsl = useIsHsl()
 
+  const router = useRouter()
+
   const [vPosCache, setVposCache] = useState<VPos[]>([])
 
   const { message } = useSubscription(isHsl ? 
-    `/hfp/v2/journey/ongoing/vp/+/+/+/${decodeURIComponent(routeId).split(":")[1]}/${direction ? direction + 1 : "+"}/#` : 
+    `/hfp/v2/journey/ongoing/vp/+/+/+/${decodeURIComponent(routeId).split(":")[1]}/${typeof direction == "number" ? direction + 1 : "+"}/#` : 
     `/gtfsrt/vp/${decodeURIComponent(routeId).split(":")[0]}/+/+/+/${decodeURIComponent(routeId).split(":")[1]}/${direction || "+"}/#`)
   useEffect(() => {
     if (!map) return
@@ -99,7 +101,7 @@ export function Map({ data, direction, routeId }: { data: NonNullable<PatternQue
           layers: ["stop"]
         })
         if (!feats[0]) return
-        redirect(`/stop/${feats[0].properties.id}`)
+        router.push(`/stop/${feats[0].properties.id}`)
       })
       m.addLayer({
         id: "stop", type: "circle", source: "route", filter: ["==", ["get", "type"], "stop"], paint: {
@@ -313,7 +315,7 @@ function generateGeoJSON(data: NonNullable<PatternQueryQuery["pattern"]>, vPos: 
   ]
 }
 
-function textSize(length: number) {
+export function textSize(length: number) {
   switch (length) {
     case 1:
       return 20

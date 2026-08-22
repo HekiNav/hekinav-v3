@@ -1,14 +1,29 @@
 "use client"
 import { useMap } from "@vis.gl/react-maplibre"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { GeoJSONSource, LngLatBounds } from "maplibre-gl"
-import { getColor } from "@/app/lib/digitransit"
+import { getColor, VPos } from "@/app/lib/digitransit"
 import { LocationType, Mode, PlanLabeledLocationInput, RealtimeState, TransitMode, ViaLocationType } from "@/app/lib/__generated__/graphql"
 import polyline from "@mapbox/polyline"
 import { PlanQueryQuery } from "../../layout.generated"
+import { useSubscription } from "mqtt-react-hooks"
+import { useIsHsl } from "@/app/hooks/useHsl"
+import { textSize } from "@/app/route/[id]/[direction_pattern]/Map"
+import { format } from "date-fns-tz"
+import { TZDate } from "@date-fns/tz"
 
 export function Map({ data, selectedRoute, destination, origin }: { data: NonNullable<PlanQueryQuery["planConnection"]>, selectedRoute: number, destination: PlanLabeledLocationInput, origin: PlanLabeledLocationInput }) {
   const { default: map } = useMap()
+
+  const isHsl = useIsHsl()
+
+  const [vPosCache, setVposCache] = useState<VPos[]>([])
+
+
+  const { message } = useSubscription(isHsl ?
+    data.edges![selectedRoute]?.node.legs.reduce<string[]>((p, c) => !c?.transitLeg ? p : [...p, `/hfp/v2/journey/ongoing/vp/+/+/+/${(c.trip?.route.gtfsId || "").split(":")[1]}/${typeof c?.trip?.pattern?.directionId == "number" ? c?.trip?.pattern?.directionId + 1 : "+"}/+/${format(new TZDate((c.trip?.departureStoptime?.scheduledDeparture || 0) * 1000, "UTC"), "HH:mm")}/#`], []) || [] :
+    data.edges![selectedRoute]?.node.legs.reduce<string[]>((p, c) => !c?.transitLeg ? p : [...p, `/gtfsrt/vp/${(c.trip?.gtfsId || "").split(":")[0]}/+/+/+/+/+/+/${(c.trip?.gtfsId || "").split(":")[1]}/#`], []) || []
+  )
   useEffect(() => {
     if (!map) return
     const m = map.getMap()
@@ -26,7 +41,7 @@ export function Map({ data, selectedRoute, destination, origin }: { data: NonNul
 
 
 
-      m.addSource("itinerary-s", { type: "geojson", data: { type: "FeatureCollection", features: generateGeoJSON(origin, destination, lines, data, selectedRoute) } })
+      m.addSource("itinerary-s", { type: "geojson", data: { type: "FeatureCollection", features: generateGeoJSON(origin, destination, [], lines, data, selectedRoute) } })
 
       m.addLayer({
         id: "itinerary-s-walking",
@@ -146,7 +161,85 @@ export function Map({ data, selectedRoute, destination, origin }: { data: NonNul
           "icon-overlap": "always"
         }
       })
+      m.addLayer({
+        id: "vehicle-outline", type: "circle", source: "itinerary-s", filter: ["==", ["get", "type"], "vehicle"], paint: {
+          "circle-radius": [
+            "interpolate",
+            [
+              "exponential",
+              1.15
+            ],
+            [
+              "zoom"
+            ],
+            10,
+            16,
+            22,
+            42
+          ],
+          "circle-stroke-width": [
+            "interpolate",
+            [
+              "exponential",
+              1.15
+            ],
+            [
+              "zoom"
+            ],
+            10,
+            4,
+            22,
+            8
+          ],
+          "circle-stroke-color": "white",
+        }
+      })
 
+      m.addLayer({
+        id: "vehicle", type: "circle", source: "itinerary-s", filter: ["==", ["get", "type"], "vehicle"], paint: {
+          "circle-radius": [
+            "interpolate",
+            [
+              "exponential",
+              1.15
+            ],
+            [
+              "zoom"
+            ],
+            10,
+            14,
+            22,
+            32
+          ],
+          "circle-color": "white",
+          "circle-stroke-color": ["get", "color"],
+          "circle-stroke-width": [
+            "interpolate",
+            [
+              "exponential",
+              1.15
+            ],
+            [
+              "zoom"
+            ],
+            10,
+            4,
+            22,
+            16
+          ],
+        }
+      })
+      m.addLayer({
+        id: "vehicle-text", type: "symbol", source: "itinerary-s", filter: ["==", ["get", "type"], "vehicle"], paint: {
+          "text-color": "#111"
+        },
+        layout: {
+          "text-field": ["get", "name"],
+          "text-font": ["Host Grotesk Bold"],
+          "text-size": ["get", "text_size"],
+          "text-overlap": "cooperative"
+        }
+      })
     }
 
     function cycle(i: number) {
@@ -154,7 +247,7 @@ export function Map({ data, selectedRoute, destination, origin }: { data: NonNul
       if (m.loaded()) {
         ensureLayers()
       } else {
-        setTimeout(() => cycle(i+1), 10)
+        setTimeout(() => cycle(i + 1), 10)
       }
     }
     cycle(0)
@@ -167,6 +260,9 @@ export function Map({ data, selectedRoute, destination, origin }: { data: NonNul
       if (m.getLayer("destination")) m.removeLayer("destination")
       if (m.getLayer("itinerary-s")) m.removeLayer("itinerary-s")
       if (m.getLayer("itinerary-s-walking")) m.removeLayer("itinerary-s-walking")
+      if (m.getLayer("vehicle")) m.removeLayer("vehicle")
+      if (m.getLayer("vehicle-outline")) m.removeLayer("vehicle-outline")
+      if (m.getLayer("vehicle-text")) m.removeLayer("vehicle-text")
       if (m.getSource("itinerary-s")) m.removeSource("itinerary-s")
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -182,18 +278,49 @@ export function Map({ data, selectedRoute, destination, origin }: { data: NonNul
 
     if (!m.getSource("itinerary-s")) return
 
+    let vPos: GeoJSON.Feature<GeoJSON.Point, { type: "vehicle", text_size: number, color: string } & VPos>[] = []
+
+    try {
+      if (isHsl) {
+        const msg: { VP?: { lat: number, long: number, oper: number, desi: string, veh: number, seq: number } } | undefined = JSON.parse(message?.message?.toString() as string)
+        if (!msg || !msg.VP) return
+
+        const route = data.edges[selectedRoute]?.node.legs.find(l => l?.transitLeg && l.trip?.route.shortName == msg.VP?.desi)?.trip?.route
+
+        const veh = { id: `${msg.VP.oper}${msg.VP.veh}`, lat: msg.VP.lat, lng: msg.VP.long, name: msg.VP.desi }
+        const newVPos: VPos[] = [...vPosCache.filter(v => v.id != veh.id), veh]
+        vPos = newVPos.map<GeoJSON.Feature<GeoJSON.Point, { type: "vehicle", text_size: number, color: string } & VPos>>(v => ({ geometry: { type: "Point", coordinates: [v.lng, v.lat] }, properties: { ...v, type: "vehicle", text_size: textSize(v.name.length), color: getColor(route?.type || -1, route?.mode || "") }, type: "Feature" })).sort((a, b) => Number(a.properties.id) - Number(b.properties.id))
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setVposCache(newVPos)
+      } else {
+        console.log(message)
+        /* const feed = GtfsRealtimeBindings.transit_realtime.FeedMessage.decode(
+          new Uint8Array(buffer)
+        );
+        feed.entity.forEach((entity) => {
+          if (entity.tripUpdate) {
+            console.log(entity.tripUpdate);
+          }
+        }); */
+      }
+    } catch {
+      return
+    }
+
 
     const geojson: GeoJSON.FeatureCollection = {
       type: "FeatureCollection",
-      features: generateGeoJSON(origin, destination, lines, data, selectedRoute)
+      features: generateGeoJSON(origin, destination, vPos, lines, data, selectedRoute)
     }
 
       ; (m.getSource("itinerary-s") as GeoJSONSource).setData(geojson)
-  }, [map, data, origin, destination, selectedRoute])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [map, data, origin, destination, selectedRoute, message, isHsl])
   return null
 }
-function generateGeoJSON(origin: PlanLabeledLocationInput, destination: PlanLabeledLocationInput, lines: [number, number][][], data: { __typename: "PlanConnection"; edges: Array<{ __typename: "PlanEdge"; cursor: string; node: { __typename: "Itinerary"; start: unknown; end: unknown; waitingTime: unknown; walkDistance: number | null; walkTime: unknown; duration: unknown; numberOfTransfers: number; legs: Array<{ __typename: "Leg"; transitLeg: boolean | null; interlineWithPreviousLeg: boolean | null; duration: number | null; distance: number | null; mode: Mode | null; realTime: boolean | null; realtimeState: RealtimeState | null; start: { __typename: "LegTime"; scheduledTime: unknown; estimated: { __typename: "RealTimeEstimate"; delay: unknown; time: unknown } | null }; end: { __typename: "LegTime"; scheduledTime: unknown; estimated: { __typename: "RealTimeEstimate"; delay: unknown; time: unknown } | null }; trip: { __typename: "Trip"; pattern: { __typename: "Pattern"; code: string; directionId: number | null } | null; route: { __typename: "Route"; shortName: string | null; longName: string | null; gtfsId: string; mode: TransitMode | null; type: number | null } } | null; legGeometry: { __typename: "Geometry"; length: number | null; points: unknown } | null; from: { __typename: "Place"; lat: number; lon: number; name: string | null; viaLocationType: ViaLocationType | null; arrival: { __typename: "LegTime"; scheduledTime: unknown; estimated: { __typename: "RealTimeEstimate"; delay: unknown; time: unknown } | null } | null; departure: { __typename: "LegTime"; scheduledTime: unknown; estimated: { __typename: "RealTimeEstimate"; delay: unknown; time: unknown } | null } | null; stop: { __typename: "Stop"; name: string; platformCode: string | null; code: string | null; gtfsId: string; locationType: LocationType | null } | null }; to: { __typename: "Place"; lat: number; lon: number; name: string | null; viaLocationType: ViaLocationType | null; arrival: { __typename: "LegTime"; scheduledTime: unknown; estimated: { __typename: "RealTimeEstimate"; delay: unknown; time: unknown } | null } | null; departure: { __typename: "LegTime"; scheduledTime: unknown; estimated: { __typename: "RealTimeEstimate"; delay: unknown; time: unknown } | null } | null; stop: { __typename: "Stop"; name: string; platformCode: string | null; code: string | null; gtfsId: string; locationType: LocationType | null } | null } } | null> } } | null> | null }, selectedRoute: number): GeoJSON.Feature[] {
+function generateGeoJSON(origin: PlanLabeledLocationInput, destination: PlanLabeledLocationInput, vPos: GeoJSON.Feature[], lines: [number, number][][], data: { __typename: "PlanConnection"; edges: Array<{ __typename: "PlanEdge"; cursor: string; node: { __typename: "Itinerary"; start: unknown; end: unknown; waitingTime: unknown; walkDistance: number | null; walkTime: unknown; duration: unknown; numberOfTransfers: number; legs: Array<{ __typename: "Leg"; transitLeg: boolean | null; interlineWithPreviousLeg: boolean | null; duration: number | null; distance: number | null; mode: Mode | null; realTime: boolean | null; realtimeState: RealtimeState | null; start: { __typename: "LegTime"; scheduledTime: unknown; estimated: { __typename: "RealTimeEstimate"; delay: unknown; time: unknown } | null }; end: { __typename: "LegTime"; scheduledTime: unknown; estimated: { __typename: "RealTimeEstimate"; delay: unknown; time: unknown } | null }; trip: { __typename: "Trip"; pattern: { __typename: "Pattern"; code: string; directionId: number | null } | null; route: { __typename: "Route"; shortName: string | null; longName: string | null; gtfsId: string; mode: TransitMode | null; type: number | null } } | null; legGeometry: { __typename: "Geometry"; length: number | null; points: unknown } | null; from: { __typename: "Place"; lat: number; lon: number; name: string | null; viaLocationType: ViaLocationType | null; arrival: { __typename: "LegTime"; scheduledTime: unknown; estimated: { __typename: "RealTimeEstimate"; delay: unknown; time: unknown } | null } | null; departure: { __typename: "LegTime"; scheduledTime: unknown; estimated: { __typename: "RealTimeEstimate"; delay: unknown; time: unknown } | null } | null; stop: { __typename: "Stop"; name: string; platformCode: string | null; code: string | null; gtfsId: string; locationType: LocationType | null } | null }; to: { __typename: "Place"; lat: number; lon: number; name: string | null; viaLocationType: ViaLocationType | null; arrival: { __typename: "LegTime"; scheduledTime: unknown; estimated: { __typename: "RealTimeEstimate"; delay: unknown; time: unknown } | null } | null; departure: { __typename: "LegTime"; scheduledTime: unknown; estimated: { __typename: "RealTimeEstimate"; delay: unknown; time: unknown } | null } | null; stop: { __typename: "Stop"; name: string; platformCode: string | null; code: string | null; gtfsId: string; locationType: LocationType | null } | null } } | null> } } | null> | null }, selectedRoute: number): GeoJSON.Feature[] {
   return [
+    ...vPos,
     {
       type: "Feature",
       geometry: {

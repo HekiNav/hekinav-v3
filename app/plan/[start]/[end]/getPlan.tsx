@@ -5,7 +5,6 @@ import { GET_PLAN } from "./layout";
 
 
 export async function getPlan(origin: PlanLabeledLocationInput, destination: PlanLabeledLocationInput, isHsl: boolean) {
-  console.log("djjdj")
   if (!origin || !destination) {
     console.log("NO ORIGIN OR DESTINATION");
     return null;

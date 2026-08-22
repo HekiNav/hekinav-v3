@@ -7,7 +7,7 @@ import { Map, MapProvider, MapRef, Popup, PopupProps } from "@vis.gl/react-mapli
 import IconItem from './components/iconitem';
 import { IconTable, Mode } from './lib/digitransit';
 import { NotListedLocationW700 as NotListedLocation } from '@material-symbols-svg/react/icons/not-listed-location';
-import { redirect, usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { DirectionsBusW700 as DirectionsBus } from '@material-symbols-svg/react/icons/directions-bus';
 import { TramW700 as Tram } from '@material-symbols-svg/react/icons/tram';
 import { MetroW700 as Metro } from '@material-symbols-svg/react/icons/metro';
@@ -170,6 +170,7 @@ const MapContainer = memo(function MapC({ isHsl,
     setOverlay,
     setPopup,
     popup }: MapProps) {
+        const router = useRouter()
     return (
         <Map
             onClick={(e) => {
@@ -199,9 +200,9 @@ const MapContainer = memo(function MapC({ isHsl,
                     const first = combined[0]
                     const isStation = stations.length == 1
                     if (isHsl) {
-                        redirect(`/${isStation ? "station" : "stop"}/HSL:${isStation ? first.properties.terminalId : first.properties.stopId}/?hsl`)
+                        router.push(`/${isStation ? "station" : "stop"}/HSL:${isStation ? first.properties.terminalId : first.properties.stopId}/?hsl`)
                     } else {
-                        redirect(`/${isStation ? "station" : "stop"}/${first.properties.gtfsId}/`)
+                        router.push(`/${isStation ? "station" : "stop"}/${first.properties.gtfsId}/`)
                     }
                 }
 
