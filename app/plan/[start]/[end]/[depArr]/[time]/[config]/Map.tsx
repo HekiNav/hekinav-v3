@@ -26,7 +26,7 @@ export function Map({ data, selectedRoute = null, destination, origin }: { data:
       ) || []
 
       const bounds = lines.length > 0 && lines.flat(2).reduce((bounds, coord) => bounds.extend(coord), new LngLatBounds(lines[0][0][0], lines[0][0][1]))
-      if (bounds) m.fitBounds(bounds, { padding: 40 })  
+      if (bounds) m.fitBounds(bounds, { padding: 100 })  
 
 
 

@@ -14,7 +14,7 @@ import Dropdown, { DropdownItem } from "@/app/components/dropdown";
 import { SyncAltW700 as SyncAlt } from '@material-symbols-svg/react/icons/sync-alt';
 import DateEl from "@/app/components/Date";
 import { Map } from "./Map";
-import { Metadata, ResolvingMetadata } from "next";
+import { Metadata } from "next";
 
 const GET_PATTERN:
   TypedDocumentNode<PatternQueryQuery, PatternQueryQueryVariables> =

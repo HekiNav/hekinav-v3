@@ -5,14 +5,19 @@ import { PlanQueryQuery, PlanQueryQueryVariables } from "./layout.generated";
 import { getPlan } from "./getPlan";
 import Loading from "./loading";
 import { useIsHsl } from "@/app/hooks/useHsl";
+import { TZDate } from "@date-fns/tz";
+import { RoutingConfig } from "@/app/lib/digitransit";
 
 export const PlanContext = createContext<ContextType>(null)
 
 export type ContextType = ({
-    data: NonNullable<PlanQueryQuery["planConnection"]>
+    data: PlanQueryQuery["planConnection"]
+    depArr: "dep" | "arr"
+    dateTime: TZDate
+    config: RoutingConfig
 } & PlanQueryQueryVariables) | null
 
-export default function Context({ children, end, start }: PropsWithChildren & { start: string, end: string }) {
+export default function Context({ children, end, start, config, depArr, time }: PropsWithChildren & { start: string, end: string, depArr: "dep" | "arr", config: string, time: string }) {
     const [a, setA] = useState<string>("idi")
     const [prev, setPrev] = useState<{ start: string, end: string }>({ end: "", start: "" })
     const isHsl = useIsHsl()
@@ -26,6 +31,10 @@ export default function Context({ children, end, start }: PropsWithChildren & { 
     }
     const origin = parseParam(typeof start == "string" ? start : "")
     const destination = parseParam(typeof end == "string" ? end : "")
+    const options: RoutingConfig = parseParam(config)
+    const dateTime = new TZDate(Number(time), "UTC")
+
+    console.log(dateTime)
 
     useEffect(() => {
         // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -38,22 +47,24 @@ export default function Context({ children, end, start }: PropsWithChildren & { 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const planPromise = useMemo(() => getPlan(origin, destination, isHsl), [a])
 
-    if (typeof start != "string" || typeof end != "string") return (
-        "failed to load"
-    )
-
-    return (<Suspense fallback={<Loading></Loading>}><PlanData destination={destination} origin={origin} promise={planPromise}>{children}</PlanData></Suspense>)
+    return (<Suspense fallback={<Loading></Loading>}><PlanData config={options} dateTime={dateTime} depArr={depArr} destination={destination} origin={origin} promise={planPromise}>{children}</PlanData></Suspense>)
 }
 
-export function PlanData({ children, promise, destination, origin }: PropsWithChildren & PlanQueryQueryVariables & { promise: Promise<PlanQueryQuery["planConnection"]> }) {
+export function PlanData({ children, promise, destination, origin, config, dateTime, depArr }: PropsWithChildren & PlanQueryQueryVariables & { promise: Promise<PlanQueryQuery["planConnection"]>, depArr: "dep" | "arr", dateTime: TZDate, config: RoutingConfig }) {
     const data = use(promise)
 
+    const [rr, setRr] = useState<boolean>()
 
-    if (!data) return (
-        "failed to load"
-    )
+    console.log(data)
+
+    useEffect(() => {
+        if (rr) return
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setRr(true)
+    })
+
     return (
-        <PlanContext value={{ data: data, destination, origin }}>
+        <PlanContext value={{ data: data, destination, origin, depArr, dateTime, config }}>
             {children}
         </PlanContext>
     )

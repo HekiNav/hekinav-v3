@@ -64,13 +64,13 @@ for (let i = 0; i < 28; i++) {
 export type PlaceSuggestion = Suggestion<{ lat: number, lng: number }>
 
 
-export default function RoutingUi({ iDateTime = new Date(), iDestination = null, iOrigin = null }: { iOrigin?: PlaceSuggestion | null, iDestination?: PlaceSuggestion | null, iDateTime?: Date }) {
+export default function RoutingUi({ iDateTime = new Date(), iDestination = null, iOrigin = null, iDepArr = "dep" }: { iOrigin?: PlaceSuggestion | null, iDestination?: PlaceSuggestion | null, iDateTime?: Date, iDepArr?: "dep" | "arr" }) {
 
     const [origin, setOrigin] = useState<PlaceSuggestion | null>(iOrigin)
     const [destination, setDestination] = useState<PlaceSuggestion | null>(iDestination)
-    const [depArr, setDepArr] = useState<"dep" | "arr">("dep")
-    const [date, setDate] = useState<TZDate>(new TZDate(iDateTime.getFullYear(), iDateTime.getMonth(), iDateTime.getDate()).withTimeZone("Europe/Helsinki"))
-    const [time, setTime] = useState<TZDate>(new TZDate(1970, 0, 1, iDateTime.getHours(), iDateTime.getMinutes()).withTimeZone("Europe/Helsinki"))
+    const [depArr, setDepArr] = useState<"dep" | "arr">(iDepArr)
+    const [date, setDate] = useState<TZDate>(new TZDate(iDateTime.getUTCFullYear(), iDateTime.getUTCMonth(), iDateTime.getUTCDate(), "UTC").withTimeZone("Europe/Helsinki"))
+    const [time, setTime] = useState<TZDate>(new TZDate(iDateTime.getUTCFullYear(), iDateTime.getUTCMonth(), iDateTime.getUTCDate(), iDateTime.getUTCHours(), iDateTime.getUTCMinutes(), "UTC").withTimeZone("Europe/Helsinki"))
     const [pickedLocation, setPickedLocation] = useState<LngLat | null | boolean>(null)
     const [pickedLocationTarget, setPickedLocationTarget] = useState<"origin" | "destination" | null>(null)
     const [settingsOpen, setSettingsOpen] = useState<boolean>(false)
@@ -165,11 +165,12 @@ export default function RoutingUi({ iDateTime = new Date(), iDestination = null,
     function plan() {
         if (!origin || !origin.properties) return toast("Select a valid origin")
         if (!destination || !destination.properties) return toast("Select a valid destination")
-        const dateTime = date.getTime() + time.getTime()
-        console.log(new Date(dateTime), origin, destination)
+
+        const dateTime = new TZDate(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate() + 1, time.getUTCHours(), time.getUTCMinutes(), "UTC")
         const start = { label: origin.text, location: { coordinate: { latitude: origin.properties?.lat, longitude: origin.properties?.lng } } }
         const end = { label: destination.text, location: { coordinate: { latitude: destination.properties?.lat, longitude: destination.properties?.lng } } }
 
+        const url = `/plan/${JSON.stringify(start)}/${JSON.stringify(end)}/${depArr}/${dateTime.getTime()}/${JSON.stringify({})}/${isHsl ? "?hsl" : ""}`;
         /* const routingConfig: RoutingConfig = {
             modes: {
                 transit: {
@@ -177,8 +178,7 @@ export default function RoutingUi({ iDateTime = new Date(), iDestination = null,
                 }
             }
         } */
-
-        router.push(`/plan/${JSON.stringify(start)}/${JSON.stringify(end)}/${dateTime}/${JSON.stringify({})}/${isHsl ? "?hsl" : ""}`)
+        router.push(url)
     }
 
     function importConfig() {

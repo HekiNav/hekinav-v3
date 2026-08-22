@@ -4,6 +4,7 @@ import { PlanQueryQuery, PlanQueryQueryVariables } from "./layout.generated";
 import { Sidebar } from "@/app/mapcontext";
 import { Metadata } from "next";
 import Context from "./provider";
+import { TZDate } from "@date-fns/tz";
 
 
 export const GET_PLAN:
@@ -139,13 +140,16 @@ export const GET_PLAN:
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 
 export async function generateMetadata({
-  params}: {
-  params: Promise<{
-    start: string
-    end: string
-  }>,
-  searchParams: SearchParams;
-}): Promise<Metadata> {
+  params }: {
+    params: Promise<{
+      start: string
+      end: string
+      time: string
+      config: string
+      depArr: string
+    }>,
+    searchParams: SearchParams;
+  }): Promise<Metadata> {
   const { end, start } = await params
 
   function parseParam(t: string) {
@@ -157,6 +161,8 @@ export async function generateMetadata({
   }
   const origin = parseParam(start)
   const destination = parseParam(end)
+
+
 
   if (!origin || !destination) {
     return { title: "Failed to load routes - Hekinav Routing" }
@@ -177,17 +183,30 @@ export default async function PlanLayout({
   params: Promise<{
     start: string
     end: string
+    time: string
+    config: string
+    depArr: string
   }>,
 }) {
-  const { end, start } = await params
+  const { end, start, config, time, depArr } = await params
+
+
+  if (typeof start != "string" || typeof end != "string" || (depArr != "dep" && depArr != "arr")) {
+    return (
+      "failed to load"
+    )
+  }
 
   return (
     <>
       <Sidebar>
 
         <Context
-        end={end}
-        start={start}
+          end={end}
+          start={start}
+          time={time}
+          config={config}
+          depArr={depArr}
         >
           {children}
         </Context>

@@ -29,7 +29,7 @@ export default function Content() {
     </>
     const { data, destination, origin } = stuff
 
-    const node = data.edges![selectedRoute]?.node
+    const node = data?.edges![selectedRoute]?.node
 
     if (!node) return <>
         failed to load

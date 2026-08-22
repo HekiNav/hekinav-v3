@@ -33,7 +33,7 @@ export function Map({ data, direction, routeId }: { data: NonNullable<PatternQue
 
       const line: [number, number][] = polyline.decode(data.patternGeometry?.points as string).map<[number, number]>(([lat, lng]) => [lng, lat])
       const bounds = line.reduce((bounds, coord) => bounds.extend(coord), new LngLatBounds(line[0], line[0]))
-      if (bounds) m.fitBounds(bounds, { padding: 40 })
+      if (bounds) m.fitBounds(bounds, { padding: 100 })
 
 
 

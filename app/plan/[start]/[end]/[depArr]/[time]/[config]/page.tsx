@@ -1,8 +1,6 @@
 "use client"
 import { useContext, useEffect, useState } from "react";
-import { ConfigContext } from "@/app/HekinavConfig";
 import { PlanQueryQuery } from "./layout.generated";
-import { useMap } from "@vis.gl/react-maplibre";
 import RoutingUi from "@/app/components/RoutingUi";
 import { TZDate } from "@date-fns/tz";
 import { format } from "date-fns-tz";
@@ -17,13 +15,11 @@ import { PlanContext } from "./provider";
 import { ArrowForwardIosW700 } from "@material-symbols-svg/react/icons/arrow-forward-ios";
 import Link from "next/link";
 import { useIsHsl } from "@/app/hooks/useHsl";
-import { useRouter } from "next/navigation";
 
 
 export default function Content() {
     const stuff = useContext(PlanContext)
     const isHsl = useIsHsl()
-
 
     const [selectedRoute, setSelectedRoute] = useState<number | null>(null)
 
@@ -32,7 +28,7 @@ export default function Content() {
         failed to load
     </>
 
-    const { data, destination, origin } = stuff
+    const { data, destination, origin, config, dateTime, depArr } = stuff
 
 
 
@@ -43,9 +39,9 @@ export default function Content() {
                 <h2 className="m-0 w-full text-center text-3xl my-1">Routing options</h2>
             </Sidebar>
 
-            <RoutingUi iOrigin={{ icon: <></>, id: "origin", text: origin.label || "origin", properties: { lat: origin.location.coordinate?.latitude as number || 0, lng: origin.location.coordinate?.longitude as number || 0 } }} iDestination={{ icon: <></>, id: "origin", text: destination.label || "origin", properties: { lat: destination.location.coordinate?.latitude as number || 0, lng: destination.location.coordinate?.longitude as number || 0 } }}></RoutingUi>
+            <RoutingUi iDateTime={dateTime} iDepArr={depArr} iOrigin={{ icon: <></>, id: "origin", text: origin.label || "origin", properties: { lat: origin.location.coordinate?.latitude as number || 0, lng: origin.location.coordinate?.longitude as number || 0 } }} iDestination={{ icon: <></>, id: "origin", text: destination.label || "origin", properties: { lat: destination.location.coordinate?.latitude as number || 0, lng: destination.location.coordinate?.longitude as number || 0 } }}></RoutingUi>
             <div className="flex flex-col gap-2">
-                {data.edges?.map((e, i) => {
+                {data?.edges?.map((e, i) => {
                     const walkDistance = (e?.node.walkDistance as number)
                     const firstTransitLeg = e?.node.legs.find(l => l?.transitLeg)
                     const duration = e?.node.duration as number || 0
@@ -71,7 +67,7 @@ export default function Content() {
                                     </span>
                                 </div>
                             </div>
-                            <Link prefetch={true} className="h-full" href={`/plan/${JSON.stringify(origin)}/${JSON.stringify(destination)}/i/i${i}/${isHsl ? "?hsl" : ""}`}>
+                            <Link prefetch={true} className="h-full" href={`./i/i${i}/${isHsl ? "?hsl" : ""}`}>
                                 <div className="flex items-center justify-center border-l-3 h-full">
                                     <Icon><ArrowForwardIosW700 height={32} width={32}></ArrowForwardIosW700></Icon>
                                 </div>
@@ -89,16 +85,4 @@ export default function Content() {
             </MapOverlay>
         </>
     );
-}
-
-function getColorFromDelay(delay: number) {
-    if (delay > 900) {
-        return "text-red"
-    } else if (delay > 120) {
-        return "text-orange"
-    } else if (delay < -120) {
-        return "text-cyan"
-    } else {
-        return "text-green"
-    }
 }
