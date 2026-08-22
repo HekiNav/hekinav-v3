@@ -65,7 +65,7 @@ export default function InputField({ icon, focusClear, suggestionFunction, onFoc
         <div className={`border-3 border-box p-2 w-full rounded-xl relative hover:cursor-text hover:border-green  ${focus && "border-green"} ${className}`} {...props}>
             <IconItem icon={{ children: icon }}>
                 <input
-                    value={value}
+                    value={value || ""}
                     onChange={onChange}
                     onFocus={(e) => {
                         onFocus && onFocus(e)

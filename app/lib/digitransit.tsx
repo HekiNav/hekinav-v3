@@ -14,6 +14,7 @@ import { MonorailW700 as Monorail } from '@material-symbols-svg/react/icons/mono
 import { QuestionMarkW700 as QuestionMark } from '@material-symbols-svg/react/icons/question-mark';
 import { ScooterW700 as Scooter } from '@material-symbols-svg/react/icons/scooter';
 import { SnowflakeW700 as Snowflake } from '@material-symbols-svg/react/icons/snowflake';
+import { TransitMode } from './__generated__/graphql';
 
 export type Mode = "BUS" | "RAIL" | "BUS-EXPRESS" | "SUBWAY" | "SPEEDTRAM" | "TRAM" | "FERRY" | "AIRPLANE"
 
@@ -194,6 +195,7 @@ export function getRouteColor(type: "bg" | "border", mode: number, stringMode?: 
                 case "LEG_SWITCH": return type == "border" ? "border-black" : "bg-black"
                 case "WALK": return type == "border" ? "border-gray" : "bg-gray"
                 case "transparent": return type == "border" ? "border-transparent" : "bg-transparent"
+                default: return type == "border" ? "border-gray" : "bg-gray"
             }
         default:
             console.log(mode)
@@ -257,9 +259,16 @@ export function getColor(mode: number, stringMode?: string) {
                 case "WALK": return '#777'
                 default: return "#777"
             }
-            break
         default:
             console.log(mode)
             return '#ccc'
+    }
+}
+
+export interface RoutingConfig {
+    modes: {
+        transit: {
+            transit: {cost: {reluctance: number}, mode: TransitMode}[]
+        }
     }
 }

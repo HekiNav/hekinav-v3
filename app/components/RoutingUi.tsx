@@ -6,7 +6,7 @@ import { NotListedLocationW700 as NotListedLocation } from '@material-symbols-sv
 import { ScheduleW700 as Schedule } from '@material-symbols-svg/react/icons/schedule';
 import { LngLat } from "maplibre-gl"
 
-import { Dispatch, SetStateAction, useContext, useEffect, useState } from 'react';
+import { Dispatch, SetStateAction, useContext, useEffect, useRef, useState } from 'react';
 import { useMap } from "@vis.gl/react-maplibre";
 import toast from "react-hot-toast";
 import { TZDate } from "@date-fns/tz";
@@ -27,7 +27,17 @@ import Toggle from './toggle';
 import { useRouter } from 'next/navigation';
 import Dropdown from './dropdown';
 import { SyncAltW700 } from '@material-symbols-svg/react/icons/sync-alt';
+import { getRouteColor, IconTable } from '../lib/digitransit';
+import Slider from './range';
+import { saveAs } from "file-saver"
+import MiniSearch from 'minisearch';
+import { searchRoutesAgencies } from '../lib/route_agency';
+import Label from './label';
+import { CorporateFareW700 } from '@material-symbols-svg/react/icons/corporate-fare';
 
+export type SearchSuggestion = Suggestion<{ type: "agency" | "route", gtfsId: string }>
+
+const miniSearch = new MiniSearch<SearchSuggestion>({ fields: ["text", "gtfsId"], storeFields: ["icon", "id", "name", "desc", "properties"] })
 
 const timeOptions: Suggestion<object>[] = []
 
@@ -54,19 +64,25 @@ for (let i = 0; i < 28; i++) {
 export type PlaceSuggestion = Suggestion<{ lat: number, lng: number }>
 
 
-export default function RoutingUi({iDateTime = new Date(), iDestination = null, iOrigin = null}: {iOrigin?: PlaceSuggestion | null, iDestination?: PlaceSuggestion | null, iDateTime?: Date}) {
+export default function RoutingUi({ iDateTime = new Date(), iDestination = null, iOrigin = null }: { iOrigin?: PlaceSuggestion | null, iDestination?: PlaceSuggestion | null, iDateTime?: Date }) {
 
     const [origin, setOrigin] = useState<PlaceSuggestion | null>(iOrigin)
     const [destination, setDestination] = useState<PlaceSuggestion | null>(iDestination)
     const [depArr, setDepArr] = useState<"dep" | "arr">("dep")
     const [date, setDate] = useState<TZDate>(new TZDate(iDateTime.getFullYear(), iDateTime.getMonth(), iDateTime.getDate()).withTimeZone("Europe/Helsinki"))
-    const [time, setTime] = useState<TZDate>(new TZDate(1970, 0, 1, iDateTime.getHours(), Math.ceil(iDateTime.getMinutes() / 15) * 15).withTimeZone("Europe/Helsinki"))
+    const [time, setTime] = useState<TZDate>(new TZDate(1970, 0, 1, iDateTime.getHours(), iDateTime.getMinutes()).withTimeZone("Europe/Helsinki"))
     const [pickedLocation, setPickedLocation] = useState<LngLat | null | boolean>(null)
     const [pickedLocationTarget, setPickedLocationTarget] = useState<"origin" | "destination" | null>(null)
     const [settingsOpen, setSettingsOpen] = useState<boolean>(false)
 
+    const [inclusionEnabled, setInclusionEnabled] = useState<boolean>(false)
+
+    const [excludedRoutes, setExcludedRoutes] = useState<{ id: string, suggestion: SearchSuggestion, type: "route" | "agency" }[]>([])
+    const [excludedAgencies, setExcludedAgencies] = useState<{ id: string, suggestion: SearchSuggestion, type: "route" | "agency" }[]>([])
+
     const { setSidebarHidden } = useContext(FocusContext)
 
+    const fileInputRef = useRef<HTMLInputElement>(null)
 
 
     const { default: map } = useMap()
@@ -122,6 +138,7 @@ export default function RoutingUi({iDateTime = new Date(), iDestination = null, 
         if (destination?.id == "user_location") getUserLocation(setDestination)
     }, [destination, openMapLocationPicker, origin])
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
         if (typeof pickedLocation != "object" || pickedLocation == null) return
 
@@ -141,31 +158,63 @@ export default function RoutingUi({iDateTime = new Date(), iDestination = null, 
         if (setSidebarHidden) setSidebarHidden(false)
     })
 
-    function plan () {
+    useEffect(() => {
+        console.log(config.routingOptions, excludedRoutes)
+    })
+
+    function plan() {
         if (!origin || !origin.properties) return toast("Select a valid origin")
         if (!destination || !destination.properties) return toast("Select a valid destination")
         const dateTime = date.getTime() + time.getTime()
         console.log(new Date(dateTime), origin, destination)
-        const start = {label: origin.text, location: {coordinate: {latitude: origin.properties?.lat, longitude: origin.properties?.lng}}}
-        const end = {label: destination.text, location: {coordinate: {latitude: destination.properties?.lat, longitude: destination.properties?.lng}}}
-        router.push(`/plan/${JSON.stringify(start)}/${JSON.stringify(end)}/${isHsl ? "?hsl" : ""}`)
+        const start = { label: origin.text, location: { coordinate: { latitude: origin.properties?.lat, longitude: origin.properties?.lng } } }
+        const end = { label: destination.text, location: { coordinate: { latitude: destination.properties?.lat, longitude: destination.properties?.lng } } }
+
+        /* const routingConfig: RoutingConfig = {
+            modes: {
+                transit: {
+                    transit: config.
+                }
+            }
+        } */
+
+        router.push(`/plan/${JSON.stringify(start)}/${JSON.stringify(end)}/${dateTime}/${JSON.stringify({})}/${isHsl ? "?hsl" : ""}`)
+    }
+
+    function importConfig() {
+        const files = fileInputRef.current?.files
+        if (!files?.length) return
+        toast.promise(files[0].text(), {
+            loading: "Importing config",
+            error: "Failed to import config",
+            success: (data) => {
+                try {
+                    setConfig(JSON.parse(data), ["routingOptions"])
+
+                } catch {
+                    return "Successfully failed to import config"
+                }
+                return "Successfully imported config"
+            },
+        })
     }
 
     return (
         <>
-            <Modal className='bg-white max-w-8/10 w-120 max-h-8/10' cardTitle={
+            <Modal className='bg-white max-w-8/10 w-120 max-h-7/10 pb-0!' cardTitle={
                 <div className="flex justify-between items-center">
                     <span>Settings</span><span className='text-nowrap flex flex-nowrap h-full items-center'><span className='text-lg font-normal text-black'>Advanced</span> <Toggle state={config.advancedRoutingOptionsEnabled} setState={(v) => setConfig(v, ["advancedRoutingOptionsEnabled"])}></Toggle></span>
                 </div>
             } open={settingsOpen} close={() => setSettingsOpen(false)}>
-                <div className="px-4 overflow-y-scroll flex flex-col gap-2">
+                <div className="px-4 overflow-y-scroll flex flex-col gap-2 pb-4">
                     {
                         ...(config.advancedRoutingOptionsEnabled ? AdvancedRoutingOptions : RoutingOptionsUiConfig).map((v, i) => {
                             const parse = <O extends RoutingNode>(option: O, i?: number) => {
                                 switch (option.type) {
                                     case "group":
                                         return <div key={i}>
-                                            <h2 className='mb-1 text-lg'>{option.name}</h2>
+                                            <h2 className='font-medium mb-1 text-lg'>{option.name}</h2>
+                                            {option.desc && <p>{option.desc}</p>}
                                             <div className={`flex ${option.direction == "horizontal" ? "flex-row" : "flex-col"} w-full gap-1`}>
                                                 {
                                                     // @ts-expect-error idk
@@ -173,15 +222,125 @@ export default function RoutingUi({iDateTime = new Date(), iDestination = null, 
                                                 }
                                             </div>
                                         </div>
+                                    case "exclude_include_routes":
+                                    case "exclude_routes":
+                                        return <>
+                                            <h2 className='font-medium mb-1 text-lg mt-4'>{option.name}</h2>
+                                            {option.type == "exclude_include_routes" && <>
+                                                <div className="flex justify-between items-center mb-2">List type
+                                                    <div className="flex w-min items-center">Exclude<Toggle state={inclusionEnabled} setState={(v) => {
+                                                        setInclusionEnabled(v)
+                                                        option.value.forEach(p => {
+                                                            if (option.type == "exclude_include_routes") {
+                                                                const arr = p.includes("routes" as never) ? excludedRoutes.map(r => r.id) : excludedAgencies.map(a => a.id)
+                                                                setConfig({ exclude: v ? [] : arr, include: v ? arr : [] }, p)
+                                                            } else {
+                                                                // @ts-expect-error i have no idea tbh
+                                                                setConfig(p.includes("routes" as never) ? excludedRoutes.map(r => r.id) : excludedAgencies.map(a => a.id), p)
+                                                            }
+                                                        })
+                                                    }}></Toggle>Include</div>
+                                                </div>
+                                            </>}
+                                            {(excludedAgencies.length > 0 || excludedRoutes.length > 0) && (<div className='flex flex-col gap-1 mb-2'>
+                                                <div className='text-lg font-medium'>{inclusionEnabled ? "Included" : "Excluded"}</div>
+                                                {...[...excludedAgencies, ...excludedRoutes].map((e, i) => <div className='flex w-full truncate items-center justify-between' key={i}><div className='shrink truncate'>{e.suggestion.name}</div><Button className='px-1! rounded-md! text-black hover:border-red! hover:text-red! p-0! flex items-center justify-center' onClick={() => {
+                                                    let agencies: { id: string, suggestion: SearchSuggestion, type: "route" | "agency" }[] = excludedAgencies
+                                                    let routes: { id: string, suggestion: SearchSuggestion, type: "route" | "agency" }[] = excludedRoutes
+
+                                                    if (e.type == "route") {
+                                                        const i = excludedRoutes.findIndex(t => e.id == t.id)
+                                                        if (i < 0) return
+                                                        excludedRoutes.splice(i, 1)
+                                                        routes = excludedRoutes
+                                                        setExcludedRoutes(excludedRoutes)
+                                                    } else if (e.type == "agency") {
+                                                        const i = excludedAgencies.findIndex(t => e.id == t.id)
+                                                        if (i < 0) return
+                                                        excludedAgencies.splice(i, 1)
+                                                        agencies = excludedAgencies
+                                                        setExcludedAgencies(excludedAgencies)
+                                                    }
+                                                    console.log(agencies, routes)
+                                                    option.value.forEach(p => {
+                                                        if (option.type == "exclude_include_routes") {
+                                                            const arr = p.includes("routes" as never) ? routes.map(r => r.id) : agencies.map(a => a.id)
+                                                            setConfig({ exclude: inclusionEnabled ? [] : arr, include: inclusionEnabled ? arr : [] }, p)
+                                                        } else {
+                                                            setConfig(p.includes("routes" as never) ? routes.map(r => r.id) : agencies.map(a => a.id), p)
+                                                        }
+                                                    })
+                                                }}>Remove</Button></div>)}
+                                            </div>)}
+                                            <InputField suggestionFunction={(t) => searchRouteAgency(t, isHsl, [...excludedAgencies.map(a => a.id), ...excludedRoutes.map(r => r.id)])} icon={<></>} name='agency_route_search' placeholder='Route or agency' onValueSet={(n, v) => {
+                                                if (typeof v == "string") return;
+                                                if (option.type == "exclude_routes") {
+                                                    setInclusionEnabled(false)
+                                                }
+                                                let agencies: { id: string, suggestion: SearchSuggestion, type: "route" | "agency" }[] = excludedAgencies
+                                                let routes: { id: string, suggestion: SearchSuggestion, type: "route" | "agency" }[] = excludedRoutes
+
+                                                if (v.properties.type == "route") {
+                                                    const i = excludedRoutes.findIndex(e => e.id == v.properties.gtfsId)
+                                                    if (i >= 0) {
+                                                        excludedRoutes.splice(i, 1)
+                                                        routes = excludedRoutes
+                                                        setExcludedRoutes(excludedRoutes)
+                                                    }
+                                                    else {
+                                                        routes = [...excludedRoutes, { id: v.properties.gtfsId, suggestion: v, type: "route" as const }];
+                                                        setExcludedRoutes(routes)
+                                                    }
+                                                } else if (v.properties.type == "agency") {
+                                                    const i = excludedAgencies.findIndex(e => e.id == v.properties.gtfsId)
+                                                    if (i >= 0) {
+                                                        excludedAgencies.splice(i, 1)
+                                                        agencies = excludedAgencies
+                                                        setExcludedAgencies(excludedAgencies)
+                                                    }
+                                                    else {
+                                                        agencies = [...excludedAgencies, { id: v.properties.gtfsId, suggestion: v, type: "agency" as const }];
+                                                        setExcludedAgencies(agencies)
+                                                    }
+                                                }
+                                                option.value.forEach(p => {
+                                                    if (option.type == "exclude_include_routes") {
+                                                        const arr = p.includes("routes" as never) ? routes.map(r => r.id) : agencies.map(a => a.id)
+                                                        setConfig({ exclude: inclusionEnabled ? [] : arr, include: inclusionEnabled ? arr : [] }, p)
+                                                    } else {
+                                                        setConfig(p.includes("routes" as never) ? routes.map(r => r.id) : agencies.map(a => a.id), p)
+                                                    }
+                                                })
+                                            }}></InputField>
+                                        </>
+                                    case "import_export":
+                                        return <>
+                                            <div className="flex justify-between items-center"><span className={option.desc ? 'font-medium text-lg' : ""}>{option.name}</span>
+                                                <span className='flex flex-row gap-2'>
+                                                    <Button onClick={() => saveAs(new Blob([JSON.stringify(config.routingOptions)], { type: "application/json" }), "config.hekinav.json")}>Export</Button>
+                                                    <Button className='relative'>Import <input onChange={() => importConfig()} ref={fileInputRef} type='file' accept='.hekinav.json' className='absolute top-0 bottom-0 left-0 right-0 opacity-0'></input></Button>
+                                                </span>
+                                            </div>
+                                        </>
+                                    case "range":
+                                        return <>
+                                            <div className={`flex justify-between items-center ${option.desc && "mt-4"}`}><span className={option.desc ? 'font-medium text-lg' : ""}>{option.name}</span><Slider thumb={{ children: Math.max(...getConfig(...option.value)) }} track={{ className: "w-5/10! my-2 mr-4" }} label='' max={option.max} min={option.min} step={option.step} value={Math.max(...getConfig(...option.value))} setValue={(v) => setConfig(v, ...option.value)}></Slider></div>
+                                            {option.desc && <p>{option.desc}</p>}
+                                        </>
                                     case "toggle":
-                                        return <div className="flex justify-between"><span>{option.name}</span><Toggle state={getConfig(...option.value).every(v => v)} setState={(v) => setConfig(v, ...option.value)}></Toggle></div>
+                                    case "toggle_number":
+                                        return <div className="flex justify-between"><span>{option.name}</span><Toggle state={getConfig(...option.value).every(v => option.type == "toggle_number" ? v >= option.on : v)} setState={(v) => setConfig(option.type == "toggle_number" ? (v ? option.on : option.off) : v, ...option.value)}></Toggle></div>
                                     case "icon_toggle":
-                                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                                        return <Button className='p-0' title={option.name} key={i} onClick={() => setConfig(!getConfig(...option.value).every(v => v), ...option.value)}><Icon>{{ ...option.icon, props: { ...(option.icon.props as object), height: 28, width: 28, className: `${(option.icon.props as any).className} ${getConfig(...option.value).every(v => v) ? "" : "text-gray!"}` } }}</Icon></Button>
+                                    case "icon_toggle_number":
+                                        return <Button className='p-0' title={option.name} key={i} onClick={() => {
+                                            const value = getConfig(...option.value).every(v => option.type == "icon_toggle_number" ? v >= option.on : v)
+                                            setConfig(option.type == "icon_toggle_number" ? (value ? option.off : option.on) : !value, ...option.value)
+                                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                        }}><Icon>{{ ...option.icon, props: { ...(option.icon.props as object), height: 28, width: 28, className: `${(option.icon.props as any).className} ${getConfig(...option.value).every(v => v) ? "" : "text-gray!"}` } }}</Icon></Button>
                                     case "dropdown":
                                         return <div>
                                             <div className="text-lg font-medium">{option.name}</div>
-                                            <Dropdown<number | string> key={i} initial={option.options.find(o => getConfig(...option.value).every(v => v == o.id))?.content} items={option.options}></Dropdown>
+                                            <Dropdown<number | string> key={i} initial={`${Math.max(...getConfig(...option.value))} km/h`} onSet={(i) => typeof i.id == "number" && setConfig(i.id, ...option.value)} items={option.options}></Dropdown>
                                         </div>
                                     default:
                                         return <div key={i}></div>
@@ -196,16 +355,16 @@ export default function RoutingUi({iDateTime = new Date(), iDestination = null, 
             <Sidebar>
                 <div className='flex flex-row gap-2'>
                     <InputField initialValue={origin?.text} suggestionFunction={(t) => placeSearch(t, map?.getCenter() || new LngLat(24.94, 60.18), isHsl)} onlySuggestions placeholder='Origin' name='origin' onValueSet={(_t, v) => setOrigin(typeof v == "string" ? null : v)} icon={<LocationOn className='text-blue'></LocationOn>}></InputField>
-                    <Button onClick={() => {const tempOrigin = origin; setOrigin(destination); setDestination(tempOrigin)}} className="w-min text-center text-darkgray h-min p-1.5!"><Icon><SyncAltW700 style={{transform: "rotate(90deg)"}} height={28} width={28}></SyncAltW700></Icon></Button>
-                    
+                    <Button onClick={() => { const tempOrigin = origin; setOrigin(destination); setDestination(tempOrigin) }} className="w-min text-center text-green h-min p-1.5!"><Icon><SyncAltW700 style={{ transform: "rotate(90deg)" }} height={28} width={28}></SyncAltW700></Icon></Button>
+
                 </div>
                 <div className='flex flex-row gap-2'>
-                <InputField initialValue={destination?.text} suggestionFunction={(t) => placeSearch(t, map?.getCenter() || new LngLat(24.94, 60.18), isHsl)} onlySuggestions placeholder='Destination' name='destination' onValueSet={(_t, v) => setDestination(typeof v == "string" ? null : v)} icon={<LocationOn className='text-red'></LocationOn>}></InputField>
+                    <InputField initialValue={destination?.text} suggestionFunction={(t) => placeSearch(t, map?.getCenter() || new LngLat(24.94, 60.18), isHsl)} onlySuggestions placeholder='Destination' name='destination' onValueSet={(_t, v) => setDestination(typeof v == "string" ? null : v)} icon={<LocationOn className='text-red'></LocationOn>}></InputField>
                 </div>
                 <div className="flex flex-row gap-2">
                     <Button className="w-70 text-center h-min" onClick={() => setDepArr(depArr == "dep" ? "arr" : "dep")}>{depArr == "dep" ? "Departure" : "Arrival"}</Button>
                     <InputField className="h-min" name="date" initialValue={"Today"} suggestionFunction={async () => dateOptions} onlySuggestions onValueSet={(_n, v) => typeof v != "string" && setDate(new TZDate(v.id))} icon={<CalendarToday></CalendarToday>}></InputField>
-                    <InputField className="h-min" name="time" focusClear initialValue={format(time, "H:mm")} suggestionFunction={async (t) => timeOptions.filter(o => o.text.includes(t))} onlySuggestions onValueSet={(_n, v) => typeof v != "string" && setTime(new TZDate(v.id))} icon={<Schedule></Schedule>}></InputField>
+                    <InputField className="h-min" name="time" focusClear initialValue={format(time, "H:mm")} suggestionFunction={async (t) => timeOptions.filter(o => o.text.includes(t))} onValueSet={(n, v) => typeof v == "string" ? (new TZDate(n) && setTime(new TZDate(n))) : setTime(new TZDate(v.id))} icon={<Schedule></Schedule>}></InputField>
                     <Button onClick={() => setSettingsOpen(true)} className="w-min text-center text-darkgray h-min p-1.5!"><Icon><Settings height={28} width={28}></Settings></Icon></Button>
                 </div>
                 <Button onClick={plan} className='text-green text-2xl p-0.5!'>Search</Button>
@@ -241,5 +400,53 @@ async function placeSearch(text: string, focusPoint: LngLat, isHsl: boolean): Pr
         const result = await search(text, focusPoint.toArray(), isHsl)
         return result.length == 0 ? fallbackOptions : result
     }
+}
+
+let searchIndex = 0
+
+
+async function searchRouteAgency(text: string, isHsl: boolean, ignore: string[]): Promise<SearchSuggestion[]> {
+    searchIndex++
+    const index = searchIndex
+    miniSearch.removeAll()
+    if (text.length < 1) return []
+    const items = await searchRoutesAgencies(text, isHsl)
+    if (!items || !items.agencies || !items.routes) return []
+
+
+    const parsed = [
+        ...items.routes.map<SearchSuggestion>(r => {
+
+            return {
+                icon: IconTable[r?.mode || "BUS"], id: `${r?.gtfsId}`, text: r?.shortName || "" + r?.longName || "", name: <span>
+                    {r?.shortName && <Label className={`${getRouteColor("bg", r?.type || -1, r?.mode || "")} font-bold text-white`}>{r?.shortName}</Label>}
+                    <span className='ml-1 truncate mr-2'>{r?.longName}</span>
+                </span>,
+                desc: !isHsl ? r?.agency?.name : undefined,
+                properties: {
+                    type: "route",
+                    gtfsId: r?.gtfsId || ""
+                }
+            }
+        }),
+        ...items.agencies.map<SearchSuggestion>(a => {
+            return {
+                icon: <CorporateFareW700></CorporateFareW700>, id: `${a?.gtfsId}`, text: `${a?.name || ""} ${a?.gtfsId.split(":")[0] || ""} `,
+                name: a?.name || "",
+                properties: {
+                    type: "agency",
+                    gtfsId: a?.gtfsId || ""
+                }
+            }
+        })
+    ]
+    if (index < searchIndex) {
+        return []
+    }
+    await miniSearch.addAllAsync(parsed)
+    const results = miniSearch.search(text, { fuzzy: 0.2, prefix: true, boost: { text: 5 } })
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return results.filter(r => ignore.every(s => s != r.id)) as any
 }
 

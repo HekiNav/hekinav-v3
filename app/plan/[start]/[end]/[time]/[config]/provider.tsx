@@ -12,9 +12,9 @@ export type ContextType = ({
     data: NonNullable<PlanQueryQuery["planConnection"]>
 } & PlanQueryQueryVariables) | null
 
-export default function Context({ children, end, start }: PropsWithChildren & {start: string, end: string}) {
+export default function Context({ children, end, start }: PropsWithChildren & { start: string, end: string }) {
     const [a, setA] = useState<string>("idi")
-    const [prev, setPrev] = useState<{start: string, end: string}>({end: "", start: ""})
+    const [prev, setPrev] = useState<{ start: string, end: string }>({ end: "", start: "" })
     const isHsl = useIsHsl()
 
     function parseParam(t: string) {
@@ -29,9 +29,10 @@ export default function Context({ children, end, start }: PropsWithChildren & {s
 
     useEffect(() => {
         // eslint-disable-next-line react-hooks/set-state-in-effect
-        if (prev.end != end || prev.start != start) setA(end)
-        setPrev({end, start})
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        if (prev.end != end || prev.start != start) setA(end + Math.random().toString())
+        console.log(prev.end != end || prev.start != start)
+        setPrev({ end, start })
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [end, start])
 
     // eslint-disable-next-line react-hooks/exhaustive-deps

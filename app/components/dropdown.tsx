@@ -1,7 +1,7 @@
 // Dropdown.js 
 
 'use client'
-import React, { ReactNode, useState } from 'react';
+import React, { ReactNode, useEffect, useState } from 'react';
 import Icon from './icon';
 import { ArrowDropDownW700 as ArrowDropDown } from '@material-symbols-svg/react/icons/arrow-drop-down';
 
@@ -17,10 +17,15 @@ export interface DropdownItem<T> {
 }
 
 export default function Dropdown<T extends string | number>(props: DropdownProps<T>) {
-    const {small = false, items, initial, onSet, ...otherProps} = props
+    const { small = false, items, initial, onSet, ...otherProps } = props
 
     const [isOpen, setIsOpen] = useState(false);
     const [selectedLanguage, setSelectedLanguage] = useState<DropdownItem<T>>({ id: null, content: initial });
+
+    useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setSelectedLanguage({ id: null, content: initial })
+    }, [initial])
 
     const toggleDropdown = () => {
         setIsOpen(!isOpen);
