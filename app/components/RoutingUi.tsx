@@ -34,6 +34,8 @@ import MiniSearch from 'minisearch';
 import { searchRoutesAgencies } from '../lib/route_agency';
 import Label from './label';
 import { CorporateFareW700 } from '@material-symbols-svg/react/icons/corporate-fare';
+import { PlanModesInput, PlanPreferencesInput } from '../lib/__generated__/graphql';
+import { typedEntries } from '../lib/typedEntries';
 
 export type SearchSuggestion = Suggestion<{ type: "agency" | "route", gtfsId: string }>
 
@@ -41,8 +43,11 @@ const miniSearch = new MiniSearch<SearchSuggestion>({ fields: ["text", "gtfsId"]
 
 const timeOptions: Suggestion<object>[] = []
 
+const startOfToday = new TZDate(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()).withTimeZone("Europe/Helsinki")
+
+
 for (let i = 0; i < 96; i++) {
-    const date = new TZDate(1970, 0, 1, 0, i * 15, "Europe/Helsinki")
+    const date = new TZDate(startOfToday.getFullYear(), startOfToday.getMonth(), startOfToday.getDate(), 0, i * 15, "Europe/Helsinki")
     timeOptions.push({
         icon: <></>,
         text: format(date, "H:mm"),
@@ -51,7 +56,6 @@ for (let i = 0; i < 96; i++) {
 }
 
 const dateOptions: Suggestion<object>[] = []
-const startOfToday = new TZDate(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()).withTimeZone("Europe/Helsinki")
 for (let i = 0; i < 28; i++) {
     const date = new TZDate(startOfToday.getFullYear(), startOfToday.getMonth(), startOfToday.getDate() + i, "Europe/Helsinki")
     dateOptions.push({
@@ -75,10 +79,7 @@ export default function RoutingUi({ iDateTime = new Date(), iDestination = null,
     const [pickedLocationTarget, setPickedLocationTarget] = useState<"origin" | "destination" | null>(null)
     const [settingsOpen, setSettingsOpen] = useState<boolean>(false)
 
-    const [inclusionEnabled, setInclusionEnabled] = useState<boolean>(false)
-
-    const [excludedRoutes, setExcludedRoutes] = useState<{ id: string, suggestion: SearchSuggestion, type: "route" | "agency" }[]>([])
-    const [excludedAgencies, setExcludedAgencies] = useState<{ id: string, suggestion: SearchSuggestion, type: "route" | "agency" }[]>([])
+    const { config, setConfig, getConfig } = useContext(ConfigContext)
 
     const { setSidebarHidden } = useContext(FocusContext)
 
@@ -88,7 +89,6 @@ export default function RoutingUi({ iDateTime = new Date(), iDestination = null,
     const { default: map } = useMap()
     const router = useRouter()
     const isHsl = useIsHsl()
-    const { config, setConfig, getConfig } = useContext(ConfigContext)
 
     function getUserLocation(fn: Dispatch<SetStateAction<PlaceSuggestion | null>>) {
         if ("geolocation" in navigator) {
@@ -158,10 +158,6 @@ export default function RoutingUi({ iDateTime = new Date(), iDestination = null,
         if (setSidebarHidden) setSidebarHidden(false)
     })
 
-    useEffect(() => {
-        console.log(config.routingOptions, excludedRoutes)
-    })
-
     function plan() {
         if (!origin || !origin.properties) return toast("Select a valid origin")
         if (!destination || !destination.properties) return toast("Select a valid destination")
@@ -170,14 +166,40 @@ export default function RoutingUi({ iDateTime = new Date(), iDestination = null,
         const start = { label: origin.text, location: { coordinate: { latitude: origin.properties?.lat, longitude: origin.properties?.lng } } }
         const end = { label: destination.text, location: { coordinate: { latitude: destination.properties?.lat, longitude: destination.properties?.lng } } }
 
-        const url = `/plan/${JSON.stringify(start)}/${JSON.stringify(end)}/${depArr}/${dateTime.getTime()}/${JSON.stringify({})}/${isHsl ? "?hsl" : ""}`;
-        /* const routingConfig: RoutingConfig = {
+
+        const filter = config.routingOptions.includeExclude.reduce((p, c) => { const k = c.type == "agency" ? "agencies" : "routes"; return { ...p, [k]: [...(p[k] || []), c.id] } }, { agencies: null, routes: null } as { agencies: string[] | null, routes: string[] | null });
+        const routingConfig: { preferences: PlanPreferencesInput, modes: PlanModesInput } = {
+            preferences: {
+                transit: {
+                    filters: filter.agencies && filter.routes ? [
+                        {
+                            include: config.routingOptions.include ? (filter.agencies && filter.routes ? [filter] : null) : null,
+                            exclude: config.routingOptions.include ? null : (filter.agencies && filter.routes ? [filter] : null)
+                        }
+                    ] : null,
+                    board: {
+                        waitReluctance: config.routingOptions.waitReluctance
+                    },
+                    transfer: {
+                        cost: config.routingOptions.transferCost
+                    }
+                },
+                street: {
+                    walk: {
+                        reluctance: config.routingOptions.walkReluctance,
+                        speed: config.routingOptions.walkSpeed / 3.6
+                    }
+                }
+            },
             modes: {
                 transit: {
-                    transit: config.
+                    transit: typedEntries(config.routingOptions.modes).map(([k, v]) => ({ mode: k, cost: { reluctance: v } })).filter(e => e.cost.reluctance != 0)
                 }
             }
-        } */
+        }
+
+        const url = `/plan/${JSON.stringify(start)}/${JSON.stringify(end)}/${depArr}/${dateTime.getTime()}/${/* this is to minify the json */JSON.stringify(JSON.parse(JSON.stringify(routingConfig)))}/options/${isHsl ? "?hsl" : ""}`;
+
         router.push(url)
     }
 
@@ -228,89 +250,39 @@ export default function RoutingUi({ iDateTime = new Date(), iDestination = null,
                                             <h2 className='font-medium mb-1 text-lg mt-4'>{option.name}</h2>
                                             {option.type == "exclude_include_routes" && <>
                                                 <div className="flex justify-between items-center mb-2">List type
-                                                    <div className="flex w-min items-center">Exclude<Toggle state={inclusionEnabled} setState={(v) => {
-                                                        setInclusionEnabled(v)
-                                                        option.value.forEach(p => {
-                                                            if (option.type == "exclude_include_routes") {
-                                                                const arr = p.includes("routes" as never) ? excludedRoutes.map(r => r.id) : excludedAgencies.map(a => a.id)
-                                                                setConfig({ exclude: v ? [] : arr, include: v ? arr : [] }, p)
-                                                            } else {
-                                                                // @ts-expect-error i have no idea tbh
-                                                                setConfig(p.includes("routes" as never) ? excludedRoutes.map(r => r.id) : excludedAgencies.map(a => a.id), p)
-                                                            }
-                                                        })
+                                                    <div className="flex w-min items-center">Exclude<Toggle state={getConfig(...option.secondaryValue) as never} setState={(v) => {
+                                                        setConfig(v, ...option.secondaryValue)
                                                     }}></Toggle>Include</div>
                                                 </div>
                                             </>}
-                                            {(excludedAgencies.length > 0 || excludedRoutes.length > 0) && (<div className='flex flex-col gap-1 mb-2'>
-                                                <div className='text-lg font-medium'>{inclusionEnabled ? "Included" : "Excluded"}</div>
-                                                {...[...excludedAgencies, ...excludedRoutes].map((e, i) => <div className='flex w-full truncate items-center justify-between' key={i}><div className='shrink truncate'>{e.suggestion.name}</div><Button className='px-1! rounded-md! text-black hover:border-red! hover:text-red! p-0! flex items-center justify-center' onClick={() => {
-                                                    let agencies: { id: string, suggestion: SearchSuggestion, type: "route" | "agency" }[] = excludedAgencies
-                                                    let routes: { id: string, suggestion: SearchSuggestion, type: "route" | "agency" }[] = excludedRoutes
+                                            {(getConfig(...option.value).length > 0) && (<div className='flex flex-col gap-1 mb-2'>
+                                                <div className='text-lg font-medium'>{getConfig(...option.secondaryValue) as never ? "Included" : "Excluded"}</div>
+                                                {...getConfig(...option.value).flat().map((e, i) => <div className='flex w-full truncate items-center justify-between' key={i}><div className='shrink truncate'>{e.name}</div><Button className='px-1! rounded-md! text-black hover:border-red! hover:text-red! p-0! flex items-center justify-center' onClick={() => {
 
-                                                    if (e.type == "route") {
-                                                        const i = excludedRoutes.findIndex(t => e.id == t.id)
-                                                        if (i < 0) return
-                                                        excludedRoutes.splice(i, 1)
-                                                        routes = excludedRoutes
-                                                        setExcludedRoutes(excludedRoutes)
-                                                    } else if (e.type == "agency") {
-                                                        const i = excludedAgencies.findIndex(t => e.id == t.id)
-                                                        if (i < 0) return
-                                                        excludedAgencies.splice(i, 1)
-                                                        agencies = excludedAgencies
-                                                        setExcludedAgencies(excludedAgencies)
-                                                    }
-                                                    console.log(agencies, routes)
-                                                    option.value.forEach(p => {
-                                                        if (option.type == "exclude_include_routes") {
-                                                            const arr = p.includes("routes" as never) ? routes.map(r => r.id) : agencies.map(a => a.id)
-                                                            setConfig({ exclude: inclusionEnabled ? [] : arr, include: inclusionEnabled ? arr : [] }, p)
-                                                        } else {
-                                                            setConfig(p.includes("routes" as never) ? routes.map(r => r.id) : agencies.map(a => a.id), p)
-                                                        }
-                                                    })
+                                                    const excludedIncluded = getConfig(...option.value).flat()
+
+                                                    const i = excludedIncluded.findIndex(t => e.id == t.id)
+                                                    if (i < 0) return
+                                                    excludedIncluded.splice(i, 1)
+                                                    setConfig(excludedIncluded, ...option.value)
+
                                                 }}>Remove</Button></div>)}
                                             </div>)}
-                                            <InputField suggestionFunction={(t) => searchRouteAgency(t, isHsl, [...excludedAgencies.map(a => a.id), ...excludedRoutes.map(r => r.id)])} icon={<></>} name='agency_route_search' placeholder='Route or agency' onValueSet={(n, v) => {
+                                            <InputField suggestionFunction={(t) => searchRouteAgency(t, isHsl, getConfig(...option.value).flat().map(e => e.id))} icon={<></>} name='agency_route_search' placeholder='Route or agency' onValueSet={(n, v) => {
                                                 if (typeof v == "string") return;
                                                 if (option.type == "exclude_routes") {
-                                                    setInclusionEnabled(false)
+                                                    setConfig(false, ...option.secondaryValue)
                                                 }
-                                                let agencies: { id: string, suggestion: SearchSuggestion, type: "route" | "agency" }[] = excludedAgencies
-                                                let routes: { id: string, suggestion: SearchSuggestion, type: "route" | "agency" }[] = excludedRoutes
 
-                                                if (v.properties.type == "route") {
-                                                    const i = excludedRoutes.findIndex(e => e.id == v.properties.gtfsId)
-                                                    if (i >= 0) {
-                                                        excludedRoutes.splice(i, 1)
-                                                        routes = excludedRoutes
-                                                        setExcludedRoutes(excludedRoutes)
-                                                    }
-                                                    else {
-                                                        routes = [...excludedRoutes, { id: v.properties.gtfsId, suggestion: v, type: "route" as const }];
-                                                        setExcludedRoutes(routes)
-                                                    }
-                                                } else if (v.properties.type == "agency") {
-                                                    const i = excludedAgencies.findIndex(e => e.id == v.properties.gtfsId)
-                                                    if (i >= 0) {
-                                                        excludedAgencies.splice(i, 1)
-                                                        agencies = excludedAgencies
-                                                        setExcludedAgencies(excludedAgencies)
-                                                    }
-                                                    else {
-                                                        agencies = [...excludedAgencies, { id: v.properties.gtfsId, suggestion: v, type: "agency" as const }];
-                                                        setExcludedAgencies(agencies)
-                                                    }
+                                                const excludedIncluded = getConfig(...option.value).flat()
+
+                                                const i = excludedIncluded.findIndex(t => v.id == t.id)
+                                                if (i < 0) {
+                                                    setConfig([...excludedIncluded, v.properties], ...option.value)
+                                                } else {
+                                                    excludedIncluded.splice(i, 1)
+                                                    setConfig(excludedIncluded, ...option.value)
                                                 }
-                                                option.value.forEach(p => {
-                                                    if (option.type == "exclude_include_routes") {
-                                                        const arr = p.includes("routes" as never) ? routes.map(r => r.id) : agencies.map(a => a.id)
-                                                        setConfig({ exclude: inclusionEnabled ? [] : arr, include: inclusionEnabled ? arr : [] }, p)
-                                                    } else {
-                                                        setConfig(p.includes("routes" as never) ? routes.map(r => r.id) : agencies.map(a => a.id), p)
-                                                    }
-                                                })
                                             }}></InputField>
                                         </>
                                     case "import_export":
@@ -327,14 +299,20 @@ export default function RoutingUi({ iDateTime = new Date(), iDestination = null,
                                             <div className={`flex justify-between items-center ${option.desc && "mt-4"}`}><span className={option.desc ? 'font-medium text-lg' : ""}>{option.name}</span><Slider thumb={{ children: Math.max(...getConfig(...option.value)) }} track={{ className: "w-5/10! my-2 mr-4" }} label='' max={option.max} min={option.min} step={option.step} value={Math.max(...getConfig(...option.value))} setValue={(v) => setConfig(v, ...option.value)}></Slider></div>
                                             {option.desc && <p>{option.desc}</p>}
                                         </>
-                                    case "toggle":
                                     case "toggle_number":
-                                        return <div className="flex justify-between"><span>{option.name}</span><Toggle state={getConfig(...option.value).every(v => option.type == "toggle_number" ? v >= option.on : v)} setState={(v) => setConfig(option.type == "toggle_number" ? (v ? option.on : option.off) : v, ...option.value)}></Toggle></div>
+                                        return <div className="flex justify-between"><span>{option.name}</span><Toggle state={getConfig(...option.value).every(v => v >= option.on)} setState={(v) => setConfig(v ? option.on : option.off, ...option.value)}></Toggle></div>
+                                    case "toggle":
+                                        return <div className="flex justify-between"><span>{option.name}</span><Toggle state={getConfig(...option.value).every(v => v)} setState={(v) => setConfig(v, ...option.value)}></Toggle></div>
                                     case "icon_toggle":
+                                        return <Button className='p-0' title={option.name} key={i} onClick={() => {
+                                            const value = getConfig(...option.value).every(v => v)
+                                            setConfig(!value, ...option.value)
+                                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                        }}><Icon>{{ ...option.icon, props: { ...(option.icon.props as object), height: 28, width: 28, className: `${(option.icon.props as any).className} ${getConfig(...option.value).every(v => v) ? "" : "text-gray!"}` } }}</Icon></Button>
                                     case "icon_toggle_number":
                                         return <Button className='p-0' title={option.name} key={i} onClick={() => {
-                                            const value = getConfig(...option.value).every(v => option.type == "icon_toggle_number" ? v >= option.on : v)
-                                            setConfig(option.type == "icon_toggle_number" ? (value ? option.off : option.on) : !value, ...option.value)
+                                            const value = getConfig(...option.value).every(v => v >= option.on)
+                                            setConfig(value ? option.off : option.on, ...option.value)
                                             // eslint-disable-next-line @typescript-eslint/no-explicit-any
                                         }}><Icon>{{ ...option.icon, props: { ...(option.icon.props as object), height: 28, width: 28, className: `${(option.icon.props as any).className} ${getConfig(...option.value).every(v => v) ? "" : "text-gray!"}` } }}</Icon></Button>
                                     case "dropdown":
@@ -363,8 +341,15 @@ export default function RoutingUi({ iDateTime = new Date(), iDestination = null,
                 </div>
                 <div className="flex flex-row gap-2">
                     <Button className="w-70 text-center h-min" onClick={() => setDepArr(depArr == "dep" ? "arr" : "dep")}>{depArr == "dep" ? "Departure" : "Arrival"}</Button>
-                    <InputField className="h-min" name="date" initialValue={"Today"} suggestionFunction={async () => dateOptions} onlySuggestions onValueSet={(_n, v) => typeof v != "string" && setDate(new TZDate(v.id))} icon={<CalendarToday></CalendarToday>}></InputField>
-                    <InputField className="h-min" name="time" focusClear initialValue={format(time, "H:mm")} suggestionFunction={async (t) => timeOptions.filter(o => o.text.includes(t))} onValueSet={(n, v) => typeof v == "string" ? (new TZDate(n) && setTime(new TZDate(n))) : setTime(new TZDate(v.id))} icon={<Schedule></Schedule>}></InputField>
+                    <InputField className="h-min" name="date" initialValue={isToday(date) ? "Today" : isTomorrow(date) ? "Tomorrow" : format(date, "ccc d.M.")} suggestionFunction={async () => dateOptions} onlySuggestions onValueSet={(_n, v) => typeof v != "string" && setDate(new TZDate(v.id))} icon={<CalendarToday></CalendarToday>}></InputField>
+                    <InputField className="h-min" name="time" focusClear initialValue={format(time, "H:mm")} suggestionFunction={async (t) => timeOptions.filter(o => o.text.includes(t))} onValueSet={(n, v) => {
+                        if (typeof v == "string") {
+                            const dt = new Date()
+                            const [hours, mins] = v.split(":").map(e => Number(e))
+                            const time = new TZDate(dt.getFullYear(), dt.getMonth(), dt.getDate(), hours, mins)
+                            if (!isNaN(time.getTime()) && v.split(":")[1] && v.split(":")[1].length == 2) setTime(new TZDate(time))
+                        } else setTime(new TZDate(v.id))
+                    }} icon={<Schedule></Schedule>}></InputField>
                     <Button onClick={() => setSettingsOpen(true)} className="w-min text-center text-darkgray h-min p-1.5!"><Icon><Settings height={28} width={28}></Settings></Icon></Button>
                 </div>
                 <Button onClick={plan} className='text-green text-2xl p-0.5!'>Search</Button>

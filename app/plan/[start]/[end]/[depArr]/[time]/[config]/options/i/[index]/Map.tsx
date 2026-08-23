@@ -285,11 +285,11 @@ export function Map({ data, selectedRoute, destination, origin }: { data: NonNul
         const msg: { VP?: { lat: number, long: number, oper: number, desi: string, veh: number, seq: number } } | undefined = JSON.parse(message?.message?.toString() as string)
         if (!msg || !msg.VP) return
 
-        const route = data.edges[selectedRoute]?.node.legs.find(l => l?.transitLeg && l.trip?.route.shortName == msg.VP?.desi)?.trip?.route
+        const route = data.edges[selectedRoute]?.node.legs.find(l => (l?.transitLeg && l.trip?.route.shortName) == (msg.VP?.desi || "-"))?.trip?.route
 
-        const veh = { id: `${msg.VP.oper}${msg.VP.veh}`, lat: msg.VP.lat, lng: msg.VP.long, name: msg.VP.desi }
+        const veh = { id: `${msg.VP.oper}${msg.VP.veh}`, lat: msg.VP.lat, lng: msg.VP.long, name: msg.VP.desi, color: getColor(route?.type || -1, route?.mode || "") }
         const newVPos: VPos[] = [...vPosCache.filter(v => v.id != veh.id), veh]
-        vPos = newVPos.map<GeoJSON.Feature<GeoJSON.Point, { type: "vehicle", text_size: number, color: string } & VPos>>(v => ({ geometry: { type: "Point", coordinates: [v.lng, v.lat] }, properties: { ...v, type: "vehicle", text_size: textSize(v.name.length), color: getColor(route?.type || -1, route?.mode || "") }, type: "Feature" })).sort((a, b) => Number(a.properties.id) - Number(b.properties.id))
+        vPos = newVPos.map<GeoJSON.Feature<GeoJSON.Point, { type: "vehicle", text_size: number, color: string } & VPos>>(v => ({ geometry: { type: "Point", coordinates: [v.lng, v.lat] }, properties: { ...v, type: "vehicle", text_size: textSize(v.name.length) }, type: "Feature" })).sort((a, b) => Number(a.properties.id) - Number(b.properties.id))
         // eslint-disable-next-line react-hooks/set-state-in-effect
         setVposCache(newVPos)
       } else {

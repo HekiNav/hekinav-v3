@@ -7,6 +7,8 @@ import Loading from "./loading";
 import { useIsHsl } from "@/app/hooks/useHsl";
 import { TZDate } from "@date-fns/tz";
 import { RoutingConfig } from "@/app/lib/digitransit";
+import { PlanLabeledLocationInput } from "@/app/lib/__generated__/graphql";
+import { usePathname } from "next/navigation";
 
 export const PlanContext = createContext<ContextType>(null)
 
@@ -15,11 +17,14 @@ export type ContextType = ({
     depArr: "dep" | "arr"
     dateTime: TZDate
     config: RoutingConfig
-} & PlanQueryQueryVariables) | null
+
+    destination: PlanLabeledLocationInput
+    origin: PlanLabeledLocationInput
+}) | null
 
 export default function Context({ children, end, start, config, depArr, time }: PropsWithChildren & { start: string, end: string, depArr: "dep" | "arr", config: string, time: string }) {
-    const [a, setA] = useState<string>("idi")
-    const [prev, setPrev] = useState<{ start: string, end: string }>({ end: "", start: "" })
+    const [a, setA] = useState<string>("")
+    const [prev, setPrev] = useState<string>("")
     const isHsl = useIsHsl()
 
     function parseParam(t: string) {
@@ -34,29 +39,36 @@ export default function Context({ children, end, start, config, depArr, time }: 
     const options: RoutingConfig = parseParam(config)
     const dateTime = new TZDate(Number(time), "UTC")
 
-    console.log(dateTime)
 
     useEffect(() => {
         // eslint-disable-next-line react-hooks/set-state-in-effect
-        if (prev.end != end || prev.start != start) setA(end + Math.random().toString())
-        console.log(prev.end != end || prev.start != start)
-        setPrev({ end, start })
+        if (end + start + config + depArr + time != prev) setA(end + Math.random().toString())
+        setPrev(end + start + config + depArr + time)
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [end, start])
+    }, [end, start, options, config, depArr, time])
 
+    console.log("data:\n", origin, "\n", destination, "\n", isHsl, "\n", options, "\n", dateTime, "\n", depArr, "\n")
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    const planPromise = useMemo(() => getPlan(origin, destination, isHsl), [a])
+    const planPromise = useMemo(() => getPlan(origin, destination, isHsl, options, dateTime, depArr), [a])
+
+    useEffect(() => {
+        planPromise.then((v) => {
+            console.log(v)
+            setTimeout(() => {if (!v) setA(Math.random().toString())}, 1000)
+        })
+    })
 
     return (<Suspense fallback={<Loading></Loading>}><PlanData config={options} dateTime={dateTime} depArr={depArr} destination={destination} origin={origin} promise={planPromise}>{children}</PlanData></Suspense>)
 }
 
-export function PlanData({ children, promise, destination, origin, config, dateTime, depArr }: PropsWithChildren & PlanQueryQueryVariables & { promise: Promise<PlanQueryQuery["planConnection"]>, depArr: "dep" | "arr", dateTime: TZDate, config: RoutingConfig }) {
+export function PlanData({ children, promise, destination, origin, config, dateTime, depArr }: PropsWithChildren & { promise: Promise<PlanQueryQuery["planConnection"]>, depArr: "dep" | "arr", dateTime: TZDate, config: RoutingConfig, origin: PlanLabeledLocationInput, destination: PlanLabeledLocationInput }) {
     const data = use(promise)
 
-    const [rr, setRr] = useState<boolean>()
+    const [rr, setRr] = useState<boolean>(false)
 
     console.log(data)
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
         if (rr) return
         // eslint-disable-next-line react-hooks/set-state-in-effect

@@ -4,16 +4,18 @@ import { PlanQueryQuery, PlanQueryQueryVariables } from "./layout.generated";
 import { Sidebar } from "@/app/mapcontext";
 import { Metadata } from "next";
 import Context from "./provider";
-import { TZDate } from "@date-fns/tz";
 
 
 export const GET_PLAN:
   TypedDocumentNode<PlanQueryQuery, PlanQueryQueryVariables> =
   gql`
-  query PlanQuery($origin: PlanLabeledLocationInput!, $destination: PlanLabeledLocationInput!) {
+  query PlanQuery($origin: PlanLabeledLocationInput!, $destination: PlanLabeledLocationInput!, $preferences: PlanPreferencesInput!, $modes: PlanModesInput!, $dateTime: PlanDateTimeInput) {
     planConnection(
       origin: $origin,
-      destination: $destination
+      destination: $destination,
+      preferences: $preferences,
+      modes: $modes,
+      dateTime: $dateTime,
     ) {
       routingErrors {
         code

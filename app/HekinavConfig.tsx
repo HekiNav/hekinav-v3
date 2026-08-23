@@ -7,7 +7,7 @@ export type RoutingOption<T extends string, V> = {
   name: string,
   desc: string,
   type: T
-  value: HekinavConfigPathTo<V>[]
+  value: readonly [HekinavConfigPathTo<V>, ...HekinavConfigPathTo<V>[]]
 }
 
 export type IconToggleRoutingOption = RoutingOption<"icon_toggle", boolean> & {
@@ -29,12 +29,16 @@ export type RangeRoutingOption = RoutingOption<"range", number> & {
 
 export type ToggleRoutingOption = RoutingOption<"toggle", boolean>
 
-export type ImportExportRoutingOption = RoutingOption<"import_export", null>
+export type ImportExportRoutingOption = RoutingOption<"import_export", boolean>
 
 
-export type ExcludeRoutes = RoutingOption<"exclude_routes", string[]>
+export type ExcludeRoutes = RoutingOption<"exclude_routes", IncludeExclude[]> & {
+  secondaryValue: readonly [HekinavConfigPathTo<boolean>, ...HekinavConfigPathTo<boolean>[]]
+}
 
-export type ExcludeIncludeRoutes = RoutingOption<"exclude_include_routes", {exclude: string[], include: string[]}>
+export type ExcludeIncludeRoutes = RoutingOption<"exclude_include_routes", IncludeExclude[]> & {
+  secondaryValue: readonly [HekinavConfigPathTo<boolean>, ...HekinavConfigPathTo<boolean>[]]
+}
 
 export type NumberToggleRoutingOption = RoutingOption<"toggle_number", number> & {
   on: number,
@@ -54,7 +58,7 @@ export type RoutingNode<T = AnyRoutingOption> = RoutingOptionGroup<T> | T
 
 
 
-export type AnyRoutingOption = IconToggleRoutingOption | ToggleRoutingOption | DropdownRoutingOption<string> | DropdownRoutingOption<number> | NumberIconToggleRoutingOption | NumberToggleRoutingOption | RangeRoutingOption | ImportExportRoutingOption | ExcludeRoutes | ExcludeIncludeRoutes
+export type AnyRoutingOption = IconToggleRoutingOption | ToggleRoutingOption | DropdownRoutingOption<number> | NumberIconToggleRoutingOption | NumberToggleRoutingOption | RangeRoutingOption | ImportExportRoutingOption | ExcludeRoutes | ExcludeIncludeRoutes
 
 export interface HekinavConfig {
   advancedDepartures: boolean;
@@ -65,9 +69,15 @@ export interface HekinavConfig {
     waitReluctance: number
     walkReluctance: number
     walkSpeed: number
-    agencies: {include: string[], exclude: string[]}
-    routes: {include: string[], exclude: string[]}
+    includeExclude: IncludeExclude[]
+    include: boolean
   }
+}
+export interface IncludeExclude {
+  name: string,
+  code: string,
+  type: "route" | "agency",
+  id: string
 }
 
 export const RoutingOptionsUiConfig: RoutingNode[] = [
@@ -75,7 +85,7 @@ export const RoutingOptionsUiConfig: RoutingNode[] = [
     type: "import_export",
     desc: "",
     name: "Import and export",
-    value: []
+    value: [["advancedDepartures"]] // not actually used
   },
   {
     type: "group",
@@ -152,7 +162,8 @@ export const RoutingOptionsUiConfig: RoutingNode[] = [
     type: "exclude_routes",
     desc: "",
     name: "Exclude routes and agencies",
-    value: [["routingOptions", "agencies", "exclude"], ["routingOptions", "routes", "exclude"]]
+    value: [["routingOptions", "includeExclude"]],
+    secondaryValue: [["routingOptions", "include"]]
   },
   {
     type: "dropdown",
@@ -213,16 +224,16 @@ export const AdvancedRoutingOptions: RoutingNode[] = [
     type: "group",
     direction: "vertical",
     name: "Modes",
-    desc: "0 = disabled, 1 = baseline, 0.5 = 50% less preferred than baseline",
+    desc: "0 = disabled, 1 = baseline, 2 = 2 times less preferred than baseline",
     items: [
       {
         value: [["routingOptions", "modes", "BUS"]],
         name: "Bus",
         desc: "",
         type: "range",
-        max: 1,
+        max: 10,
         min: 0,
-        step: 0.05,
+        step: 0.2,
         id: "BUS"
       },
       {
@@ -230,9 +241,9 @@ export const AdvancedRoutingOptions: RoutingNode[] = [
         name: "Tram",
         desc: "",
         type: "range",
-        max: 1,
+        max: 10,
         min: 0,
-        step: 0.05,
+        step: 0.2,
         id: "TRAM"
       },
       {
@@ -240,9 +251,9 @@ export const AdvancedRoutingOptions: RoutingNode[] = [
         name: "Rail",
         desc: "",
         type: "range",
-        max: 1,
+        max: 10,
         min: 0,
-        step: 0.05,
+        step: 0.2,
         id: "RAIL"
       },
       {
@@ -250,9 +261,9 @@ export const AdvancedRoutingOptions: RoutingNode[] = [
         name: "Metro",
         desc: "",
         type: "range",
-        max: 1,
+        max: 10,
         min: 0,
-        step: 0.05,
+        step: 0.2,
         id: "SUBWAY"
       },
       {
@@ -260,9 +271,9 @@ export const AdvancedRoutingOptions: RoutingNode[] = [
         name: "Ferry",
         desc: "",
         type: "range",
-        max: 1,
+        max: 10,
         min: 0,
-        step: 0.05,
+        step: 0.2,
         id: "FERRY"
       },
       {
@@ -270,9 +281,9 @@ export const AdvancedRoutingOptions: RoutingNode[] = [
         name: "Airplane",
         desc: "",
         type: "range",
-        max: 1,
+        max: 10,
         min: 0,
-        step: 0.05,
+        step: 0.2,
         id: "AIRPLANE"
       },
       {
@@ -280,9 +291,9 @@ export const AdvancedRoutingOptions: RoutingNode[] = [
         name: "Coach",
         desc: "",
         type: "range",
-        max: 1,
+        max: 10,
         min: 0,
-        step: 0.05,
+        step: 0.2,
         id: "COACH"
       },
       {
@@ -290,9 +301,9 @@ export const AdvancedRoutingOptions: RoutingNode[] = [
         name: "Monorail",
         desc: "",
         type: "range",
-        max: 1,
+        max: 10,
         min: 0,
-        step: 0.05,
+        step: 0.2,
         id: "MONORAIL"
       },
       {
@@ -300,9 +311,9 @@ export const AdvancedRoutingOptions: RoutingNode[] = [
         name: "Cable car",
         desc: "",
         type: "range",
-        max: 1,
+        max: 10,
         min: 0,
-        step: 0.05,
+        step: 0.2,
         id: "CABLE_CAR"
       },
       {
@@ -310,9 +321,9 @@ export const AdvancedRoutingOptions: RoutingNode[] = [
         name: "Gondola",
         desc: "",
         type: "range",
-        max: 1,
+        max: 10,
         min: 0,
-        step: 0.05,
+        step: 0.2,
         id: "GONDOLA"
       },
       {
@@ -320,9 +331,9 @@ export const AdvancedRoutingOptions: RoutingNode[] = [
         name: "Funicular",
         desc: "",
         type: "range",
-        max: 1,
+        max: 10,
         min: 0,
-        step: 0.05,
+        step: 0.2,
         id: "FUNICULAR"
       },
       {
@@ -330,9 +341,9 @@ export const AdvancedRoutingOptions: RoutingNode[] = [
         name: "Carpool",
         desc: "",
         type: "range",
-        max: 1,
+        max: 10,
         min: 0,
-        step: 0.05,
+        step: 0.2,
         id: "CARPOOL"
       },
       {
@@ -340,9 +351,9 @@ export const AdvancedRoutingOptions: RoutingNode[] = [
         name: "Taxi",
         desc: "",
         type: "range",
-        max: 1,
+        max: 10,
         min: 0,
-        step: 0.05,
+        step: 0.2,
         id: "TAXI"
       },
       {
@@ -350,9 +361,9 @@ export const AdvancedRoutingOptions: RoutingNode[] = [
         name: "Trolleybus",
         desc: "",
         type: "range",
-        max: 1,
+        max: 10,
         min: 0,
-        step: 0.05,
+        step: 0.2,
         id: "TROLLEYBUS"
       },
       {
@@ -360,9 +371,9 @@ export const AdvancedRoutingOptions: RoutingNode[] = [
         name: "Snow vehicles",
         desc: "",
         type: "range",
-        max: 1,
+        max: 10,
         min: 0,
-        step: 0.05,
+        step: 0.2,
         id: "SNOW_AND_ICE"
       }
     ]
@@ -371,7 +382,8 @@ export const AdvancedRoutingOptions: RoutingNode[] = [
     type: "exclude_include_routes",
     desc: "",
     name: "Exclude routes and agencies",
-    value: [["routingOptions", "agencies"], ["routingOptions", "routes"]]
+    value: [["routingOptions", "includeExclude"]],
+    secondaryValue: [["routingOptions", "include"]]
   },
   {
     type: "range",
@@ -432,8 +444,8 @@ export const defaultConfig: HekinavConfig = {
       TRAM: 1,
       TROLLEYBUS: 1
     },
-    agencies: {exclude: [], include: []},
-    routes: {exclude: [], include: []},
+    includeExclude: [],
+    include: false,
     transferCost: 0,
     walkReluctance: 1.5,
     waitReluctance: 1,
@@ -450,15 +462,15 @@ type AllPaths<T> = T extends readonly any[]
   ? never // arrays are leaves, not walkable objects
   : T extends object
   ? {
-      [K in keyof T]-?:
-        | readonly [K]
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        | (T[K] extends readonly any[]
-            ? never
-            : T[K] extends object
-            ? readonly [K, ...AllPaths<T[K]>]
-            : never);
-    }[keyof T]
+    [K in keyof T]-?:
+    | readonly [K]
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    | (T[K] extends readonly any[]
+      ? never
+      : T[K] extends object
+      ? readonly [K, ...AllPaths<T[K]>]
+      : never);
+  }[keyof T]
   : never;
 
 type PathValue<T, P extends readonly PropertyKey[]> = P extends readonly [
@@ -466,39 +478,42 @@ type PathValue<T, P extends readonly PropertyKey[]> = P extends readonly [
   ...infer Rest
 ]
   ? K extends keyof T
-    ? Rest extends readonly []
-      ? T[K]
-      : Rest extends readonly PropertyKey[]
-      ? PathValue<T[K], Rest>
-      : never
-    : never
+  ? Rest extends readonly []
+  ? T[K]
+  : Rest extends readonly PropertyKey[]
+  ? PathValue<T[K], Rest>
+  : never
+  : never
   : never;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type PathsToValue<T, V, Prev extends readonly PropertyKey[] = []> = T extends readonly any[]
   ? T extends V
-    ? readonly [...Prev]
-    : never
+  ? readonly [...Prev]
+  : never
   : {
-      [K in keyof T]-?: T[K] extends V
-        ? readonly [...Prev, K]
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        : T[K] extends readonly any[]
-        ? never
-        : T[K] extends object
-        ? PathsToValue<T[K], V, readonly [...Prev, K]>
-        : never;
-    }[keyof T];
+    [K in keyof T]-?: T[K] extends V
+    ? readonly [...Prev, K]
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    : T[K] extends readonly any[]
+    ? never
+    : T[K] extends object
+    ? PathsToValue<T[K], V, readonly [...Prev, K]>
+    : never;
+  }[keyof T];
 
 export type HekinavConfigPathTo<V> = PathsToValue<HekinavConfig, V>;
 
-export type SetHekinavConfigKey = <P extends AllPaths<HekinavConfig>>(
-  value: PathValue<HekinavConfig, P>,
-  ...path: P[]
+
+
+export type SetHekinavConfigKey = <V>(
+  value: V,
+  ...paths: readonly [HekinavConfigPathTo<V>, ...HekinavConfigPathTo<V>[]]
 ) => void;
 
-export type GetHekinavConfigKey = <P extends AllPaths<HekinavConfig>>(
-  ...path: P[]
-) => HekinavConfigPathTo<P>[];
+export type GetHekinavConfigKey = <P1 extends AllPaths<HekinavConfig>, V = PathValue<HekinavConfig, P1>> (
+  ...paths: readonly [P1, ...HekinavConfigPathTo<V>[]]
+) => V[];
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const ConfigContext = createContext<{ config: HekinavConfig; setConfig: SetHekinavConfigKey; getConfig: GetHekinavConfigKey }>({ config: defaultConfig, setConfig: () => { }, getConfig: () => { return {} as any } });

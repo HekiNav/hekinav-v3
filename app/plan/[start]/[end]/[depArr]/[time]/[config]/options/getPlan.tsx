@@ -2,9 +2,11 @@
 import { PlanLabeledLocationInput } from "@/app/lib/__generated__/graphql";
 import { ApolloClient, HttpLink, InMemoryCache } from "@apollo/client";
 import { GET_PLAN } from "./layout";
+import { RoutingConfig } from "@/app/lib/digitransit";
+import { TZDate } from "@date-fns/tz";
 
 
-export async function getPlan(origin: PlanLabeledLocationInput, destination: PlanLabeledLocationInput, isHsl: boolean) {
+export async function getPlan(origin: PlanLabeledLocationInput, destination: PlanLabeledLocationInput, isHsl: boolean, config: RoutingConfig, dateTime: TZDate, depArr: "dep" | "arr") {
   if (!origin || !destination) {
     console.log("NO ORIGIN OR DESTINATION");
     return null;
@@ -15,11 +17,14 @@ export async function getPlan(origin: PlanLabeledLocationInput, destination: Pla
     cache: new InMemoryCache(),
   });
 
+
   const result = await client.query({
     query: GET_PLAN,
     variables: {
       destination,
-      origin
+      origin,
+      ...config,
+      dateTime: {[depArr == "arr" ? "latestArrival" : "earliestDeparture"]: dateTime}
     }
   });
 

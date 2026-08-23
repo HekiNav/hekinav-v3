@@ -86,7 +86,7 @@ export default function Content() {
                                     {l?.transitLeg ? <>
                                         <Link className="decoration-none" href={`/route/${l.trip?.route.gtfsId}/${l.trip?.pattern?.code.split(":")[2] || ""}-${l.trip?.pattern?.code.split(":")[3] || ""}/${isHsl ? "?hsl" : ""}`}><Label className={`font-bold text-white ${getRouteColor("bg", route?.type || -1, route?.mode || "")}`}>{route?.shortName || route?.longName || ""}</Label> {l.headsign}</Link>
                                     </> : <>
-                                        Walk {walkDistance >= 1100 ? Math.round(walkDistance / 100) / 10 + " km " : Math.round(walkDistance) + " m "}({duration >= 3600 && `${Math.floor(duration / 3600)} h `}{Math.floor(duration / 60 % 60)} min)
+                                        Walk {walkDistance >= 1100 ? Math.round(walkDistance / 100) / 10 + " km " : Math.round(walkDistance) + " m "}({duration >= 3600 && `${Math.ceil(duration / 3600)} h `}{Math.ceil(duration / 60 % 60)} min)
                                     </>}
                                 </div>
                             </div>

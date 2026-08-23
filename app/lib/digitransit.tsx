@@ -14,7 +14,7 @@ import { MonorailW700 as Monorail } from '@material-symbols-svg/react/icons/mono
 import { QuestionMarkW700 as QuestionMark } from '@material-symbols-svg/react/icons/question-mark';
 import { ScooterW700 as Scooter } from '@material-symbols-svg/react/icons/scooter';
 import { SnowflakeW700 as Snowflake } from '@material-symbols-svg/react/icons/snowflake';
-import { TransitMode } from './__generated__/graphql';
+import { PlanModesInput, PlanPreferencesInput, TransitMode } from './__generated__/graphql';
 
 export type Mode = "BUS" | "RAIL" | "BUS-EXPRESS" | "SUBWAY" | "SPEEDTRAM" | "TRAM" | "FERRY" | "AIRPLANE"
 
@@ -108,6 +108,7 @@ export interface VPos {
     lng: number
     id: string
     name: string
+    color: string
 }
 
 export const IconTableLarge = {
@@ -265,10 +266,4 @@ export function getColor(mode: number, stringMode?: string) {
     }
 }
 
-export interface RoutingConfig {
-    modes: {
-        transit: {
-            transit: {cost: {reluctance: number}, mode: TransitMode}[]
-        }
-    }
-}
+export interface RoutingConfig { preferences: PlanPreferencesInput, modes: PlanModesInput }
