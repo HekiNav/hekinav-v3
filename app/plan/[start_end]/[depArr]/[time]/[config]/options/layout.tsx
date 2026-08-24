@@ -9,14 +9,15 @@ import Context from "./provider";
 export const GET_PLAN:
   TypedDocumentNode<PlanQueryQuery, PlanQueryQueryVariables> =
   gql`
-  query PlanQuery($origin: PlanLabeledLocationInput!, $destination: PlanLabeledLocationInput!, $preferences: PlanPreferencesInput!, $modes: PlanModesInput!, $dateTime: PlanDateTimeInput) {
+  query PlanQuery($origin: PlanLabeledLocationInput!, $destination: PlanLabeledLocationInput!, $preferences: PlanPreferencesInput!, $modes: PlanModesInput!, $dateTime: PlanDateTimeInput!, $via: [PlanViaLocationInput!]) {
     planConnection(
       origin: $origin,
       destination: $destination,
       preferences: $preferences,
       modes: $modes,
       dateTime: $dateTime,
-    ) {
+      via: $via
+      ) {
       routingErrors {
         code
         description
@@ -144,27 +145,16 @@ type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 export async function generateMetadata({
   params }: {
     params: Promise<{
-      start: string
-      end: string
+      start_end: string
       time: string
       config: string
       depArr: string
     }>,
     searchParams: SearchParams;
   }): Promise<Metadata> {
-  const { end, start } = await params
+  const { start_end } = await params
 
-  function parseParam(t: string) {
-    try {
-      return JSON.parse(decodeURIComponent(t))
-    } catch {
-      return null
-    }
-  }
-  const origin = parseParam(start)
-  const destination = parseParam(end)
-
-
+  const [origin, destination, ...via] = parseParam(start_end) || []
 
   if (!origin || !destination) {
     return { title: "Failed to load routes - Hekinav Routing" }
@@ -183,17 +173,17 @@ export default async function PlanLayout({
 }: {
   children: React.ReactNode;
   params: Promise<{
-    start: string
-    end: string
+    start_end: string
     time: string
     config: string
     depArr: string
   }>,
 }) {
-  const { end, start, config, time, depArr } = await params
+  const { start_end, config, time, depArr } = await params
 
 
-  if (typeof start != "string" || typeof end != "string" || (depArr != "dep" && depArr != "arr")) {
+
+  if (typeof start_end != "string" || (depArr != "dep" && depArr != "arr")) {
     return (
       "failed to load"
     )
@@ -204,8 +194,7 @@ export default async function PlanLayout({
       <Sidebar>
 
         <Context
-          end={end}
-          start={start}
+          start_end={start_end}
           time={time}
           config={config}
           depArr={depArr}
@@ -216,6 +205,13 @@ export default async function PlanLayout({
       </Sidebar>
     </>
   );
+}
+function parseParam(t: string) {
+  try {
+    return JSON.parse(decodeURIComponent(t))
+  } catch {
+    return null
+  }
 }
 
 

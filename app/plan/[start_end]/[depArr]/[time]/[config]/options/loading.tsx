@@ -2,6 +2,7 @@
 import RoutingUi from "@/app/components/RoutingUi";
 import Icon from "@/app/components/icon";
 import { Sidebar } from "@/app/mapcontext";
+import { TZDate } from "@date-fns/tz";
 import { ArrowForwardIosW700 } from "@material-symbols-svg/react/icons/arrow-forward-ios";
 import Skeleton from "react-loading-skeleton";
 
@@ -12,7 +13,7 @@ export default function Loading() {
             <Sidebar>
                 <h2 className="m-0 w-full text-center text-3xl my-1">Routing options</h2>
             </Sidebar>
-            <RoutingUi iOrigin={{ icon: <></>, id: "origin", text: "Loading..." }} iDestination={{ icon: <></>, id: "origin", text: "Loading..." }}></RoutingUi>
+            <RoutingUi iOrigin={{ icon: <></>, id: "origin", text: "Loading..." }} iDepArr="loading" iDateTime={new TZDate(0)} iDestination={{ icon: <></>, id: "origin", text: "Loading..." }}></RoutingUi>
             <div className="flex flex-col gap-2">
                 <SkeletonItinerary></SkeletonItinerary>
                 <SkeletonItinerary></SkeletonItinerary>

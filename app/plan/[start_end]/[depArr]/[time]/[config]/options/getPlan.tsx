@@ -1,12 +1,12 @@
 "use server";
-import { PlanLabeledLocationInput } from "@/app/lib/__generated__/graphql";
+import { PlanLabeledLocationInput, PlanVisitViaLocationInput } from "@/app/lib/__generated__/graphql";
 import { ApolloClient, HttpLink, InMemoryCache } from "@apollo/client";
 import { GET_PLAN } from "./layout";
 import { RoutingConfig } from "@/app/lib/digitransit";
 import { TZDate } from "@date-fns/tz";
 
 
-export async function getPlan(origin: PlanLabeledLocationInput, destination: PlanLabeledLocationInput, isHsl: boolean, config: RoutingConfig, dateTime: TZDate, depArr: "dep" | "arr") {
+export async function getPlan(origin: PlanLabeledLocationInput, destination: PlanLabeledLocationInput, via: PlanVisitViaLocationInput[], isHsl: boolean, config: RoutingConfig, dateTime: TZDate, depArr: "dep" | "arr") {
   if (!origin || !destination) {
     console.log("NO ORIGIN OR DESTINATION");
     return null;
@@ -24,6 +24,7 @@ export async function getPlan(origin: PlanLabeledLocationInput, destination: Pla
       destination,
       origin,
       ...config,
+      via: via.map(e => ({visit: e})),
       dateTime: {[depArr == "arr" ? "latestArrival" : "earliestDeparture"]: dateTime}
     }
   });

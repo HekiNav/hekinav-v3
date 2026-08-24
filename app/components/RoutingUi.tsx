@@ -6,11 +6,11 @@ import { NotListedLocationW700 as NotListedLocation } from '@material-symbols-sv
 import { ScheduleW700 as Schedule } from '@material-symbols-svg/react/icons/schedule';
 import { LngLat } from "maplibre-gl"
 
-import { Dispatch, SetStateAction, useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { useMap } from "@vis.gl/react-maplibre";
 import toast from "react-hot-toast";
 import { TZDate } from "@date-fns/tz";
-import { format, formatInTimeZone } from "date-fns-tz";
+import { formatInTimeZone } from "date-fns-tz";
 import { SettingsW700 as Settings } from '@material-symbols-svg/react/icons/settings';
 import Modal from './modal';
 import InputField, { Suggestion } from './inputfield';
@@ -34,8 +34,10 @@ import MiniSearch from 'minisearch';
 import { searchRoutesAgencies } from '../lib/route_agency';
 import Label from './label';
 import { CorporateFareW700 } from '@material-symbols-svg/react/icons/corporate-fare';
-import { PlanModesInput, PlanPreferencesInput } from '../lib/__generated__/graphql';
+import { PlanModesInput, PlanPreferencesInput, PlanVisitViaLocationInput } from '../lib/__generated__/graphql';
 import { typedEntries } from '../lib/typedEntries';
+import { AddLocationAltW700 } from '@material-symbols-svg/react/icons/add-location-alt';
+import { DeleteW700 } from '@material-symbols-svg/react/icons/delete';
 
 export type SearchSuggestion = Suggestion<IncludeExclude>
 
@@ -46,8 +48,6 @@ const timeOptions: Suggestion<object>[] = []
 const startOfToday = new Date()
 
 const currentTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone
-
-console.log(currentTimeZone)
 
 
 for (let i = 0; i < 96; i++) {
@@ -72,16 +72,18 @@ for (let i = 0; i < 28; i++) {
 export type PlaceSuggestion = Suggestion<{ lat: number, lng: number }>
 
 
-export default function RoutingUi({ iDateTime = new Date(), iDestination = null, iOrigin = null, iDepArr = "dep" }: { iOrigin?: PlaceSuggestion | null, iDestination?: PlaceSuggestion | null, iDateTime?: Date, iDepArr?: "dep" | "arr" }) {
+export default function RoutingUi({ iDateTime = new Date(), iDestination = null, iViaPoints = [], iOrigin = null, iDepArr = "dep" }: { iOrigin?: PlaceSuggestion | null, iDestination?: PlaceSuggestion | null, iDateTime?: Date, iDepArr?: "dep" | "arr" | "loading", iViaPoints?: PlaceSuggestion[] }) {
 
     const [origin, setOrigin] = useState<PlaceSuggestion | null>(iOrigin)
+    const [viaPoints, setViaPoints] = useState<(PlaceSuggestion | null)[]>([])
     const [destination, setDestination] = useState<PlaceSuggestion | null>(iDestination)
-    const [depArr, setDepArr] = useState<"dep" | "arr">(iDepArr)
-    const [date, setDate] = useState<TZDate>(new TZDate(iDateTime.getUTCFullYear(), iDateTime.getUTCMonth(), iDateTime.getUTCDate(), "UTC"))
+    const [depArr, setDepArr] = useState<"dep" | "arr" | "loading">(iDepArr)
+    const [date, setDate] = useState<TZDate>(new TZDate(iDateTime.getUTCFullYear(), iDateTime.getUTCMonth(), iDateTime.getUTCDate() - 1, "UTC"))
     const [time, setTime] = useState<TZDate>(new TZDate(iDateTime.getUTCFullYear(), iDateTime.getUTCMonth(), iDateTime.getUTCDate(), iDateTime.getUTCHours(), iDateTime.getUTCMinutes(), "UTC"))
     const [pickedLocation, setPickedLocation] = useState<LngLat | null | boolean>(null)
-    const [pickedLocationTarget, setPickedLocationTarget] = useState<"origin" | "destination" | null>(null)
+    const [pickedLocationTarget, setPickedLocationTarget] = useState<number | null>(null)
     const [settingsOpen, setSettingsOpen] = useState<boolean>(false)
+
 
     const { config, setConfig, getConfig } = useContext(ConfigContext)
 
@@ -94,7 +96,17 @@ export default function RoutingUi({ iDateTime = new Date(), iDestination = null,
     const router = useRouter()
     const isHsl = useIsHsl()
 
-    function getUserLocation(fn: Dispatch<SetStateAction<PlaceSuggestion | null>>) {
+    useEffect(() => {
+        if (iViaPoints.length > 0 && iViaPoints.some((e, i) => e.id != viaPoints[i]?.id)) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
+            setViaPoints(iViaPoints)
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [iViaPoints])
+
+    function getUserLocation(fn: (e: PlaceSuggestion | null) => void) {
+        setPickedLocation(null)
+        setPickedLocationTarget(null)
         if ("geolocation" in navigator) {
             navigator.geolocation.getCurrentPosition(
                 (data) => {
@@ -123,39 +135,44 @@ export default function RoutingUi({ iDateTime = new Date(), iDestination = null,
         }
     }
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    function openMapLocationPicker(target: "origin" | "destination") {
+    function openMapLocationPicker(target: number) {
         setPickedLocation(false)
         setPickedLocationTarget(target)
         if (setSidebarHidden) setSidebarHidden(true)
     }
 
     useEffect(() => {
+
+        viaPoints.forEach((p, i) => {
+            if (p?.id == "choose_on_map") openMapLocationPicker(i)
+            if (p?.id == "user_location") getUserLocation((e) => setViaPoints(prev => prev.map((v, idx) => idx === i ? e : v)))
+        })
+
         // eslint-disable-next-line react-hooks/set-state-in-effect
-        setPickedLocation(null)
-        setPickedLocationTarget(null)
+        if (destination?.id == "choose_on_map") openMapLocationPicker(-2)
+        if (origin?.id == "choose_on_map") openMapLocationPicker(-1)
 
-        if (destination?.id == "choose_on_map") openMapLocationPicker("destination")
-        if (origin?.id == "choose_on_map") openMapLocationPicker("origin")
-
-        if (origin?.id == "user_location") getUserLocation(setOrigin)
-        if (destination?.id == "user_location") getUserLocation(setDestination)
-    }, [destination, openMapLocationPicker, origin])
+        if (origin?.id == "user_location") getUserLocation((v) => setOrigin(v))
+        if (destination?.id == "user_location") getUserLocation((v) => setDestination(v))
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [origin, destination, viaPoints])
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
-        if (typeof pickedLocation != "object" || pickedLocation == null) return
+        if (typeof pickedLocation !== "object" || pickedLocation === null || pickedLocationTarget === null) return;
+
+        const setter = pickedLocationTarget == -2 ? setDestination : pickedLocationTarget == -1 ? setOrigin : (e: PlaceSuggestion) => setViaPoints(prev => prev.map((v, idx) => idx === pickedLocationTarget ? e : v))
 
         // eslint-disable-next-line react-hooks/set-state-in-effect
-        (pickedLocationTarget == "destination" ? setDestination : setOrigin)({ icon: <NotListedLocation></NotListedLocation>, id: "loading", text: "Loading...", properties: pickedLocation });
+        setter({ icon: <NotListedLocation></NotListedLocation>, id: "loading", text: "Loading...", properties: pickedLocation });
         setPickedLocation(true)
         reverseGeocode(pickedLocation.toArray()).then((data) => {
             if (data.length == 0) {
                 toast.error("Failed to load address (routing will still work by coordinates)");
-                (pickedLocationTarget == "destination" ? setDestination : setOrigin)({ icon: <NotListedLocation></NotListedLocation>, id: "unknown_location", text: "Somewhere", properties: pickedLocation });
+                setter({ icon: <NotListedLocation></NotListedLocation>, id: "unknown_location", text: "Somewhere", properties: pickedLocation });
                 return
             }
-            (pickedLocationTarget == "destination" ? setDestination : setOrigin)({ ...data[0], properties: pickedLocation })
+            setter({ ...data[0], properties: pickedLocation })
             setPickedLocation(null)
             setPickedLocationTarget(null)
         });
@@ -165,10 +182,12 @@ export default function RoutingUi({ iDateTime = new Date(), iDestination = null,
     function plan() {
         if (!origin || !origin.properties) return toast("Select a valid origin")
         if (!destination || !destination.properties) return toast("Select a valid destination")
+        if (viaPoints.some(v => !v || !v.properties)) return toast("Select a valid location foll all via points")
 
         const dateTime = new TZDate(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate() + 1, time.getUTCHours(), time.getUTCMinutes(), "UTC")
         const start = { label: origin.text, location: { coordinate: { latitude: origin.properties?.lat, longitude: origin.properties?.lng } } }
         const end = { label: destination.text, location: { coordinate: { latitude: destination.properties?.lat, longitude: destination.properties?.lng } } }
+        const via: PlanVisitViaLocationInput[] = viaPoints.map(e => ({ label: e?.text, coordinate: { latitude: e?.properties?.lat, longitude: e?.properties?.lng } }))
 
 
         const filter = config.routingOptions.includeExclude.reduce((p, c) => { const k = c.type == "agency" ? "agencies" : "routes"; return { ...p, [k]: [...(p[k] || []), c.id] } }, { agencies: null, routes: null } as { agencies: string[] | null, routes: string[] | null });
@@ -202,7 +221,7 @@ export default function RoutingUi({ iDateTime = new Date(), iDestination = null,
             }
         }
 
-        const url = `/plan/${JSON.stringify(start)}/${JSON.stringify(end)}/${depArr}/${dateTime.getTime()}/${/* this is to minify the json */JSON.stringify(JSON.parse(JSON.stringify(routingConfig)))}/options/${isHsl ? "?hsl" : ""}`;
+        const url = `/plan/${JSON.stringify([start,end, ...via])}/${depArr}/${dateTime.getTime()}/${/* this is to minify the json */JSON.stringify(JSON.parse(JSON.stringify(routingConfig)))}/options/${isHsl ? "?hsl" : ""}`;
 
         router.push(url)
     }
@@ -353,15 +372,21 @@ export default function RoutingUi({ iDateTime = new Date(), iDestination = null,
                 <div className='flex flex-row gap-2'>
                     <InputField initialValue={origin?.text} suggestionFunction={(t) => placeSearch(t, map?.getCenter() || new LngLat(24.94, 60.18), isHsl)} onlySuggestions placeholder='Origin' name='origin' onValueSet={(_t, v) => setOrigin(typeof v == "string" ? null : v)} icon={<LocationOn className='text-blue'></LocationOn>}></InputField>
                     <Button onClick={() => { const tempOrigin = origin; setOrigin(destination); setDestination(tempOrigin) }} className="w-min text-center text-green h-min p-1.5!"><Icon><SyncAltW700 style={{ transform: "rotate(90deg)" }} height={28} width={28}></SyncAltW700></Icon></Button>
-
                 </div>
+                {viaPoints.map((p, i) => {
+                    return <div key={i} className='flex flex-row gap-2'>
+                        <InputField initialValue={p !== null ? p.text : ""} suggestionFunction={(t) => placeSearch(t, map?.getCenter() || new LngLat(24.94, 60.18), isHsl)} onlySuggestions placeholder="Via point" name='via_point' onValueSet={(_t, e) => setViaPoints(prev => prev.map((v, idx) => idx === i ? (typeof e == "string" ? null : e) as PlaceSuggestion | null : v))} icon={<LocationOn className='text-darkgray'></LocationOn>}></InputField>
+                        <Button onClick={() => setViaPoints(prev => prev.filter((_, j) => j !== i))} className="w-min text-center text-darkgray h-min p-1.5!"><Icon><DeleteW700 height={28} width={28}></DeleteW700></Icon></Button>
+                    </div>
+                })}
                 <div className='flex flex-row gap-2'>
                     <InputField initialValue={destination?.text} suggestionFunction={(t) => placeSearch(t, map?.getCenter() || new LngLat(24.94, 60.18), isHsl)} onlySuggestions placeholder='Destination' name='destination' onValueSet={(_t, v) => setDestination(typeof v == "string" ? null : v)} icon={<LocationOn className='text-red'></LocationOn>}></InputField>
+                    <Button onClick={() => viaPoints.length >= 5 ? toast.error("Too many via points") : setViaPoints([...viaPoints, null])} className="w-min text-center text-green h-min p-1.5!"><Icon><AddLocationAltW700 height={28} width={28}></AddLocationAltW700></Icon></Button>
                 </div>
                 <div className="flex flex-row gap-2">
                     <Button className="w-70 text-center h-min" onClick={() => setDepArr(depArr == "dep" ? "arr" : "dep")}>{depArr == "dep" ? "Departure" : "Arrival"}</Button>
                     <InputField className="h-min" name="date" initialValue={isToday(date.withTimeZone(currentTimeZone)) ? "Today" : isTomorrow(date.withTimeZone(currentTimeZone)) ? "Tomorrow" : formatInTimeZone(date, currentTimeZone, "ccc d.M.")} suggestionFunction={async () => dateOptions} onlySuggestions onValueSet={(_n, v) => typeof v != "string" && setDate(new TZDate(v.id))} icon={<CalendarToday></CalendarToday>}></InputField>
-                    <InputField className="h-min" name="time" focusClear initialValue={formatInTimeZone(time, currentTimeZone, "H:mm")} suggestionFunction={async (t) => timeOptions.filter(o => o.text.includes(t))} onValueSet={(n, v) => {
+                    <InputField className="h-min" name="time" focusClear initialValue={formatInTimeZone(time, currentTimeZone, "H:mm")} suggestionFunction={async (t) => timeOptions.sort((a, b) => Number(a.text.replaceAll(":", "")) - Number(b.text.replaceAll(":", ""))).filter(o => o.text.includes(t))} onValueSet={(n, v) => {
                         if (typeof v == "string") {
                             const dt = new Date()
                             const [hours, mins] = v.split(":").map(e => Number(e))
@@ -374,7 +399,7 @@ export default function RoutingUi({ iDateTime = new Date(), iDestination = null,
                 <Button onClick={plan} className='text-green text-2xl p-0.5!'>Search</Button>
             </Sidebar>
             <MapOverlay>
-                {pickedLocation == false && <>
+                {pickedLocation === false && <>
                     <div onClick={() => setPickedLocation(map?.getCenter() || new LngLat(0, 0))} className="absolute pt-16 left-0 right-0 flex z-100 px-4 py-2 pointer-events-auto text-lg justify-center font-a font-medium text-white bg-green" style={{ top: "calc(env(safe-area-inset-top) + calc(var(--spacing) * -14))" }}>
                         Click here to confirm location
                     </div>

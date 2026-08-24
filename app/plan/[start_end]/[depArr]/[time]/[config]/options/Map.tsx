@@ -26,13 +26,13 @@ export function Map({ data, selectedRoute = null, destination, origin }: { data:
       ) || []
 
       const bounds = lines.length > 0 && lines.flat(2).reduce((bounds, coord) => bounds.extend(coord), new LngLatBounds(lines[0][0][0], lines[0][0][1]))
-      if (bounds) m.fitBounds(bounds, { padding: 100 })  
+      if (bounds) m.fitBounds(bounds, { padding: 100 })
 
 
 
       m.addSource("itinerary", { type: "geojson", data: { type: "FeatureCollection", features: generateGeoJSON(origin, destination, lines, data, selectedRoute) } })
 
-      
+
       m.addLayer({
         id: "itinerary",
         source: "itinerary",
@@ -165,7 +165,7 @@ export function Map({ data, selectedRoute = null, destination, origin }: { data:
           "icon-overlap": "always"
         }
       })
-      
+
     }
 
     function cycle(i: number) {
@@ -173,7 +173,7 @@ export function Map({ data, selectedRoute = null, destination, origin }: { data:
       if (m.loaded()) {
         ensureLayers()
       } else {
-        setTimeout(() => cycle(i+1), 10)
+        setTimeout(() => cycle(i + 1), 10)
       }
     }
     cycle(0)
@@ -203,6 +203,9 @@ export function Map({ data, selectedRoute = null, destination, origin }: { data:
         polyline.decode(l?.legGeometry?.points as string).map<[number, number]>(([lat, lng]) => [lng, lat])
       ) || []
     )
+
+    const bounds = lines.length > 0 && lines.flat(2).reduce((bounds, coord) => bounds.extend(coord), new LngLatBounds(lines[0][0][0], lines[0][0][1]))
+    if (bounds) m.fitBounds(bounds, { padding: 100 })
 
     if (!m.getSource("itinerary")) return
 

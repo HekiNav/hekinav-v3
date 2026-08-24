@@ -3,259 +3,259 @@
     "height": 32,
     "pixelRatio": 1,
     "width": 32,
-    "x": 144,
+    "x": 80,
     "y": 216
   },
   "bike": {
     "height": 32,
     "pixelRatio": 1,
     "width": 32,
-    "x": 176,
+    "x": 112,
     "y": 216
   },
   "bus": {
     "height": 32,
     "pixelRatio": 1,
     "width": 32,
-    "x": 208,
-    "y": 216
+    "x": 200,
+    "y": 144
   },
   "elevator": {
     "height": 32,
     "pixelRatio": 1,
     "width": 32,
-    "x": 152,
-    "y": 96
+    "x": 200,
+    "y": 176
   },
   "ferry": {
     "height": 32,
     "pixelRatio": 1,
     "width": 32,
-    "x": 184,
-    "y": 96
+    "x": 200,
+    "y": 208
   },
   "harbour": {
     "height": 32,
     "pixelRatio": 1,
     "width": 32,
-    "x": 200,
+    "x": 224,
     "y": 0
   },
   "letter_0": {
     "height": 32,
     "pixelRatio": 1,
     "width": 32,
-    "x": 200,
+    "x": 224,
     "y": 32
   },
   "letter_a": {
     "height": 32,
     "pixelRatio": 1,
     "width": 32,
-    "x": 200,
+    "x": 224,
     "y": 64
   },
   "letter_b": {
     "height": 32,
     "pixelRatio": 1,
     "width": 32,
-    "x": 216,
+    "x": 224,
     "y": 96
   },
   "letter_c": {
     "height": 32,
     "pixelRatio": 1,
     "width": 32,
-    "x": 216,
+    "x": 232,
     "y": 128
   },
   "letter_d": {
     "height": 32,
     "pixelRatio": 1,
     "width": 32,
-    "x": 216,
+    "x": 232,
     "y": 160
   },
   "letter_e": {
     "height": 32,
     "pixelRatio": 1,
     "width": 32,
-    "x": 240,
+    "x": 232,
     "y": 192
   },
   "letter_f": {
     "height": 32,
     "pixelRatio": 1,
     "width": 32,
-    "x": 240,
+    "x": 232,
     "y": 224
   },
   "letter_g": {
     "height": 32,
     "pixelRatio": 1,
     "width": 32,
-    "x": 232,
+    "x": 256,
     "y": 0
   },
   "letter_h": {
     "height": 32,
     "pixelRatio": 1,
     "width": 32,
-    "x": 232,
+    "x": 256,
     "y": 32
   },
   "letter_i": {
     "height": 32,
     "pixelRatio": 1,
     "width": 32,
-    "x": 232,
+    "x": 256,
     "y": 64
   },
   "letter_j": {
     "height": 32,
     "pixelRatio": 1,
     "width": 32,
-    "x": 248,
+    "x": 256,
     "y": 96
   },
   "letter_k": {
     "height": 32,
     "pixelRatio": 1,
     "width": 32,
-    "x": 248,
+    "x": 264,
     "y": 128
   },
   "letter_l": {
     "height": 32,
     "pixelRatio": 1,
     "width": 32,
-    "x": 248,
+    "x": 264,
     "y": 160
   },
   "letter_m": {
     "height": 32,
     "pixelRatio": 1,
     "width": 32,
-    "x": 272,
+    "x": 264,
     "y": 192
   },
   "letter_n": {
     "height": 32,
     "pixelRatio": 1,
     "width": 32,
-    "x": 272,
+    "x": 264,
     "y": 224
   },
   "letter_o": {
     "height": 32,
     "pixelRatio": 1,
     "width": 32,
-    "x": 264,
+    "x": 288,
     "y": 0
   },
   "letter_p": {
     "height": 32,
     "pixelRatio": 1,
     "width": 32,
-    "x": 264,
+    "x": 288,
     "y": 32
   },
   "letter_q": {
     "height": 32,
     "pixelRatio": 1,
     "width": 32,
-    "x": 264,
+    "x": 288,
     "y": 64
   },
   "letter_r": {
     "height": 32,
     "pixelRatio": 1,
     "width": 32,
-    "x": 280,
+    "x": 288,
     "y": 96
   },
   "letter_s": {
     "height": 32,
     "pixelRatio": 1,
     "width": 32,
-    "x": 280,
+    "x": 296,
     "y": 128
   },
   "letter_t": {
     "height": 32,
     "pixelRatio": 1,
     "width": 32,
-    "x": 280,
+    "x": 296,
     "y": 160
   },
   "letter_u": {
     "height": 32,
     "pixelRatio": 1,
     "width": 32,
-    "x": 304,
+    "x": 296,
     "y": 192
   },
   "letter_v": {
     "height": 32,
     "pixelRatio": 1,
     "width": 32,
-    "x": 304,
+    "x": 296,
     "y": 224
   },
   "letter_w": {
     "height": 32,
     "pixelRatio": 1,
     "width": 32,
-    "x": 296,
+    "x": 320,
     "y": 0
   },
   "letter_x": {
     "height": 32,
     "pixelRatio": 1,
     "width": 32,
-    "x": 296,
+    "x": 320,
     "y": 32
   },
   "letter_y": {
     "height": 32,
     "pixelRatio": 1,
     "width": 32,
-    "x": 296,
+    "x": 320,
     "y": 64
   },
   "letter_z": {
     "height": 32,
     "pixelRatio": 1,
     "width": 32,
-    "x": 312,
+    "x": 320,
     "y": 96
   },
   "letter_ä": {
     "height": 32,
     "pixelRatio": 1,
     "width": 32,
-    "x": 312,
+    "x": 328,
     "y": 128
   },
   "letter_å": {
     "height": 32,
     "pixelRatio": 1,
     "width": 32,
-    "x": 312,
+    "x": 328,
     "y": 160
   },
   "letter_ö": {
     "height": 32,
     "pixelRatio": 1,
     "width": 32,
-    "x": 336,
+    "x": 328,
     "y": 192
   },
   "metro": {
     "height": 32,
     "pixelRatio": 1,
     "width": 32,
-    "x": 336,
+    "x": 328,
     "y": 224
   },
   "metro_entrance": {
@@ -263,7 +263,7 @@
     "pixelRatio": 1,
     "width": 48,
     "x": 152,
-    "y": 0
+    "y": 144
   },
   "pin_blue": {
     "height": 83,
@@ -272,53 +272,60 @@
     "x": 0,
     "y": 0
   },
-  "pin_red": {
+  "pin_darkgray": {
     "height": 83,
     "pixelRatio": 1,
     "width": 80,
     "x": 0,
     "y": 83
   },
+  "pin_red": {
+    "height": 83,
+    "pixelRatio": 1,
+    "width": 80,
+    "x": 0,
+    "y": 166
+  },
   "rail": {
     "height": 32,
     "pixelRatio": 1,
     "width": 32,
-    "x": 328,
+    "x": 352,
     "y": 0
   },
   "zone_a": {
     "height": 72,
     "pixelRatio": 1,
     "width": 72,
-    "x": 0,
-    "y": 166
-  },
-  "zone_b": {
-    "height": 72,
-    "pixelRatio": 1,
-    "width": 72,
-    "x": 72,
-    "y": 166
-  },
-  "zone_c": {
-    "height": 72,
-    "pixelRatio": 1,
-    "width": 72,
     "x": 80,
     "y": 0
   },
-  "zone_d": {
+  "zone_b": {
     "height": 72,
     "pixelRatio": 1,
     "width": 72,
     "x": 80,
     "y": 72
   },
+  "zone_c": {
+    "height": 72,
+    "pixelRatio": 1,
+    "width": 72,
+    "x": 80,
+    "y": 144
+  },
+  "zone_d": {
+    "height": 72,
+    "pixelRatio": 1,
+    "width": 72,
+    "x": 152,
+    "y": 0
+  },
   "zone_e": {
     "height": 72,
     "pixelRatio": 1,
     "width": 72,
-    "x": 144,
-    "y": 144
+    "x": 152,
+    "y": 72
   }
 }

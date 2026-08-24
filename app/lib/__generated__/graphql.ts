@@ -607,6 +607,20 @@ export type PlanModesInput = {
   transitOnly?: boolean | null | undefined;
 };
 
+/**
+ * One of the listed stop locations must be visited on-board a transit vehicle or the journey must
+ * alight or board at the location.
+ */
+export type PlanPassThroughViaLocationInput = {
+  /** The label/name of the location. This is pass-through information and is not used in routing. */
+  label?: string | null | undefined;
+  /**
+   * A list of stop locations. A stop location can be a stop or a station.
+   * It is enough to visit ONE of the locations listed.
+   */
+  stopLocationIds: Array<string>;
+};
+
 /** Wrapper type for different types of preferences related to plan query. */
 export type PlanPreferencesInput = {
   /** Accessibility preferences that affect both the street and transit routing. */
@@ -723,6 +737,44 @@ export type PlanTransitModesInput = {
    * in the field.
    */
   transit?: Array<PlanTransitModePreferenceInput> | null | undefined;
+};
+
+/**
+ * A via-location is used to specifying a location as an intermediate place the router must
+ * route through. The via-location is either a pass-through-location or a visit-via-location.
+ */
+export type PlanViaLocationInput = {
+  /** Board, alight or pass-through(on-board) at the stop location. */
+  passThrough?: PlanPassThroughViaLocationInput | null | undefined;
+  /** Board or alight at a stop location or visit a coordinate. */
+  visit?: PlanVisitViaLocationInput | null | undefined;
+};
+
+/**
+ * A visit-via-location is a physical visit to one of the stop locations or coordinates listed. An
+ * on-board visit does not count, the traveler must alight or board at the given stop for it to to
+ * be accepted. To visit a coordinate, the traveler must walk(bike or drive) to the closest point
+ * in the street network from a stop and back to another stop to join the transit network.
+ */
+export type PlanVisitViaLocationInput = {
+  /**
+   * A coordinate to route through. To visit a coordinate, the traveler must walk(bike or drive)
+   * to the closest point in the street network from a stop and back to another stop to join the transit
+   * network.
+   */
+  coordinate?: PlanCoordinateInput | null | undefined;
+  /** The label/name of the location. This is pass-through information and is not used in routing. */
+  label?: string | null | undefined;
+  /**
+   * The minimum wait time is used to force the trip to stay the given duration at the
+   * via-location before the itinerary is continued.
+   */
+  minimumWaitTime?: unknown;
+  /**
+   * A list of stop locations. A stop location can be a stop or a station.
+   * It is enough to visit ONE of the locations listed.
+   */
+  stopLocationIds?: Array<string> | null | undefined;
 };
 
 export type RealtimeState =

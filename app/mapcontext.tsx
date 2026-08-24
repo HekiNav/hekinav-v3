@@ -48,16 +48,17 @@ export function MapLayoutProvider({ children }: { children: React.ReactNode }) {
 
     const isHsl = useIsHsl()
 
-    const focusSidebar = () => !map.current?.isMoving() && setFocus(true)
-    const blurSidebar = () => setFocus(false)
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+    const focusSidebar = (e: MouseEvent) => {e.stopPropagation(); !map.current?.isMoving() && setFocus(true)}
+    //const blurSidebar = (e: MouseEvent) => {e.stopPropagation(); setFocus(false)}
 
 
     useEffect(() => {
         if (!sidebar) return
         sidebar.addEventListener("click", focusSidebar)
-        sidebar.addEventListener("mouseenter", focusSidebar)
-        sidebar.addEventListener("mouseleave", blurSidebar)
-        return () => { sidebar.removeEventListener("click", focusSidebar); sidebar.removeEventListener("mouseenter", focusSidebar); sidebar.removeEventListener("mouseleave", blurSidebar) }
+        /* sidebar.addEventListener("mouseenter", focusSidebar)
+        sidebar.addEventListener("mouseleave", blurSidebar) */
+        return () => { sidebar.removeEventListener("click", focusSidebar); /* sidebar.removeEventListener("mouseenter", focusSidebar); sidebar.removeEventListener("mouseleave", blurSidebar) */ }
     }, [sidebar])
 
     useEffect(() => {

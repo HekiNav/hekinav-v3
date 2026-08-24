@@ -15,6 +15,8 @@ import { PlanContext } from "./provider";
 import { ArrowForwardIosW700 } from "@material-symbols-svg/react/icons/arrow-forward-ios";
 import Link from "next/link";
 import { useIsHsl } from "@/app/hooks/useHsl";
+import { ConfigContext, defaultConfig } from "@/app/HekinavConfig";
+import toast from "react-hot-toast";
 
 
 export default function Content() {
@@ -23,16 +25,14 @@ export default function Content() {
 
     const [selectedRoute, setSelectedRoute] = useState<number | null>(null)
 
-    useEffect(() => {
-        console.log(stuff)
-    })
+    const {setConfig} = useContext(ConfigContext)
 
 
     if (!stuff) return <>
         failed to load
     </>
 
-    const { data, destination, origin, config, dateTime, depArr } = stuff
+    const { data, destination, via, origin, dateTime, depArr } = stuff
 
 
 
@@ -43,15 +43,25 @@ export default function Content() {
                 <h2 className="m-0 w-full text-center text-3xl my-1">Routing options</h2>
             </Sidebar>
 
-            <RoutingUi iDateTime={dateTime} iDepArr={depArr} iOrigin={{ icon: <></>, id: "origin", text: origin.label || "origin", properties: { lat: origin.location.coordinate?.latitude as number || 0, lng: origin.location.coordinate?.longitude as number || 0 } }} iDestination={{ icon: <></>, id: "origin", text: destination.label || "origin", properties: { lat: destination.location.coordinate?.latitude as number || 0, lng: destination.location.coordinate?.longitude as number || 0 } }}></RoutingUi>
-            <div className="flex flex-col gap-2">
+            <RoutingUi iViaPoints={via.map((e, i) => ({ icon: <></>, id: "via" + i, text: e.label || "via " + i, properties: { lat: e.coordinate?.latitude as number || 0, lng: e.coordinate?.longitude as number || 0 } }))} iDateTime={dateTime} iDepArr={depArr} iOrigin={{ icon: <></>, id: "origin", text: origin.label || "origin", properties: { lat: origin.location.coordinate?.latitude as number || 0, lng: origin.location.coordinate?.longitude as number || 0 } }} iDestination={{ icon: <></>, id: "origin", text: destination.label || "origin", properties: { lat: destination.location.coordinate?.latitude as number || 0, lng: destination.location.coordinate?.longitude as number || 0 } }}></RoutingUi>
+            <div className="flex flex-col gap-2 w-full">
+                {data?.edges?.length === 0 && (
+                    <div className="w-full p-4">
+                        <div className="text-lg">Could not find routes. Here are some things to check: </div>
+                        <ol>
+                            <li>1. Are your destination and origin reachable?</li>
+                            <li>2. Are your settings excluding all routes? <span onClick={() => {setConfig(defaultConfig.routingOptions, ["routingOptions"]) ;toast.success("Reset setting")}} className="text-green underline">Reset settings.</span></li>
+                            <li>3. Do you have 4 or more via points? Try removing one or more of them.</li>
+                        </ol>
+                    </div>
+                )}
                 {data?.edges?.map((e, i) => {
                     const walkDistance = (e?.node.walkDistance as number)
                     const firstTransitLeg = e?.node.legs.find(l => l?.transitLeg)
                     const duration = e?.node.duration as number || 0
                     return (
-                        <div onMouseEnter={() => setSelectedRoute(i)} key={i} className="border-3 focus:border-green rounded-xl flex flex-row gap-1">
-                            <div className="flex flex-col gap-1 shrink w-full py-1 px-2">
+                        <div onMouseEnter={() => setSelectedRoute(i)} key={i} className="border-3 w-full focus:border-green rounded-xl flex flex-row gap-1">
+                            <div className="flex flex-col gap-1 shrink-1 w-9/10 py-1 px-2">
                                 <div className="w-full flex justify-between">
                                     <span className="font-medium">{format(new TZDate(e?.node.start as number), "HH:mm")} - {format(new TZDate(e?.node.end as number), "HH:mm")}</span>
                                     <span className="gap-0! text-md font-medium">{duration >= 3600 && `${Math.floor(duration / 3600)}h `}{Math.floor(duration / 60 % 60)}min</span>
@@ -71,7 +81,7 @@ export default function Content() {
                                     </span>
                                 </div>
                             </div>
-                            <Link prefetch={true} className="h-full" href={`./i/i${i}/${isHsl ? "?hsl" : ""}`}>
+                            <Link prefetch={true} className="h-full w-1/10" href={`./i/i${i}/${isHsl ? "?hsl" : ""}`}>
                                 <div className="flex items-center justify-center border-l-3 h-full">
                                     <Icon><ArrowForwardIosW700 height={32} width={32}></ArrowForwardIosW700></Icon>
                                 </div>

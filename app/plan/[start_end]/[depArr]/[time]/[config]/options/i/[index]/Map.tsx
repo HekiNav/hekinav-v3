@@ -3,7 +3,7 @@ import { useMap } from "@vis.gl/react-maplibre"
 import { useEffect, useState } from "react"
 import { GeoJSONSource, LngLatBounds } from "maplibre-gl"
 import { getColor, VPos } from "@/app/lib/digitransit"
-import { LocationType, Mode, PlanLabeledLocationInput, RealtimeState, TransitMode, ViaLocationType } from "@/app/lib/__generated__/graphql"
+import { LocationType, Mode, PlanLabeledLocationInput, PlanVisitViaLocationInput, RealtimeState, TransitMode, ViaLocationType } from "@/app/lib/__generated__/graphql"
 import polyline from "@mapbox/polyline"
 import { PlanQueryQuery } from "../../layout.generated"
 import { useSubscription } from "mqtt-react-hooks"
@@ -12,7 +12,7 @@ import { textSize } from "@/app/route/[id]/[direction_pattern]/Map"
 import { format } from "date-fns-tz"
 import { TZDate } from "@date-fns/tz"
 
-export function Map({ data, selectedRoute, destination, origin }: { data: NonNullable<PlanQueryQuery["planConnection"]>, selectedRoute: number, destination: PlanLabeledLocationInput, origin: PlanLabeledLocationInput }) {
+export function Map({ data, selectedRoute, destination, origin, via }: { data: NonNullable<PlanQueryQuery["planConnection"]>, selectedRoute: number, destination: PlanLabeledLocationInput, origin: PlanLabeledLocationInput, via: PlanVisitViaLocationInput[] }) {
   const { default: map } = useMap()
 
   const isHsl = useIsHsl()
@@ -41,7 +41,7 @@ export function Map({ data, selectedRoute, destination, origin }: { data: NonNul
 
 
 
-      m.addSource("itinerary-s", { type: "geojson", data: { type: "FeatureCollection", features: generateGeoJSON(origin, destination, [], lines, data, selectedRoute) } })
+      m.addSource("itinerary-s", { type: "geojson", data: { type: "FeatureCollection", features: generateGeoJSON(origin, destination, via, [], lines, data, selectedRoute) } })
 
       m.addLayer({
         id: "itinerary-s-walking",
@@ -147,7 +147,20 @@ export function Map({ data, selectedRoute, destination, origin }: { data: NonNul
         layout: {
           "icon-image": "pin_blue",
           "icon-size": ["interpolate", ["exponential", 1.15], ["zoom"], 1, 0.1, 22, 1],
-          "icon-overlap": "always"
+          "icon-overlap": "always",
+          "icon-anchor": "bottom"
+        }
+      })
+      m.addLayer({
+        id: "via",
+        source: "itinerary-s",
+        filter: ["==", ["get", "type"], "via"],
+        type: "symbol",
+        layout: {
+          "icon-image": "pin_darkgray",
+          "icon-size": ["interpolate", ["exponential", 1.15], ["zoom"], 1, 0.1, 22, 1],
+          "icon-overlap": "always",
+          "icon-anchor": "bottom"
         }
       })
       m.addLayer({
@@ -158,7 +171,8 @@ export function Map({ data, selectedRoute, destination, origin }: { data: NonNul
         layout: {
           "icon-image": "pin_red",
           "icon-size": ["interpolate", ["exponential", 1.15], ["zoom"], 1, 0.1, 22, 1],
-          "icon-overlap": "always"
+          "icon-overlap": "always",
+          "icon-anchor": "bottom"
         }
       })
       m.addLayer({
@@ -258,6 +272,7 @@ export function Map({ data, selectedRoute, destination, origin }: { data: NonNul
       if (m.getLayer("stop")) m.removeLayer("stop")
       if (m.getLayer("stop-outline")) m.removeLayer("stop-outline")
       if (m.getLayer("destination")) m.removeLayer("destination")
+      if (m.getLayer("via")) m.removeLayer("via")
       if (m.getLayer("itinerary-s")) m.removeLayer("itinerary-s")
       if (m.getLayer("itinerary-s-walking")) m.removeLayer("itinerary-s-walking")
       if (m.getLayer("vehicle")) m.removeLayer("vehicle")
@@ -310,7 +325,7 @@ export function Map({ data, selectedRoute, destination, origin }: { data: NonNul
 
     const geojson: GeoJSON.FeatureCollection = {
       type: "FeatureCollection",
-      features: generateGeoJSON(origin, destination, vPos, lines, data, selectedRoute)
+      features: generateGeoJSON(origin, destination, via, vPos, lines, data, selectedRoute)
     }
 
       ; (m.getSource("itinerary-s") as GeoJSONSource).setData(geojson)
@@ -318,7 +333,7 @@ export function Map({ data, selectedRoute, destination, origin }: { data: NonNul
   }, [map, data, origin, destination, selectedRoute, message, isHsl])
   return null
 }
-function generateGeoJSON(origin: PlanLabeledLocationInput, destination: PlanLabeledLocationInput, vPos: GeoJSON.Feature[], lines: [number, number][][], data: { __typename: "PlanConnection"; edges: Array<{ __typename: "PlanEdge"; cursor: string; node: { __typename: "Itinerary"; start: unknown; end: unknown; waitingTime: unknown; walkDistance: number | null; walkTime: unknown; duration: unknown; numberOfTransfers: number; legs: Array<{ __typename: "Leg"; transitLeg: boolean | null; interlineWithPreviousLeg: boolean | null; duration: number | null; distance: number | null; mode: Mode | null; realTime: boolean | null; realtimeState: RealtimeState | null; start: { __typename: "LegTime"; scheduledTime: unknown; estimated: { __typename: "RealTimeEstimate"; delay: unknown; time: unknown } | null }; end: { __typename: "LegTime"; scheduledTime: unknown; estimated: { __typename: "RealTimeEstimate"; delay: unknown; time: unknown } | null }; trip: { __typename: "Trip"; pattern: { __typename: "Pattern"; code: string; directionId: number | null } | null; route: { __typename: "Route"; shortName: string | null; longName: string | null; gtfsId: string; mode: TransitMode | null; type: number | null } } | null; legGeometry: { __typename: "Geometry"; length: number | null; points: unknown } | null; from: { __typename: "Place"; lat: number; lon: number; name: string | null; viaLocationType: ViaLocationType | null; arrival: { __typename: "LegTime"; scheduledTime: unknown; estimated: { __typename: "RealTimeEstimate"; delay: unknown; time: unknown } | null } | null; departure: { __typename: "LegTime"; scheduledTime: unknown; estimated: { __typename: "RealTimeEstimate"; delay: unknown; time: unknown } | null } | null; stop: { __typename: "Stop"; name: string; platformCode: string | null; code: string | null; gtfsId: string; locationType: LocationType | null } | null }; to: { __typename: "Place"; lat: number; lon: number; name: string | null; viaLocationType: ViaLocationType | null; arrival: { __typename: "LegTime"; scheduledTime: unknown; estimated: { __typename: "RealTimeEstimate"; delay: unknown; time: unknown } | null } | null; departure: { __typename: "LegTime"; scheduledTime: unknown; estimated: { __typename: "RealTimeEstimate"; delay: unknown; time: unknown } | null } | null; stop: { __typename: "Stop"; name: string; platformCode: string | null; code: string | null; gtfsId: string; locationType: LocationType | null } | null } } | null> } } | null> | null }, selectedRoute: number): GeoJSON.Feature[] {
+function generateGeoJSON(origin: PlanLabeledLocationInput, destination: PlanLabeledLocationInput, via: PlanVisitViaLocationInput[], vPos: GeoJSON.Feature[], lines: [number, number][][], data: { __typename: "PlanConnection"; edges: Array<{ __typename: "PlanEdge"; cursor: string; node: { __typename: "Itinerary"; start: unknown; end: unknown; waitingTime: unknown; walkDistance: number | null; walkTime: unknown; duration: unknown; numberOfTransfers: number; legs: Array<{ __typename: "Leg"; transitLeg: boolean | null; interlineWithPreviousLeg: boolean | null; duration: number | null; distance: number | null; mode: Mode | null; realTime: boolean | null; realtimeState: RealtimeState | null; start: { __typename: "LegTime"; scheduledTime: unknown; estimated: { __typename: "RealTimeEstimate"; delay: unknown; time: unknown } | null }; end: { __typename: "LegTime"; scheduledTime: unknown; estimated: { __typename: "RealTimeEstimate"; delay: unknown; time: unknown } | null }; trip: { __typename: "Trip"; pattern: { __typename: "Pattern"; code: string; directionId: number | null } | null; route: { __typename: "Route"; shortName: string | null; longName: string | null; gtfsId: string; mode: TransitMode | null; type: number | null } } | null; legGeometry: { __typename: "Geometry"; length: number | null; points: unknown } | null; from: { __typename: "Place"; lat: number; lon: number; name: string | null; viaLocationType: ViaLocationType | null; arrival: { __typename: "LegTime"; scheduledTime: unknown; estimated: { __typename: "RealTimeEstimate"; delay: unknown; time: unknown } | null } | null; departure: { __typename: "LegTime"; scheduledTime: unknown; estimated: { __typename: "RealTimeEstimate"; delay: unknown; time: unknown } | null } | null; stop: { __typename: "Stop"; name: string; platformCode: string | null; code: string | null; gtfsId: string; locationType: LocationType | null } | null }; to: { __typename: "Place"; lat: number; lon: number; name: string | null; viaLocationType: ViaLocationType | null; arrival: { __typename: "LegTime"; scheduledTime: unknown; estimated: { __typename: "RealTimeEstimate"; delay: unknown; time: unknown } | null } | null; departure: { __typename: "LegTime"; scheduledTime: unknown; estimated: { __typename: "RealTimeEstimate"; delay: unknown; time: unknown } | null } | null; stop: { __typename: "Stop"; name: string; platformCode: string | null; code: string | null; gtfsId: string; locationType: LocationType | null } | null } } | null> } } | null> | null }, selectedRoute: number): GeoJSON.Feature[] {
   return [
     ...vPos,
     {
@@ -337,6 +352,14 @@ function generateGeoJSON(origin: PlanLabeledLocationInput, destination: PlanLabe
       },
       properties: { type: "destination" }
     },
+    ...via.map<GeoJSON.Feature>(e => ({
+      type: "Feature" as const,
+      geometry: {
+        type: "Point",
+        coordinates: [e.coordinate?.longitude as number || 0, e.coordinate?.latitude as number || 0]
+      },
+      properties: { type: "via" }
+    })),
     ...lines.flatMap<GeoJSON.Feature>((l, i) => {
       const legs = data.edges![selectedRoute]?.node.legs
       const leg = legs![i]

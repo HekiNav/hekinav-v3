@@ -1,8 +1,12 @@
 # Hekinav v3
 
-The third generation of the HekiNav routing UI. This version has a new look, more configurability and less bugs. This project is built with cloudflare vinext.
+The third generation of the HekiNav routing UI. This version has a new look, more configurability and less bugs. Built with Cloudflare vinext.
 
 View the production version at [routing.hekinav.dev](https://routing.hekinav.dev/)
+
+## Features
+
+- 
 
 ## Two modes
 
