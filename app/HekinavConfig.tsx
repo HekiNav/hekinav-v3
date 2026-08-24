@@ -77,16 +77,11 @@ export interface IncludeExclude {
   name: string,
   code: string,
   type: "route" | "agency",
-  id: string
+  id: string,
+  color: string
 }
 
 export const RoutingOptionsUiConfig: RoutingNode[] = [
-  {
-    type: "import_export",
-    desc: "",
-    name: "Import and export",
-    value: [["advancedDepartures"]] // not actually used
-  },
   {
     type: "group",
     direction: "horizontal",
@@ -220,6 +215,12 @@ export const RoutingOptionsUiConfig: RoutingNode[] = [
 ]
 
 export const AdvancedRoutingOptions: RoutingNode[] = [
+  {
+    type: "import_export",
+    desc: "",
+    name: "Import and export",
+    value: [["advancedDepartures"]] // not actually used
+  },
   {
     type: "group",
     direction: "vertical",
@@ -405,7 +406,7 @@ export const AdvancedRoutingOptions: RoutingNode[] = [
   },
   {
     type: "range",
-    desc: "A multiplier for how bad waiting at a stop is compared to being in transit for equal lengths of time. (default 1.5)",
+    desc: "A multiplier for how bad walking is compared to being in transit for equal lengths of time. (default 1.5)",
     name: "Walk Reluctance",
     max: 5,
     min: 0,
@@ -423,7 +424,7 @@ export const AdvancedRoutingOptions: RoutingNode[] = [
   }
 ]
 
-export const defaultConfig: HekinavConfig = {
+export const defaultConfig: Readonly<HekinavConfig> = {
   advancedDepartures: false,
   advancedRoutingOptionsEnabled: false,
   routingOptions: {
@@ -453,6 +454,7 @@ export const defaultConfig: HekinavConfig = {
   }
 
 };
+
 
 
 // crazy typescript magic in the following types
@@ -516,4 +518,4 @@ export type GetHekinavConfigKey = <P1 extends AllPaths<HekinavConfig>, V = PathV
 ) => V[];
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const ConfigContext = createContext<{ config: HekinavConfig; setConfig: SetHekinavConfigKey; getConfig: GetHekinavConfigKey }>({ config: defaultConfig, setConfig: () => { }, getConfig: () => { return {} as any } });
+export const ConfigContext = createContext<{ config: HekinavConfig; setConfig: SetHekinavConfigKey; getConfig: GetHekinavConfigKey }>({ config: structuredClone(defaultConfig), setConfig: () => { }, getConfig: () => { return {} as any } });

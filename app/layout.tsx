@@ -26,7 +26,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
 
-  const [config, setConfig] = useState<HekinavConfig>(defaultConfig)
+  const [config, setConfig] = useState<HekinavConfig>(structuredClone(defaultConfig))
   const [configFromLocalStorageGotten, setConfigFromLocalStorageGotten] = useState<boolean>(false)
 
   useEffect(() => {

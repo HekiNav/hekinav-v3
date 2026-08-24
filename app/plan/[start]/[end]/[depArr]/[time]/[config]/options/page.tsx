@@ -23,6 +23,10 @@ export default function Content() {
 
     const [selectedRoute, setSelectedRoute] = useState<number | null>(null)
 
+    useEffect(() => {
+        console.log(stuff)
+    })
+
 
     if (!stuff) return <>
         failed to load

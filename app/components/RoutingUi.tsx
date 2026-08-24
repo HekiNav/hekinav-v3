@@ -22,7 +22,7 @@ import { MapOverlay, Sidebar } from '../mapcontext';
 import Button from './button';
 import Icon from './icon';
 import { search } from '../lib/search';
-import { AdvancedRoutingOptions, ConfigContext, RoutingNode, RoutingOptionsUiConfig } from '../HekinavConfig';
+import { AdvancedRoutingOptions, ConfigContext, defaultConfig, IncludeExclude, RoutingNode, RoutingOptionsUiConfig } from '../HekinavConfig';
 import Toggle from './toggle';
 import { useRouter } from 'next/navigation';
 import Dropdown from './dropdown';
@@ -37,7 +37,7 @@ import { CorporateFareW700 } from '@material-symbols-svg/react/icons/corporate-f
 import { PlanModesInput, PlanPreferencesInput } from '../lib/__generated__/graphql';
 import { typedEntries } from '../lib/typedEntries';
 
-export type SearchSuggestion = Suggestion<{ type: "agency" | "route", gtfsId: string }>
+export type SearchSuggestion = Suggestion<IncludeExclude>
 
 const miniSearch = new MiniSearch<SearchSuggestion>({ fields: ["text", "gtfsId"], storeFields: ["icon", "id", "name", "desc", "properties"] })
 
@@ -220,6 +220,10 @@ export default function RoutingUi({ iDateTime = new Date(), iDestination = null,
             },
         })
     }
+    useEffect(() => {
+        if (!config.advancedRoutingOptionsEnabled && config.routingOptions.include) setConfig(false, ["routingOptions", "include"])
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [config.advancedRoutingOptionsEnabled])
 
     return (
         <>
@@ -250,23 +254,29 @@ export default function RoutingUi({ iDateTime = new Date(), iDestination = null,
                                             <h2 className='font-medium mb-1 text-lg mt-4'>{option.name}</h2>
                                             {option.type == "exclude_include_routes" && <>
                                                 <div className="flex justify-between items-center mb-2">List type
-                                                    <div className="flex w-min items-center">Exclude<Toggle state={getConfig(...option.secondaryValue) as never} setState={(v) => {
+                                                    <div className="flex w-min items-center">Exclude<Toggle state={getConfig(...option.secondaryValue).every(v => v)} setState={(v) => {
                                                         setConfig(v, ...option.secondaryValue)
                                                     }}></Toggle>Include</div>
                                                 </div>
                                             </>}
                                             {(getConfig(...option.value).length > 0) && (<div className='flex flex-col gap-1 mb-2'>
-                                                <div className='text-lg font-medium'>{getConfig(...option.secondaryValue) as never ? "Included" : "Excluded"}</div>
-                                                {...getConfig(...option.value).flat().map((e, i) => <div className='flex w-full truncate items-center justify-between' key={i}><div className='shrink truncate'>{e.name}</div><Button className='px-1! rounded-md! text-black hover:border-red! hover:text-red! p-0! flex items-center justify-center' onClick={() => {
+                                                <div className='text-lg font-medium'>{getConfig(...option.secondaryValue).every(v => v) ? "Included" : "Excluded"}</div>
+                                                {...getConfig(...option.value).flat().map((e, i) =>
+                                                    <div className='flex w-full truncate items-center justify-between' key={i}>
+                                                        <div className='shrink truncate'>
+                                                            {e.code.length && <Label className={`${e.color} font-bold text-white`}>{e.code}</Label>}
+                                                            <span className='ml-1 truncate mr-2'>{e.name}</span>
+                                                        </div>
+                                                        <Button className='px-1! rounded-md! text-black hover:border-red! hover:text-red! p-0! flex items-center justify-center' onClick={() => {
 
-                                                    const excludedIncluded = getConfig(...option.value).flat()
+                                                            const excludedIncluded = getConfig(...option.value).flat()
 
-                                                    const i = excludedIncluded.findIndex(t => e.id == t.id)
-                                                    if (i < 0) return
-                                                    excludedIncluded.splice(i, 1)
-                                                    setConfig(excludedIncluded, ...option.value)
+                                                            const i = excludedIncluded.findIndex(t => e.id == t.id)
+                                                            if (i < 0) return
+                                                            excludedIncluded.splice(i, 1)
+                                                            setConfig(excludedIncluded, ...option.value)
 
-                                                }}>Remove</Button></div>)}
+                                                        }}>Remove</Button></div>)}
                                             </div>)}
                                             <InputField suggestionFunction={(t) => searchRouteAgency(t, isHsl, getConfig(...option.value).flat().map(e => e.id))} icon={<></>} name='agency_route_search' placeholder='Route or agency' onValueSet={(n, v) => {
                                                 if (typeof v == "string") return;
@@ -327,7 +337,12 @@ export default function RoutingUi({ iDateTime = new Date(), iDestination = null,
 
                             return <div key={i}>{parse<typeof v>(v, i)}</div>
                         })
+
                     }
+                </div>
+                <div className="p-4 w-full flex flex-row justify-between">
+                    <Button onClick={() => setSettingsOpen(false)}>Close</Button>
+                    {JSON.stringify(config.routingOptions) !== JSON.stringify(defaultConfig.routingOptions) && <Button onClick={() => setConfig(structuredClone(defaultConfig).routingOptions, ["routingOptions"])} className='hover:border-red'>Reset to default</Button>}
                 </div>
             </Modal>
             <Sidebar>
@@ -409,8 +424,11 @@ async function searchRouteAgency(text: string, isHsl: boolean, ignore: string[])
                 </span>,
                 desc: !isHsl ? r?.agency?.name : undefined,
                 properties: {
+                    code: r?.shortName || "",
+                    id: r?.gtfsId || "",
+                    color: getRouteColor("bg", r?.type || -1, r?.mode || ""),
                     type: "route",
-                    gtfsId: r?.gtfsId || ""
+                    name: r?.longName || ""
                 }
             }
         }),
@@ -419,16 +437,26 @@ async function searchRouteAgency(text: string, isHsl: boolean, ignore: string[])
                 icon: <CorporateFareW700></CorporateFareW700>, id: `${a?.gtfsId}`, text: `${a?.name || ""} ${a?.gtfsId.split(":")[0] || ""} `,
                 name: a?.name || "",
                 properties: {
+                    code: a?.gtfsId.split(":")[0] || "",
+                    id: a?.gtfsId || "",
+                    color: "bg-gray",
                     type: "agency",
-                    gtfsId: a?.gtfsId || ""
+                    name: a?.name || "",
                 }
             }
         })
     ]
-    if (index < searchIndex) {
+    if (index < searchIndex || miniSearch.termCount > 0) {
         return []
     }
-    await miniSearch.addAllAsync(parsed)
+
+    const filtered = parsed.filter((value, index, self) =>
+        index === self.findIndex((t) => (
+            t.id === value.id
+        ))
+    )
+
+    await miniSearch.addAllAsync(filtered)
     const results = miniSearch.search(text, { fuzzy: 0.2, prefix: true, boost: { text: 5 } })
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

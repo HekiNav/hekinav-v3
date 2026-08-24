@@ -51,29 +51,12 @@ export default function Context({ children, end, start, config, depArr, time }: 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const planPromise = useMemo(() => getPlan(origin, destination, isHsl, options, dateTime, depArr), [a])
 
-    useEffect(() => {
-        planPromise.then((v) => {
-            console.log(v)
-            setTimeout(() => {if (!v) setA(Math.random().toString())}, 1000)
-        })
-    })
 
     return (<Suspense fallback={<Loading></Loading>}><PlanData config={options} dateTime={dateTime} depArr={depArr} destination={destination} origin={origin} promise={planPromise}>{children}</PlanData></Suspense>)
 }
 
 export function PlanData({ children, promise, destination, origin, config, dateTime, depArr }: PropsWithChildren & { promise: Promise<PlanQueryQuery["planConnection"]>, depArr: "dep" | "arr", dateTime: TZDate, config: RoutingConfig, origin: PlanLabeledLocationInput, destination: PlanLabeledLocationInput }) {
     const data = use(promise)
-
-    const [rr, setRr] = useState<boolean>(false)
-
-    console.log(data)
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    useEffect(() => {
-        if (rr) return
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setRr(true)
-    })
 
     return (
         <PlanContext value={{ data: data, destination, origin, depArr, dateTime, config }}>
