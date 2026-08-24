@@ -10,7 +10,7 @@ import { Dispatch, SetStateAction, useContext, useEffect, useRef, useState } fro
 import { useMap } from "@vis.gl/react-maplibre";
 import toast from "react-hot-toast";
 import { TZDate } from "@date-fns/tz";
-import { format } from "date-fns-tz";
+import { format, formatInTimeZone } from "date-fns-tz";
 import { SettingsW700 as Settings } from '@material-symbols-svg/react/icons/settings';
 import Modal from './modal';
 import InputField, { Suggestion } from './inputfield';
@@ -43,24 +43,28 @@ const miniSearch = new MiniSearch<SearchSuggestion>({ fields: ["text", "gtfsId"]
 
 const timeOptions: Suggestion<object>[] = []
 
-const startOfToday = new TZDate(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()).withTimeZone("Europe/Helsinki")
+const startOfToday = new Date()
+
+const currentTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone
+
+console.log(currentTimeZone)
 
 
 for (let i = 0; i < 96; i++) {
-    const date = new TZDate(startOfToday.getFullYear(), startOfToday.getMonth(), startOfToday.getDate(), 0, i * 15, "Europe/Helsinki")
+    const date = new TZDate(startOfToday.getUTCFullYear(), startOfToday.getUTCMonth(), startOfToday.getUTCDate(), 0, i * 15, "UTC")
     timeOptions.push({
         icon: <></>,
-        text: format(date, "H:mm"),
+        text: formatInTimeZone(date, currentTimeZone, "H:mm"),
         id: date.toISOString()
     })
 }
 
 const dateOptions: Suggestion<object>[] = []
 for (let i = 0; i < 28; i++) {
-    const date = new TZDate(startOfToday.getFullYear(), startOfToday.getMonth(), startOfToday.getDate() + i, "Europe/Helsinki")
+    const date = new TZDate(startOfToday.getFullYear(), startOfToday.getMonth(), startOfToday.getDate() + i, "UTC")
     dateOptions.push({
         icon: <></>,
-        text: isToday(date) ? "Today" : isTomorrow(date) ? "Tomorrow" : format(date, "ccc d.M."),
+        text: isToday(date.withTimeZone(currentTimeZone)) ? "Today" : isTomorrow(date.withTimeZone(currentTimeZone)) ? "Tomorrow" : formatInTimeZone(date, currentTimeZone, "ccc d.M."),
         id: date.toISOString()
     })
 }
@@ -73,8 +77,8 @@ export default function RoutingUi({ iDateTime = new Date(), iDestination = null,
     const [origin, setOrigin] = useState<PlaceSuggestion | null>(iOrigin)
     const [destination, setDestination] = useState<PlaceSuggestion | null>(iDestination)
     const [depArr, setDepArr] = useState<"dep" | "arr">(iDepArr)
-    const [date, setDate] = useState<TZDate>(new TZDate(iDateTime.getUTCFullYear(), iDateTime.getUTCMonth(), iDateTime.getUTCDate(), "UTC").withTimeZone("Europe/Helsinki"))
-    const [time, setTime] = useState<TZDate>(new TZDate(iDateTime.getUTCFullYear(), iDateTime.getUTCMonth(), iDateTime.getUTCDate(), iDateTime.getUTCHours(), iDateTime.getUTCMinutes(), "UTC").withTimeZone("Europe/Helsinki"))
+    const [date, setDate] = useState<TZDate>(new TZDate(iDateTime.getUTCFullYear(), iDateTime.getUTCMonth(), iDateTime.getUTCDate(), "UTC"))
+    const [time, setTime] = useState<TZDate>(new TZDate(iDateTime.getUTCFullYear(), iDateTime.getUTCMonth(), iDateTime.getUTCDate(), iDateTime.getUTCHours(), iDateTime.getUTCMinutes(), "UTC"))
     const [pickedLocation, setPickedLocation] = useState<LngLat | null | boolean>(null)
     const [pickedLocationTarget, setPickedLocationTarget] = useState<"origin" | "destination" | null>(null)
     const [settingsOpen, setSettingsOpen] = useState<boolean>(false)
@@ -356,14 +360,14 @@ export default function RoutingUi({ iDateTime = new Date(), iDestination = null,
                 </div>
                 <div className="flex flex-row gap-2">
                     <Button className="w-70 text-center h-min" onClick={() => setDepArr(depArr == "dep" ? "arr" : "dep")}>{depArr == "dep" ? "Departure" : "Arrival"}</Button>
-                    <InputField className="h-min" name="date" initialValue={isToday(date) ? "Today" : isTomorrow(date) ? "Tomorrow" : format(date, "ccc d.M.")} suggestionFunction={async () => dateOptions} onlySuggestions onValueSet={(_n, v) => typeof v != "string" && setDate(new TZDate(v.id))} icon={<CalendarToday></CalendarToday>}></InputField>
-                    <InputField className="h-min" name="time" focusClear initialValue={format(time, "H:mm")} suggestionFunction={async (t) => timeOptions.filter(o => o.text.includes(t))} onValueSet={(n, v) => {
+                    <InputField className="h-min" name="date" initialValue={isToday(date.withTimeZone(currentTimeZone)) ? "Today" : isTomorrow(date.withTimeZone(currentTimeZone)) ? "Tomorrow" : formatInTimeZone(date, currentTimeZone, "ccc d.M.")} suggestionFunction={async () => dateOptions} onlySuggestions onValueSet={(_n, v) => typeof v != "string" && setDate(new TZDate(v.id))} icon={<CalendarToday></CalendarToday>}></InputField>
+                    <InputField className="h-min" name="time" focusClear initialValue={formatInTimeZone(time, currentTimeZone, "H:mm")} suggestionFunction={async (t) => timeOptions.filter(o => o.text.includes(t))} onValueSet={(n, v) => {
                         if (typeof v == "string") {
                             const dt = new Date()
                             const [hours, mins] = v.split(":").map(e => Number(e))
                             const time = new TZDate(dt.getFullYear(), dt.getMonth(), dt.getDate(), hours, mins)
                             if (!isNaN(time.getTime()) && v.split(":")[1] && v.split(":")[1].length == 2) setTime(new TZDate(time))
-                        } else setTime(new TZDate(v.id))
+                        } else setTime(new TZDate(v.id, "UTC"))
                     }} icon={<Schedule></Schedule>}></InputField>
                     <Button onClick={() => setSettingsOpen(true)} className="w-min text-center text-darkgray h-min p-1.5!"><Icon><Settings height={28} width={28}></Settings></Icon></Button>
                 </div>
