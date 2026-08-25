@@ -132,51 +132,7 @@ const GET_STATION:
 
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 
-type Props = {
-  params: Promise<{ id: string, stop_or_station: string }>
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
-}
 
-export  async function generateMetadata({
-  params,
-  searchParams
-}: Props,
-  parent: ResolvingMetadata
-): Promise<Metadata> {
-  const { id, stop_or_station } = await params
-
-  const isHsl = (await searchParams).hsl != undefined
-  if (stop_or_station != "stop" && stop_or_station != "station") return {title: "Unknown Stop - Hekinav Routing"}
-
-  if (!gtfsIdRegex.test(decodeURIComponent(id))) {
-    return {title: "Unknown Stop - Hekinav Routing"}
-  }
-  
-
-  const client = new ApolloClient({
-    link: new HttpLink({ uri: `https://api.digitransit.fi/routing/v2/${isHsl ? "hsl" : "finland"}/gtfs/v1/`, headers: { "digitransit-subscription-key": process.env.DIGITRANSIT_KEY || "" } }),
-    cache: new InMemoryCache(),
-  });
-
-  const query = stop_or_station == "station" ? GET_STATION_METADATA : GET_STOP_METADATA
-  const result = await client.query({
-    query: query as TypedDocumentNode<StopMatadataQueryQuery | StationMetadataQueryQuery, StopMatadataQueryQueryVariables>,
-    variables: {
-      stopId: decodeURIComponent(id)
-    }
-  })
-
-  if (result.error || !result.data) {
-    return {title: "Unknown Stop - Hekinav Routing"}
-  }
-  const data = (result.data as StopMatadataQueryQuery).stop || (result.data as StationMetadataQueryQuery).station
-  if (!data) return {title: "Unknown Stop - Hekinav Routing"}
-
-  return {
-    title: `${data.name} ${data.platformCode ? `pl. ${data.platformCode}` : ""} ${data.code ? `(${data.code})` : ""}`,
-    description: `View departures and routes of ${data.name} ${data.platformCode ? `pl. ${data.platformCode}` : ""} in Hekinav Routing`
-  }
-}
 
 export default async function StopOrStation({
   params,

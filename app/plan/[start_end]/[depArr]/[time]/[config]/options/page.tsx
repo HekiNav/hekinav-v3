@@ -36,6 +36,7 @@ export default function Content() {
 
 
 
+    console.log(data)
 
     return (
         <>
