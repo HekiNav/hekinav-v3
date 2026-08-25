@@ -7,6 +7,55 @@ export type AccessibilityPreferencesInput = {
   wheelchair?: WheelchairPreferencesInput | null | undefined;
 };
 
+/** Cause of a alert */
+export type AlertCauseType =
+  /** ACCIDENT */
+  | 'ACCIDENT'
+  /** CONSTRUCTION */
+  | 'CONSTRUCTION'
+  /** DEMONSTRATION */
+  | 'DEMONSTRATION'
+  /** HOLIDAY */
+  | 'HOLIDAY'
+  /** MAINTENANCE */
+  | 'MAINTENANCE'
+  /** MEDICAL_EMERGENCY */
+  | 'MEDICAL_EMERGENCY'
+  /** OTHER_CAUSE */
+  | 'OTHER_CAUSE'
+  /** POLICE_ACTIVITY */
+  | 'POLICE_ACTIVITY'
+  /** STRIKE */
+  | 'STRIKE'
+  /** TECHNICAL_PROBLEM */
+  | 'TECHNICAL_PROBLEM'
+  /** UNKNOWN_CAUSE */
+  | 'UNKNOWN_CAUSE'
+  /** WEATHER */
+  | 'WEATHER';
+
+/** Severity level of a alert */
+export type AlertSeverityLevelType =
+  /**
+   * Info alerts are used for informational messages that should not have a
+   * significant effect on user's journey, for example: A single entrance to a
+   * metro station is temporarily closed.
+   */
+  | 'INFO'
+  /**
+   * Severe alerts are used when a significant part of public transport services is
+   * affected, for example: All train services are canceled due to technical problems.
+   */
+  | 'SEVERE'
+  /** Severity of alert is unknown */
+  | 'UNKNOWN_SEVERITY'
+  /**
+   * Warning alerts are used when a single stop or route has a disruption that can
+   * affect user's journey, for example: All trams on a specific route are running
+   * with irregular schedules.
+   */
+  | 'WARNING';
+
 /** Preferences related to alighting from a transit vehicle. */
 export type AlightPreferencesInput = {
   /** What is the required minimum time alighting from a vehicle. */

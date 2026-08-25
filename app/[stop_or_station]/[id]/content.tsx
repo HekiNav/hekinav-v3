@@ -9,6 +9,7 @@ import { LngLat } from "maplibre-gl"
 import Selector from "@/app/components/selector";
 import StopDepartures from "./deps";
 import StopTimeTableContent from "./timetable";
+import StopAlerts from "./alerts";
 
 export interface ContentProps {
     data: NonNullable<StopQueryQuery["stop"]>
@@ -35,7 +36,8 @@ export default function Content({ data,
 
     const pages = [
         <StopDepartures key={0} data={data} isHsl={isHsl} stop_or_station={stop_or_station}></StopDepartures>,
-        <StopTimeTableContent key={1} data={data} isHsl={isHsl} stop_or_station={stop_or_station}></StopTimeTableContent>
+        <StopTimeTableContent key={1} data={data} isHsl={isHsl} stop_or_station={stop_or_station}></StopTimeTableContent>,
+        <StopAlerts key={0} data={data} isHsl={isHsl} stop_or_station={stop_or_station}></StopAlerts>
     ]
 
     return (

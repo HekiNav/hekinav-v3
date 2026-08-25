@@ -53,6 +53,44 @@ const GET_STOP:
           vehicleMode
           code
           desc
+          alerts {
+            alertCause
+            alertDescriptionText
+            alertHeaderText
+            alertSeverityLevel
+            entities {
+              __typename
+              ... on Agency {
+                name
+              }
+              ... on Route {
+                shortName
+                longName
+                mode
+                type
+              }
+              ... on RouteType {
+                routeType
+                routes {
+                  shortName
+                  longName
+                }
+              }
+              ... on Stop {
+                name
+                code
+                platformCode
+                gtfsId
+              }
+              ... on Pattern {
+                route {
+                  shortName
+                  longName
+                }
+                headsign
+              }
+            }
+          }
           stoptimesWithoutPatterns(numberOfDepartures: 100,timeRange: 604800) {
             scheduledDeparture
             scheduledArrival
@@ -86,48 +124,87 @@ const GET_STOP:
 const GET_STATION:
   TypedDocumentNode<StationQueryQuery, StationQueryQueryVariables> =
   gql`
-    query StationQuery($stopId: String!) {
-        station(id: $stopId) {
+query StationQuery($stopId: String!) {
+  station(id: $stopId) {
+    name
+    lon
+    lat
+    locationType
+    platformCode
+    gtfsId
+    vehicleMode
+    code
+    desc
+    alerts {
+      alertCause
+      alertDescriptionText
+      alertHeaderText
+      alertSeverityLevel
+      entities {
+        __typename
+        ... on Agency {
           name
-          lon
-          lat
-          locationType
-          platformCode
-          gtfsId
-          vehicleMode
-          code
-          desc
-          stoptimesWithoutPatterns(numberOfDepartures: 100,timeRange: 604800) {
-            scheduledDeparture
-            scheduledArrival
-            dropoffType
-            pickupType
-            realtimeArrival
-            realtime
-            realtimeDeparture
-            headsign
-            arrivalDelay
-            departureDelay
-            serviceDay
-            stop {
-              platformCode
-            }
-            trip {
-              routeShortName
-              directionId
-              isReplacement
-              route {
-                gtfsId
-                type
-                mode
-              }
-              pattern {
-                code
-              }
-            }
+        }
+        ... on Route {
+          shortName
+          longName
+          mode
+          type
+        }
+        ... on RouteType {
+          routeType
+          routes {
+            shortName
+            longName
           }
         }
+        ... on Stop {
+          name
+          code
+          platformCode
+          gtfsId
+        }
+        ... on Pattern {
+          route {
+            shortName
+            longName
+          }
+          headsign
+        }
+      }
     }
+    stoptimesWithoutPatterns(numberOfDepartures: 100, timeRange: 604800) {
+      scheduledDeparture
+      scheduledArrival
+      dropoffType
+      pickupType
+      realtimeArrival
+      realtime
+      realtimeDeparture
+      headsign
+      arrivalDelay
+      departureDelay
+      serviceDay
+      stop {
+        platformCode
+      }
+      trip {
+        routeShortName
+        directionId
+        isReplacement
+        route {
+          gtfsId
+          type
+          mode
+        }
+        pattern {
+          code
+        }
+      }
+    }
+  }
+}
+
     `
 
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;

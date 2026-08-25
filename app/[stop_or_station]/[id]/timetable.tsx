@@ -44,7 +44,8 @@ export default function StopTimeTableContent({ data, isHsl, stop_or_station }: C
 interface StopTime {
     minutes: number,
     route: string,
-    hours: number
+    hours: number,
+    cancelled: boolean
 }
 
 type Hours = Map<number, StopTime[]>
@@ -58,7 +59,7 @@ export function Timetable({ timetable }: { timetable: Promise<StopTimetableQuery
 
     const stopTimes: Hours = data.stoptimesForServiceDate.reduce<StopTime[]>((p, c) => [...p, ...(c?.stoptimes?.map(d => {
         const date = new Date((d?.scheduledDeparture || 0) * 1000 + (d?.serviceDay as number || 0) * 1000)
-        return { hours: date.getHours(), minutes: date.getMinutes(), route: c.pattern?.route.shortName || "" }
+        return { hours: date.getHours(), minutes: date.getMinutes(), route: c.pattern?.route.shortName || "", cancelled: d?.realtimeState === "CANCELED" }
     }) || [])], [])?.reduce<Hours>((p, c) => {
         p.set(c.hours, [...(p.get(c.hours) || []), c])
         return p
@@ -66,24 +67,12 @@ export function Timetable({ timetable }: { timetable: Promise<StopTimetableQuery
     console.log(stopTimes)
     return (
         <>
-            {Array.from(stopTimes.entries()).sort((a, b) => (a[0] <= 4 ? 23 + a[0] : a[0]) - (b[0] <= 4 ? 23 + b[0] : b[0])).map(([k, v]) => (
-                <>
+            {Array.from(stopTimes.entries()).sort((a, b) => (a[0] <= 4 ? 23 + a[0] : a[0]) - (b[0] <= 4 ? 23 + b[0] : b[0])).map(([k, v],i) => (
+                <div key={i}>
                     <h2 className="font-extrabold text-2xl">{String(k).padStart(2, "0")}:</h2>
-                    <div className="grid grid-cols-4 gap-2">{v.sort((a, b) => a.minutes - b.minutes).map((e, i) => (<span className="font-medium text-lg" key={i}><span>{String(e.minutes).padStart(2, "0")}</span>/<span className="font-bold">{e.route}</span></span>))}</div>
-                </>
+                    <div className="grid grid-cols-4 gap-2">{v.sort((a, b) => a.minutes - b.minutes).map((e, i) => (<span className={`font-medium text-lg ${e.cancelled && "line-through decoration-red decoration-2"}`} key={i}><span>{String(e.minutes).padStart(2, "0")}</span>/<span className="font-bold">{e.route}</span></span>))}</div>
+                </div>
             ))}
         </>
     )
-}
-
-function getColorFromDelay(delay: number) {
-    if (delay > 900) {
-        return "text-red"
-    } else if (delay > 120) {
-        return "text-orange"
-    } else if (delay < -120) {
-        return "text-cyan"
-    } else {
-        return "text-green"
-    }
 }
