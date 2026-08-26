@@ -15,32 +15,72 @@ import { SyncAltW700 as SyncAlt } from '@material-symbols-svg/react/icons/sync-a
 import DateEl from "@/app/components/Date";
 import { Map } from "./Map";
 import { Metadata } from "next";
+import Content from "./content";
 
 const GET_PATTERN:
   TypedDocumentNode<PatternQueryQuery, PatternQueryQueryVariables> =
   gql`
 query PatternQuery($patternId: String!) {
   pattern(id: $patternId) {
-    name
     code
+    name
+    alerts {
+      alertCause
+      alertDescriptionText
+      alertHeaderText
+      alertSeverityLevel
+      entities {
+        __typename
+        ... on Agency {
+          name
+        }
+        ... on Route {
+          shortName
+          longName
+          mode
+          type
+        }
+        ... on RouteType {
+          routeType
+          routes {
+            shortName
+            longName
+          }
+        }
+        ... on Stop {
+          name
+          code
+          platformCode
+          gtfsId
+        }
+        ... on Pattern {
+          route {
+            shortName
+            longName
+          }
+          headsign
+        }
+      }
+    }
     stops {
-      lat
-      lon
       name
       gtfsId
       code
       desc
       platformCode
+      
+      lat
+      lon
       stopTimesForPattern(id: $patternId, numberOfDepartures: 2) {
         arrivalDelay
         realtimeArrival
         scheduledArrival
+        serviceDay
 
         realtime
         departureDelay
         realtimeDeparture
         scheduledDeparture
-        serviceDay
       }
     }
     patternGeometry {
@@ -48,6 +88,7 @@ query PatternQuery($patternId: String!) {
       points
     }
     route {
+      gtfsId
       mode
       type
       shortName
@@ -59,9 +100,11 @@ query PatternQuery($patternId: String!) {
           name
         }
       }
+
     }
   }
 }
+
 
 
     `
@@ -196,43 +239,13 @@ export default async function Route({
 
   return (
     <Sidebar>
-      <span className="flex justify-start items-center gap-2 mb-2 ml-14 mt-1">
-        <Label className={`text-2xl w-min ${getRouteColor("bg", data.route.type || -1, data.route.mode || "")} text-white font-bold`}>{data.route.shortName || data.route.longName}</Label>
-        <Pattern data={data}></Pattern> {(patternOptions.length == 1 && firstPattern) && <Link className="decoration-none ml-auto" href={`/route/${id}/${firstPattern.directionId}-${firstPattern.code.split(":")[3]}/${isHsl ? "?hsl" : ""}`}><Icon boxed><SyncAlt></SyncAlt></Icon></Link>}
-      </span>
-      {patternOptions.length > 1 && <Dropdown initial={<span className="text-xl font-medium text-green">Other patterns</span>} items={patternOptions}></Dropdown>}
-      <div className="stops flex flex-col">
-        {
-          data.stops.map((s, i, a) => {
-            const firstDep = s.stopTimesForPattern && s.stopTimesForPattern[0]
-            const secondDep = s.stopTimesForPattern && s.stopTimesForPattern[1]
-            return (
-              <Link className="h-full flex decoration-none" key={i} href={`/stop/${s.gtfsId}/${isHsl ? "?hsl" : ""}`}>
-                <div className="flex flex-row w-full">
-                  <div className={`mx-4 w-3 relative h-full flex ${i == 0 ? "items-end" : i == a.length - 1 ? "items-start" : ""}`}>
-                    <div className={`w-full ${i == 0 || i == a.length - 1 ? "h-5/10" : "h-full"} ${getRouteColor("bg", data.route.type || -1, data.route.mode || "")}`}></div>
-                    <div className="absolute -left-1.5 -right-1.5 top-0 bottom-0 flex justify-center items-center">
-                      <div className={`bg-white border-white absolute border-[.25rem] bg-white h-7 w-7 rounded-full z-100`}></div>
-                      <div className={`${getRouteColor("border", data.route.type || -1, data.route.mode || "")} border-[.25rem] bg-white h-6 w-6 rounded-full z-100`}></div>
-                    </div>
-                  </div>
-                  <div className="p-2 flex flex-row justify-between w-full">
-                    <div>
-                      <span className="text-lg font-medium">{s.name}</span> {s.platformCode && <Label>pl. {s.platformCode}</Label>} <br />
-                      <span className="text-sm">{s.desc}</span> {s.code && <Label className="text-xs bg-gray">{s.code}</Label>}
-                    </div>
-                    <div className="text-end">
-                      {firstDep && <span className={`text-md font-medium ${firstDep.realtime ? "text-green" : "text-black"}`}><DateEl showTime={false} day={firstDep.serviceDay as number || 0} time={firstDep.realtimeDeparture || firstDep.scheduledDeparture || 0}></DateEl></span>} <br />
-                      {secondDep && <span className={`text-sm font-medium ${secondDep.realtime ? "text-green" : "text-black"}`}>Next <DateEl showTime={false} day={secondDep.serviceDay as number || 0} time={secondDep.realtimeDeparture || secondDep.scheduledDeparture || 0}></DateEl></span>}
-                    </div>
-                  </div>
-                </div>
-              </Link>
-            )
-          })
-        }
-      </div>
-      <Map data={data} routeId={id} direction={Number(direction)} />
+        <span className="flex justify-start items-center gap-2 mb-2 ml-14 mt-1">
+          <Label className={`text-2xl w-min ${getRouteColor("bg", data.route.type || -1, data.route.mode || "")} text-white font-bold`}>{data.route.shortName || data.route.longName}</Label>
+          <Pattern data={data}></Pattern> {(patternOptions.length == 1 && firstPattern) && <Link className="decoration-none ml-auto" href={`/route/${id}/${firstPattern.directionId}-${firstPattern.code.split(":")[3]}/${isHsl ? "?hsl" : ""}`}><Icon boxed><SyncAlt></SyncAlt></Icon></Link>}
+        </span>
+        {patternOptions.length > 1 && <Dropdown initial={<span className="text-xl font-medium text-green">Other patterns</span>} items={patternOptions}></Dropdown>}
+        <Content directionId={Number(direction)} data={data} isHsl={isHsl}></Content>
+        <Map data={data} routeId={id} direction={Number(direction)} />
     </Sidebar>
   )
 }

@@ -7,7 +7,7 @@ import { InfoW700 } from "@material-symbols-svg/react/icons/info"
 import { WarningW700 } from "@material-symbols-svg/react/icons/warning"
 import Label from "@/app/components/label"
 
-export default function StopAlerts({ data, isHsl }: ContentProps) {
+export default function RouteAlerts({ data, isHsl }: ContentProps) {
     console.log(data.alerts)
     return (
         <>

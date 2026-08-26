@@ -18,6 +18,10 @@ body {
   font-family: var(--font-a);
   cursor: default;
 }
+* {
+  accent-color: #0f8c0f;
+  scrollbar-color: #0f8c0f transparent;
+}
 
 h1 {
   font-size: 40px;

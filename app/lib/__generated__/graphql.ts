@@ -238,12 +238,6 @@ export type CyclingOptimizationInput = {
 export type CyclingOptimizationType =
   /** Emphasize flatness over safety or duration of the route. This option was previously called `FLAT`. */
   | 'FLAT_STREETS'
-  /**
-   * Completely ignore the elevation differences and prefer the streets, that are evaluated
-   * to be the safest, even more than with the `SAFE_STREETS` option.
-   * Safety can also include other concerns such as convenience and general cyclist preferences
-   * by taking into account road surface etc. This option was previously called `GREENWAYS`.
-   */
   | 'SAFEST_STREETS'
   /**
    * Emphasize cycling safety over flatness or duration of the route. Safety can also include other
@@ -926,14 +920,6 @@ export type ScooterOptimizationInput = {
 export type ScooterOptimizationType =
   /** Emphasize flatness over safety or duration of the route. This option was previously called `FLAT`. */
   | 'FLAT_STREETS'
-  /**
-   * Completely ignore the elevation differences and prefer the streets, that are evaluated
-   * to be safest for scooters, even more than with the `SAFE_STREETS` option.
-   * Safety can also include other concerns such as convenience and general preferences by taking
-   * into account road surface etc.  Note, currently the same criteria is used both for cycling and
-   * scooter travel to determine how safe streets are for cycling or scooter.
-   * This option was previously called `GREENWAYS`.
-   */
   | 'SAFEST_STREETS'
   /**
    * Emphasize scooter safety over flatness or duration of the route. Safety can also include other

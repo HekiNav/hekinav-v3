@@ -1,15 +1,8 @@
 "use server"
 
-import { redirect } from "next/navigation";
-import { MapOverlay, Sidebar } from "../../mapcontext";
-import { gtfsIdRegex } from "@/app/lib/digitransit";
 import { ApolloClient, HttpLink, InMemoryCache, TypedDocumentNode, gql } from "@apollo/client";
-import Toast from "@/app/components/toast";
-import Link from "next/link";
-import Content, { ContentProps } from "./content";
-import { Map } from "./Map";
+import { ContentProps } from "./content";
 import { StationTimetableQueryQuery, StationTimetableQueryQueryVariables, StopTimetableQueryQuery, StopTimetableQueryQueryVariables } from "./timetableServerPart.generated";
-import StopTimeTableContent from "./timetable";
 
 const GET_STOP:
   TypedDocumentNode<StopTimetableQueryQuery, StopTimetableQueryQueryVariables> =
