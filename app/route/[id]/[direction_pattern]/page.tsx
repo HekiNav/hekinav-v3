@@ -88,6 +88,13 @@ query PatternQuery($patternId: String!) {
       points
     }
     route {
+      stops {
+        name
+        gtfsId
+        code
+        desc
+        platformCode
+      }
       gtfsId
       mode
       type

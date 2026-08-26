@@ -47,29 +47,31 @@ export default function RouteTimeTableContent({ data, isHsl, directionId }: Cont
 
 export function Timetable({ timetable, directionId }: { timetable: Promise<RouteTimetableQueryQuery["route"]>, directionId: number }) {
     const data = use(timetable)?.patterns?.filter(p => directionId ? p?.directionId == directionId : true)
+
+    const [fullscreen, setFullscreen] = useState<boolean>(false)
+    const [highlightedRow, setHighlightedRow] = useState<number | null>(null)
+    const [highlightedCol, setHighlightedCol] = useState<number | null>(null)
+
     if (!data) return "Failed to load"
 
     const stops = mergeStopSequences(data)
-
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const [fullscreen, setFullscreen] = useState<boolean>(false)
 
     console.log(stops, data)
 
     const trips = data.flatMap(p => p?.tripsOnServiceDate)
 
-    const table = <div className="w-full rounded-xl h-fit">
+    const table = <div onMouseOut={() => { setHighlightedCol(null); setHighlightedRow(null) }} className="w-full rounded-xl h-fit">
         <div className={`w-full h-full overflow-scroll rounded bg-white h-max grid`} style={{ gridTemplateColumns: `10em ${trips.map(() => "1fr").join(" ")}` }}>
             {stops.map((s, i) => {
                 const borderClass = `border-t-3 border-r-3 border-gray ${i == stops.length - 1 && "border-b-3"}`
                 return [
-                    <div className={`sticky left-0 bg-white p-2 truncate border-l-3 ${borderClass}`} key={-1}>{s.name} {s.platformCode && `pl. ${s.platformCode}`}</div>,
+                    <div className={`sticky left-0 bg-white p-2 truncate border-l-3 ${borderClass} ${highlightedRow == i && "font-extrabold!"}`} key={-1}>{s.name} {s.platformCode && `pl. ${s.platformCode}`}</div>,
                     trips.map((t, j) => {
                         const call = t?.stopCalls.find(e => e.stopLocation.__typename == "Stop" && e.stopLocation.gtfsId == s.gtfsId)
                         const callTimes = call?.schedule?.time && (call?.schedule?.time?.__typename == "ArrivalDepartureTime" ? [call.schedule.time.arrival, call.schedule.time.arrival] : [call.schedule.time.start, call.schedule.time.end])
                         const times = [...new Set(callTimes)]
                         return (
-                            <div className={`p-2 text-center ${borderClass}`} key={j}>
+                            <div onMouseOver={() => { setHighlightedRow(i); setHighlightedCol(j) }} className={`p-2 text-center ${borderClass} ${(highlightedRow == i || highlightedCol == j) && "font-extrabold"}`} key={j}>
                                 {times.length ? times.map(t => format(t as string, "HH:mm")) : "—"}
                             </div>
                         )
@@ -82,7 +84,7 @@ export function Timetable({ timetable, directionId }: { timetable: Promise<Route
         <>
             <Button onClick={() => setFullscreen(true)} className="w-min"><Icon><OpenInFullW700></OpenInFullW700></Icon></Button>
             {table}
-            {fullscreen && <Modal className="max-w-9/10! max-h-8/10! w-fit! h-fit! p-2! bg-white" close={() => setFullscreen(false)} open={fullscreen}>
+            {fullscreen && <Modal className="max-w-9/10! max-h-8/10! w-fit! h-fit! p-2! bg-white overflow-y-scroll" close={() => setFullscreen(false)} open={fullscreen}>
                 {table}
             </Modal>}
         </>
@@ -98,14 +100,19 @@ interface Stop {
 }
 
 function mergeStopSequences(patterns: NonNullable<NonNullable<RouteTimetableQueryQuery["route"]>["patterns"]>): Stop[] {
+
+
     const stopsById = new Map<string, Stop>();
     const graph = new Map<string, Set<string>>();
     const inDegree = new Map<string, number>();
+
+
 
     const ensureNode = (id: string) => {
         if (!graph.has(id)) graph.set(id, new Set());
         if (!inDegree.has(id)) inDegree.set(id, 0);
     };
+
 
     for (const pattern of patterns) {
         if (!pattern || !pattern.tripsOnServiceDate) continue
@@ -140,12 +147,8 @@ function mergeStopSequences(patterns: NonNullable<NonNullable<RouteTimetableQuer
     for (const [id, deg] of inDegree) if (deg === 0) queue.push(id);
 
     const result: Stop[] = [];
-    const branchWarnings: string[] = [];
 
     while (queue.length > 0) {
-        if (queue.length > 1) {
-            branchWarnings.push(`Ambiguous order between: ${queue.join(", ")}`);
-        }
         const id = queue.shift()!;
         result.push(stopsById.get(id)!);
 
@@ -156,11 +159,7 @@ function mergeStopSequences(patterns: NonNullable<NonNullable<RouteTimetableQuer
     }
 
     if (result.length !== stopsById.size) {
-        throw new Error("Cycle detected — patterns disagree on stop order");
-    }
-
-    if (branchWarnings.length > 0) {
-        console.warn("Possible branching detected:", branchWarnings);
+        throw new Error("Patterns disagree on stop order");
     }
 
     return result;
