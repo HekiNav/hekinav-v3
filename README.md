@@ -6,14 +6,32 @@ View the production version at [routing.hekinav.dev](https://routing.hekinav.dev
 
 ## Features
 
-- 
+### Routing engines
 
-## Two modes
+Hekinav routing utilises multiple routing engines for optimal results
+
+**Routing engines**
+1. Hekinav
+- Uses MOTIS
+- Faster than OTP
+
+2. Digitransit
+- Uses OpenTripPlanner
+- Better realtime data integration
+
+### Settings
+
+Hekinav Routing has a highly configurable global config system that makes it easy to add new options to the config and settings ui elements linked to them. 
+
+### Mobile compatibility
+
+The website is compatible with most desktop and mobile devices. Safari sometimes has issues with opening the keyboard.
+
+### Two modes
 
 The routing has two different modes: HSL and Finland.
 
-### Feature comparison
-
+**General**
 | Feature                                        | HSL             | Finland                  |
 |------------------------------------------------|-----------------|--------------------------|
 | Region                                         | Helsinki Region | All of Finland & Estonia |

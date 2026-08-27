@@ -58,7 +58,12 @@ export function Timetable({ timetable, directionId }: { timetable: Promise<Route
 
     console.log(stops, data)
 
-    const trips = data.flatMap(p => p?.tripsOnServiceDate)
+    const trips = data.flatMap(p => p?.tripsOnServiceDate).sort((a, b) => {
+        const aData = new Date(a?.stopCalls[0].schedule?.time?.__typename == "ArrivalDepartureTime" ? a?.stopCalls[0].schedule?.time?.departure as number : a?.stopCalls[0].schedule?.time?.start as number)
+        const bData = new Date(b?.stopCalls[0].schedule?.time?.__typename == "ArrivalDepartureTime" ? b?.stopCalls[0].schedule?.time?.departure as number : b?.stopCalls[0].schedule?.time?.start as number)
+        return aData.getTime() - bData.getTime()
+
+    })
 
     const table = <div onMouseOut={() => { setHighlightedCol(null); setHighlightedRow(null) }} className="w-full rounded-xl h-fit">
         <div className={`w-full h-full overflow-scroll rounded bg-white h-max grid`} style={{ gridTemplateColumns: `10em ${trips.map(() => "1fr").join(" ")}` }}>
