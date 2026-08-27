@@ -36,9 +36,11 @@ export default function Content() {
 
     const { data, destination, via, origin, dateTime, depArr } = stuff
 
+    if (!data) return
 
+    const {dt, motis} = data
 
-    console.log(data)
+    console.log(motis, dt)
 
     return (
         <>
@@ -48,7 +50,7 @@ export default function Content() {
 
             <RoutingUi iViaPoints={via.map((e, i) => ({ icon: <></>, id: "via" + i, text: e.label || "via " + i, properties: { lat: e.coordinate?.latitude as number || 0, lng: e.coordinate?.longitude as number || 0 } }))} iDateTime={dateTime} iDepArr={depArr} iOrigin={{ icon: <></>, id: "origin", text: origin.label || "origin", properties: { lat: origin.location.coordinate?.latitude as number || 0, lng: origin.location.coordinate?.longitude as number || 0 } }} iDestination={{ icon: <></>, id: "origin", text: destination.label || "origin", properties: { lat: destination.location.coordinate?.latitude as number || 0, lng: destination.location.coordinate?.longitude as number || 0 } }}></RoutingUi>
             <div className="flex flex-col gap-2 w-full">
-                {data?.edges?.length === 0 && (
+                {dt?.edges?.length === 0 && (
                     <div className="w-full p-4">
                         <div className="text-lg">Could not find routes. Here are some things to check: </div>
                         <ol>
@@ -58,7 +60,7 @@ export default function Content() {
                         </ol>
                     </div>
                 )}
-                {data?.edges?.map((e, i) => {
+                {dt?.edges?.map((e, i) => {
                     const walkDistance = (e?.node.walkDistance as number)
                     const firstTransitLeg = e?.node.legs.find(l => l?.transitLeg)
                     const duration = e?.node.duration as number || 0
@@ -96,7 +98,7 @@ export default function Content() {
                 })}
             </div>
             <MapOverlay>
-                <Map data={data as NonNullable<PlanQueryQuery["planConnection"]>}
+                <Map data={dt as NonNullable<PlanQueryQuery["planConnection"]>}
                     destination={destination}
                     origin={origin}
                     selectedRoute={selectedRoute}

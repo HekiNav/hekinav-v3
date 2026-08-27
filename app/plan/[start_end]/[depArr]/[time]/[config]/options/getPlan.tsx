@@ -4,9 +4,11 @@ import { ApolloClient, HttpLink, InMemoryCache } from "@apollo/client";
 import { GET_PLAN } from "./layout";
 import { RoutingConfig } from "@/app/lib/digitransit";
 import { TZDate } from "@date-fns/tz";
+import { plan, PlanResponse } from "@motis-project/motis-client"
+import { PlanQueryQuery } from "./layout.generated";
 
 
-export async function getPlan(origin: PlanLabeledLocationInput, destination: PlanLabeledLocationInput, via: PlanVisitViaLocationInput[], isHsl: boolean, config: RoutingConfig, dateTime: TZDate, depArr: "dep" | "arr") {
+export async function getPlan(origin: PlanLabeledLocationInput, destination: PlanLabeledLocationInput, via: PlanVisitViaLocationInput[], isHsl: boolean, config: RoutingConfig, dateTime: TZDate, depArr: "dep" | "arr"): Promise<GetPlanResponse | null> {
   if (!origin || !destination) {
     console.log("NO ORIGIN OR DESTINATION");
     return null;
@@ -18,16 +20,28 @@ export async function getPlan(origin: PlanLabeledLocationInput, destination: Pla
   });
 
 
-  const result = await client.query({
+
+  const [result, motisResponse] = await Promise.all([client.query({
     query: GET_PLAN,
     variables: {
       destination,
       origin,
       ...config,
-      via: via.map(e => ({visit: e})),
-      dateTime: {[depArr == "arr" ? "latestArrival" : "earliestDeparture"]: dateTime}
+      via: via.map(e => ({ visit: e })),
+      dateTime: { [depArr == "arr" ? "latestArrival" : "earliestDeparture"]: dateTime }
     }
-  });
+  }),
+  plan({
+    throwOnError: true,
+    baseUrl: 'https://api.transitous.org',
+    headers: {
+      'User-Agent': 'hekinav-routing:v1 developer.hekinav@gmail.com'
+    },
+    query: {
+      fromPlace: `${origin.location.coordinate?.latitude},${origin.location.coordinate?.longitude}`,
+      toPlace: `${destination.location.coordinate?.latitude},${destination.location.coordinate?.longitude}`
+    }
+  })])
 
   if (result.error || !result.data) {
     console.log(result.error);
@@ -38,5 +52,9 @@ export async function getPlan(origin: PlanLabeledLocationInput, destination: Pla
     console.log("NO DATA");
     return null;
   }
-  return data;
+  return { dt: data, motis: motisResponse.data };
+}
+export interface GetPlanResponse {
+  dt: NonNullable<PlanQueryQuery["planConnection"]>,
+  motis: PlanResponse
 }

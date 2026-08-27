@@ -29,7 +29,11 @@ export default function Content() {
     </>
     const { data, destination, origin, via } = stuff
 
-    const node = data?.edges![selectedRoute]?.node
+    if (!data) return
+
+    const {dt, motis} = data
+
+    const node = dt?.edges![selectedRoute]?.node
 
     console.log(node?.legs)
 
@@ -120,7 +124,7 @@ export default function Content() {
                 }
             </div>
             <MapOverlay>
-                <Map data={data as NonNullable<PlanQueryQuery["planConnection"]>}
+                <Map data={dt as NonNullable<PlanQueryQuery["planConnection"]>}
                     via={via}
                     destination={destination}
                     origin={origin}

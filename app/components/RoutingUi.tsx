@@ -371,7 +371,7 @@ export default function RoutingUi({ iDateTime = new Date(), iDestination = null,
             <Sidebar>
                 <div className='flex flex-row gap-2'>
                     <InputField initialValue={origin?.text} suggestionFunction={(t) => placeSearch(t, map?.getCenter() || new LngLat(24.94, 60.18), isHsl)} onlySuggestions placeholder='Origin' name='origin' onValueSet={(_t, v) => setOrigin(typeof v == "string" ? null : v)} icon={<LocationOn className='text-blue'></LocationOn>}></InputField>
-                    <Button onClick={() => { const tempOrigin = origin; setOrigin(destination); setDestination(tempOrigin) }} className="w-min text-center text-green h-min p-1.5!"><Icon><SyncAltW700 style={{ transform: "rotate(90deg)" }} height={28} width={28}></SyncAltW700></Icon></Button>
+                    <Button onClick={() => { const tempOrigin = origin; setOrigin(destination); setDestination(tempOrigin); setViaPoints(viaPoints.toReversed()) }} className="w-min text-center text-green h-min p-1.5!"><Icon><SyncAltW700 style={{ transform: "rotate(90deg)" }} height={28} width={28}></SyncAltW700></Icon></Button>
                 </div>
                 {viaPoints.map((p, i) => {
                     return <div key={i} className='flex flex-row gap-2'>

@@ -2,7 +2,7 @@
 
 import { PropsWithChildren, Suspense, createContext, use, useEffect, useMemo, useState } from "react";
 import { PlanQueryQuery } from "./layout.generated";
-import { getPlan } from "./getPlan";
+import { getPlan, GetPlanResponse } from "./getPlan";
 import Loading from "./loading";
 import { useIsHsl } from "@/app/hooks/useHsl";
 import { TZDate } from "@date-fns/tz";
@@ -12,7 +12,7 @@ import { PlanLabeledLocationInput, PlanVisitViaLocationInput } from "@/app/lib/_
 export const PlanContext = createContext<ContextType>(null)
 
 export type ContextType = ({
-    data: PlanQueryQuery["planConnection"]
+    data: GetPlanResponse | null
     depArr: "dep" | "arr"
     dateTime: TZDate
     config: RoutingConfig
@@ -55,7 +55,7 @@ export default function Context({ children, start_end, config, depArr, time }: P
     return (<Suspense fallback={<Loading></Loading>}><PlanData via={via} config={options} dateTime={dateTime} depArr={depArr} destination={destination} origin={origin} promise={planPromise}>{children}</PlanData></Suspense>)
 }
 
-export function PlanData({ children, via, promise, destination, origin, config, dateTime, depArr }: PropsWithChildren & { promise: Promise<PlanQueryQuery["planConnection"]>, depArr: "dep" | "arr", dateTime: TZDate, config: RoutingConfig, origin: PlanLabeledLocationInput, via: PlanLabeledLocationInput[], destination: PlanLabeledLocationInput }) {
+export function PlanData({ children, via, promise, destination, origin, config, dateTime, depArr }: PropsWithChildren & { promise: Promise<GetPlanResponse | null>, depArr: "dep" | "arr", dateTime: TZDate, config: RoutingConfig, origin: PlanLabeledLocationInput, via: PlanLabeledLocationInput[], destination: PlanLabeledLocationInput }) {
     const data = use(promise)
 
     return (
