@@ -31,11 +31,9 @@ export default function Content() {
 
     if (!data) return
 
-    const {dt, motis} = data
+    const node = data[selectedRoute]
 
-    const node = dt?.edges![selectedRoute]?.node
-
-    console.log(node?.legs)
+    console.log(node.legs)
 
     if (!node) return <>
         failed to load
@@ -47,22 +45,22 @@ export default function Content() {
                     node.legs.flatMap((l, i, a) => {
                         const prev = a[i - 1]
                         const next = a[i + 1]
-                        const route = l?.trip?.route
-                        const prevRoute = prev?.trip?.route
-                        const nextRoute = next?.trip?.route
+                        const route = l.route
+                        const prevRoute = prev?.route
+                        const nextRoute = next?.route
                         const walkDistance = l?.distance || 0
                         const duration = l?.duration || 0
 
 
-                        const timeBetweenPrevLeg = ((new Date(l?.start.estimated?.time as string || l?.start.scheduledTime as string)).getTime() - (new Date(prev?.end.estimated?.time as string || prev?.end.scheduledTime as string)).getTime()) / 1000
+                        const timeBetweenPrevLeg = ((new Date(l.start.estimated || l.start.scheduled)).getTime() - (new Date(prev?.end.estimated || prev?.end.scheduled)).getTime()) / 1000
                         return [<div key={i} className="w-full h-full flex-col flex">
                             {(l?.transitLeg || i == 0) && <div className="flex flex-row w-full" key={i + "a"}>
                                 <div className="flex w-12 flex-col font-medium my-2 items-end justify-center">
                                     {prev?.transitLeg && <>
-                                        <div className={prev.end.estimated ? "text-green" : ""}>{format(new TZDate(prev?.end.estimated?.time as number || prev?.end.scheduledTime as number || 0), "HH:mm")}</div>
+                                        <div className={prev.end.estimated ? "text-green" : ""}>{format(new TZDate(prev.end.estimated || prev.end.scheduled || ""), "HH:mm")}</div>
                                         <div>{timeBetweenPrevLeg >= 3600 && `${Math.floor(timeBetweenPrevLeg / 3600)} h `}{Math.floor(timeBetweenPrevLeg / 60 % 60)} min</div>
                                     </>}
-                                    <div className={l?.start.estimated ? "text-green" : ""}>{format(new TZDate(l?.start.estimated?.time as number || l?.start.scheduledTime as number || 0), "HH:mm")}</div>
+                                    <div className={l?.start.estimated ? "text-green" : ""}>{format(new TZDate(l.start.estimated || l?.start.scheduled || ""), "HH:mm")}</div>
                                 </div>
                                 <div className={`mx-4 w-3 relative h-full flex flex-col ${i == 0 ? "items-end" : i == a.length - 1 ? "items-start" : ""}`}>
                                     <div className={`w-full h-5/10 ${i == 0 ? "invisible" : getRouteColor("bg", prevRoute?.type || -1, (prev?.transitLeg ? prevRoute?.mode : "WALK") || "transparent")}`}></div>
@@ -91,22 +89,22 @@ export default function Content() {
                                 </div>
                                 <div className="p-2 flex flex-row gap-2 font-medium items-center h-full">
                                     {l?.transitLeg ? <>
-                                        <Link className="decoration-none" href={`/route/${l.trip?.route.gtfsId}/${l.trip?.pattern?.code.split(":")[2] || ""}-${l.trip?.pattern?.code.split(":")[3] || ""}/${isHsl ? "?hsl" : ""}`}><Label className={`font-bold text-white ${getRouteColor("bg", route?.type || -1, route?.mode || "")}`}>{route?.shortName || route?.longName || ""}</Label> {l.headsign}</Link>
+                                        <Link className="decoration-none" href={`/route/${l.route?.gtfsId}/${l.pattern?.code.split(":")[2] || ""}-${l.pattern?.code.split(":")[3] || ""}/${isHsl ? "?hsl" : ""}`}><Label className={`font-bold text-white ${getRouteColor("bg", route?.type || -1, route?.mode || "")}`}>{route?.shortName || route?.longName || ""}</Label> {l.headsign}</Link>
                                     </> : <>
                                         Walk {walkDistance >= 1100 ? Math.round(walkDistance / 100) / 10 + " km " : Math.round(walkDistance) + " m "}({duration >= 3600 && `${Math.ceil(duration / 3600)} h `}{Math.ceil(duration / 60 % 60)} min)
                                     </>}
                                 </div>
                             </div>
-                            {(l?.transitLeg || i == a.length - 1 || l?.to.viaLocationType) && !next?.transitLeg && <div className="flex flex-row w-full" key={i + "c"}>
+                            {(l?.transitLeg || i == a.length - 1 || l?.to.viaType) && !next?.transitLeg && <div className="flex flex-row w-full" key={i + "c"}>
                                 <div className="flex w-12 flex-col font-medium my-2 items-end justify-center">
-                                    <div className={l?.end.estimated ? "text-green" : ""}>{format(new TZDate(l?.end.estimated?.time as number || l?.end.scheduledTime as number || 0), "HH:mm")}</div>
+                                    <div className={l?.end.estimated ? "text-green" : ""}>{format(new TZDate(l.end.estimated || l.end.scheduled || ""), "HH:mm")}</div>
                                 </div>
                                 <div className={`mx-4 w-3 relative h-full flex flex-col ${i == 0 ? "items-end" : i == a.length - 1 ? "items-start" : ""}`}>
                                     <div className={`w-full h-5/10  ${i == a.length - 1 && "rounded-b-full"} ${getRouteColor("bg", route?.type || -1, route?.mode || "")}`}></div>
                                     {i != a.length - 1 && <div className={`w-full h-5/10 ${getRouteColor("bg", nextRoute?.type || -1, (next?.transitLeg ? nextRoute?.mode : "WALK") || "transparent")}`}></div>}
                                     {i == a.length - 1 && <div className="absolute -left-3 -right-3 bottom-2"><Image className="" src="/pin_red.svg" alt="Pin"></Image></div>}
-                                    {l?.to.viaLocationType && <div className="absolute -left-3 -right-3 bottom-2"><Image className="" src="/pin_darkgray.svg" alt="Pin"></Image></div>}
-                                    {l?.transitLeg && (<><div className={`absolute -left-1.5 -right-1.5 bottom-0 top-0 flex justify-center items-center ${l.trip?.route.type == 702 && "z-101"}`}>
+                                    {l?.to.viaType && <div className="absolute -left-3 -right-3 bottom-2"><Image className="" src="/pin_darkgray.svg" alt="Pin"></Image></div>}
+                                    {l?.transitLeg && (<><div className={`absolute -left-1.5 -right-1.5 bottom-0 top-0 flex justify-center items-center ${l.route?.type == 702 && "z-101"}`}>
                                         <div className={`bg-white border-white absolute border-[.25rem] bg-white h-7 w-7 rounded-full z-100`}></div>
                                         <div className={`${getRouteColor("border", route?.type || -1, route?.mode || "")} border-[.25rem] bg-white h-6 w-6 rounded-full z-100`}></div>
                                     </div></>)}
@@ -124,7 +122,7 @@ export default function Content() {
                 }
             </div>
             <MapOverlay>
-                <Map data={dt as NonNullable<PlanQueryQuery["planConnection"]>}
+                <Map data={data}
                     via={via}
                     destination={destination}
                     origin={origin}

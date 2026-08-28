@@ -8,11 +8,14 @@ import { useIsHsl } from "@/app/hooks/useHsl";
 import { TZDate } from "@date-fns/tz";
 import { RoutingConfig } from "@/app/lib/digitransit";
 import { PlanLabeledLocationInput, PlanVisitViaLocationInput } from "@/app/lib/__generated__/graphql";
+import { Mode } from "@/app/lib/__generated__/graphql";
+import { Mode as MotisMode } from "@motis-project/motis-client"
+
 
 export const PlanContext = createContext<ContextType>(null)
 
 export type ContextType = ({
-    data: GetPlanResponse | null
+    data: Edge[]
     depArr: "dep" | "arr"
     dateTime: TZDate
     config: RoutingConfig
@@ -55,11 +58,191 @@ export default function Context({ children, start_end, config, depArr, time }: P
     return (<Suspense fallback={<Loading></Loading>}><PlanData via={via} config={options} dateTime={dateTime} depArr={depArr} destination={destination} origin={origin} promise={planPromise}>{children}</PlanData></Suspense>)
 }
 
+export interface Edge {
+    source: "DIGITRANSIT" | "HEKINAV",
+    legs: Leg[]
+    duration: number,
+    walkDistance: number,
+    start: string,
+    end: string
+}
+
+export interface Place {
+    name: string,
+    lat: number,
+    lng: number
+    stop: Stop | null
+    viaType: "VISIT" | "VIA" | "PASS_THROUGH" | null
+}
+
+export interface Stop {
+    gtfsId: string
+    name: string,
+    desc: string | null,
+    code: string | null,
+    platformCode: string | null,
+}
+
+export interface Time {
+    estimated: string | null,
+    scheduled: string
+}
+
+export interface Leg {
+    tripId: string | null,
+    headsign: string,
+    start: Time
+    end: Time
+    from: Place,
+    to: Place,
+    duration: number,
+    distance: number,
+    transitLeg: boolean
+    route: Route | null,
+    pattern: Pattern | null,
+    mode: Mode | MotisMode | "",
+    legGeometry: { points: string, length: number } | null,
+}
+
+export interface Route {
+    shortName: string | null,
+    longName: string | null,
+    gtfsId: string,
+    mode: string | null,
+    type: number | null
+}
+
+export interface Pattern {
+    code: string
+    directionId: number
+}
+
 export function PlanData({ children, via, promise, destination, origin, config, dateTime, depArr }: PropsWithChildren & { promise: Promise<GetPlanResponse | null>, depArr: "dep" | "arr", dateTime: TZDate, config: RoutingConfig, origin: PlanLabeledLocationInput, via: PlanLabeledLocationInput[], destination: PlanLabeledLocationInput }) {
     const data = use(promise)
 
+
+    const { dt, motis } = data || {motis: {itineraries: []}, dt: {edges: [], routingErrors: []}}
+
+
+    const edges: Edge[] = [
+        ...motis.itineraries.map<Edge>(e => {
+
+            return {
+                duration: e.duration,
+                walkDistance: e.legs.reduce((p, c) => c.mode == "WALK" ? p + (c.distance || 0) : p, 0),
+                source: "HEKINAV",
+                start: e.startTime,
+                end: e.endTime,
+                legs: e.legs.map((l) => {
+                    return {
+                        headsign: l.headsign || "",
+                        tripId: l.tripId || null,
+                        pattern: {
+                            code: "",
+                            directionId: -1
+                        },
+                        duration: l.duration,
+                        legGeometry: l.legGeometry,
+                        mode: l.mode,
+                        transitLeg: !!l.routeId,
+                        distance: l?.distance || 0,
+                        from: {
+                            lat: l.from.lat,
+                            lng: l.from.lon,
+                            name: l.from.name,
+                            viaType: l.from.stopId ? null : "VISIT",
+                            stop: l.from.stopId ? {
+                                code: l.from.stopCode || null,
+                                name: l.from.name,
+                                gtfsId: l.from.stopId,
+                                desc: String(l.from.description) || null,
+                                platformCode: null
+                            } : null
+                        },
+                        to: {
+                            lat: l.to.lat,
+                            lng: l.to.lon,
+                            name: l.to.name,
+                            viaType: l.to.stopId ? null : "VISIT",
+                            stop: l.to.stopId ? {
+                                code: l.to.stopCode || null,
+                                name: l.to.name,
+                                gtfsId: l.to.stopId,
+                                desc: String(l.to.description) || null,
+                                platformCode: null
+                            } : null
+                        },
+                        end: {
+                            estimated: l.startTime,
+                            scheduled: l.scheduledStartTime
+                        },
+                        start: {
+                            estimated: l.startTime,
+                            scheduled: l.scheduledStartTime
+                        },
+                        route: l.routeId ? {
+                            gtfsId: l.routeId,
+                            longName: l.routeLongName || null,
+                            shortName: l.routeShortName || null,
+                            mode: l.mode || "",
+                            type: l.routeType || -1
+                        } : null
+                    }
+                })
+            }
+        }),
+        ...(dt.edges?.map<Edge>((e) => {
+
+            return {
+                source: "DIGITRANSIT",
+                duration: e?.node.duration as number || 0,
+                end: e?.node.end as string || "",
+                start: e?.node.start as string || "",
+                walkDistance: e?.node.walkDistance as number || 0,
+                legs: e?.node.legs.map<Leg>((l) => {
+                    return {
+                        end: {
+                            estimated: l?.end.estimated?.time as string || "",
+                            scheduled: l?.end.scheduledTime as string || ""
+                        },
+                        start: {
+                            estimated: l?.start.estimated?.time as string || "",
+                            scheduled: l?.start.scheduledTime as string || ""
+                        },
+                        from: {
+                            name: l?.from.name || "",
+                            lat: l?.from.lat || 0,
+                            lng: l?.from.lon || 0,
+                            viaType: l?.from.viaLocationType || null,
+                            stop: l?.from.stop || null
+                        },
+                        to: {
+                            name: l?.from.name || "",
+                            lat: l?.from.lat || 0,
+                            lng: l?.from.lon || 0,
+                            viaType: l?.from.viaLocationType || null,
+                            stop: l?.from.stop || null
+                        },
+                        headsign: l?.headsign || "",
+                        pattern: {
+                            code: l?.trip?.pattern?.code || "::::",
+                            directionId: l?.trip?.pattern?.directionId || -1
+                        },
+                        tripId: l?.trip?.gtfsId || null,
+                        distance: l?.distance || 0,
+                        mode: l?.mode || "",
+                        duration: l?.duration as number || 0,
+                        legGeometry: { points: l?.legGeometry?.points as string || "", length: l?.legGeometry?.length || 0 },
+                        transitLeg: l?.transitLeg || false,
+                        route: l?.trip?.route || null
+                    }
+                }) || []
+            }
+        }) || [])
+    ]
+
     return (
-        <PlanContext value={{ data: data, destination, origin, depArr, dateTime, config, via }}>
+        <PlanContext value={{ data: edges, destination, origin, depArr, dateTime, config, via }}>
             {children}
         </PlanContext>
     )

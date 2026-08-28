@@ -6,8 +6,9 @@ import { GeoJSONSource, LngLatBounds } from "maplibre-gl"
 import { getColor } from "@/app/lib/digitransit"
 import { LocationType, Mode, PlanLabeledLocationInput, RealtimeState, TransitMode, ViaLocationType } from "@/app/lib/__generated__/graphql"
 import polyline from "@mapbox/polyline"
+import { Edge } from "./provider"
 
-export function Map({ data, selectedRoute = null, destination, origin }: { data: NonNullable<PlanQueryQuery["planConnection"]>, selectedRoute?: number | null, destination: PlanLabeledLocationInput, origin: PlanLabeledLocationInput }) {
+export function Map({ data, selectedRoute = null, destination, origin }: { data: Edge[], selectedRoute?: number | null, destination: PlanLabeledLocationInput, origin: PlanLabeledLocationInput }) {
   const { default: map } = useMap()
   useEffect(() => {
     if (!map) return
@@ -19,9 +20,9 @@ export function Map({ data, selectedRoute = null, destination, origin }: { data:
 
       if (m.getSource("itinerary")) return
 
-      const lines: [number, number][][][] = data.edges?.map(e =>
-        e?.node.legs.map(l =>
-          polyline.decode(l?.legGeometry?.points as string).map<[number, number]>(([lat, lng]) => [lng, lat])
+      const lines: [number, number][][][] = data.map(e =>
+        e.legs.map(l =>
+          polyline.decode(l?.legGeometry?.points as string).map<[number, number]>(([lat, lng]) => e.source == "DIGITRANSIT" ? [lng, lat] : [lng / 10, lat / 10])
         ) || []
       ) || []
 
@@ -194,16 +195,17 @@ export function Map({ data, selectedRoute = null, destination, origin }: { data:
   }, [map])
 
   useEffect(() => {
-    if (!map || !data.edges) return
+    if (!map) return
     const m = map.getMap()
 
 
-    const lines: [number, number][][][] = data.edges.map(e =>
-      e?.node.legs.map(l =>
-        polyline.decode(l?.legGeometry?.points as string).map<[number, number]>(([lat, lng]) => [lng, lat])
+    const lines: [number, number][][][] = data.map(e =>
+      e.legs.map(l =>
+        polyline.decode(l?.legGeometry?.points as string).map<[number, number]>(([lat, lng]) => e.source == "DIGITRANSIT" ? [lng, lat] : [lng / 10, lat / 10])
       ) || []
     )
 
+    console.log(lines[0][0])
     const bounds = lines.length > 0 && lines.flat(2).reduce((bounds, coord) => bounds.extend(coord), new LngLatBounds(lines[0][0][0], lines[0][0][1]))
     if (bounds) m.fitBounds(bounds, { padding: 100 })
 
@@ -219,7 +221,7 @@ export function Map({ data, selectedRoute = null, destination, origin }: { data:
   }, [map, data, origin, destination, selectedRoute])
   return null
 }
-function generateGeoJSON(origin: PlanLabeledLocationInput, destination: PlanLabeledLocationInput, lines: [number, number][][][], data: { __typename: "PlanConnection"; edges: Array<{ __typename: "PlanEdge"; cursor: string; node: { __typename: "Itinerary"; start: unknown; end: unknown; waitingTime: unknown; walkDistance: number | null; walkTime: unknown; duration: unknown; numberOfTransfers: number; legs: Array<{ __typename: "Leg"; transitLeg: boolean | null; interlineWithPreviousLeg: boolean | null; duration: number | null; distance: number | null; mode: Mode | null; realTime: boolean | null; realtimeState: RealtimeState | null; start: { __typename: "LegTime"; scheduledTime: unknown; estimated: { __typename: "RealTimeEstimate"; delay: unknown; time: unknown } | null }; end: { __typename: "LegTime"; scheduledTime: unknown; estimated: { __typename: "RealTimeEstimate"; delay: unknown; time: unknown } | null }; trip: { __typename: "Trip"; pattern: { __typename: "Pattern"; code: string; directionId: number | null } | null; route: { __typename: "Route"; shortName: string | null; longName: string | null; gtfsId: string; mode: TransitMode | null; type: number | null } } | null; legGeometry: { __typename: "Geometry"; length: number | null; points: unknown } | null; from: { __typename: "Place"; lat: number; lon: number; name: string | null; viaLocationType: ViaLocationType | null; arrival: { __typename: "LegTime"; scheduledTime: unknown; estimated: { __typename: "RealTimeEstimate"; delay: unknown; time: unknown } | null } | null; departure: { __typename: "LegTime"; scheduledTime: unknown; estimated: { __typename: "RealTimeEstimate"; delay: unknown; time: unknown } | null } | null; stop: { __typename: "Stop"; name: string; platformCode: string | null; code: string | null; gtfsId: string; locationType: LocationType | null } | null }; to: { __typename: "Place"; lat: number; lon: number; name: string | null; viaLocationType: ViaLocationType | null; arrival: { __typename: "LegTime"; scheduledTime: unknown; estimated: { __typename: "RealTimeEstimate"; delay: unknown; time: unknown } | null } | null; departure: { __typename: "LegTime"; scheduledTime: unknown; estimated: { __typename: "RealTimeEstimate"; delay: unknown; time: unknown } | null } | null; stop: { __typename: "Stop"; name: string; platformCode: string | null; code: string | null; gtfsId: string; locationType: LocationType | null } | null } } | null> } } | null> | null }, selectedRoute: number | null): GeoJSON.Feature[] {
+function generateGeoJSON(origin: PlanLabeledLocationInput, destination: PlanLabeledLocationInput, lines: [number, number][][][], edges: Edge[], selectedRoute: number | null): GeoJSON.Feature[] {
   return [
     {
       type: "Feature",
@@ -238,12 +240,12 @@ function generateGeoJSON(origin: PlanLabeledLocationInput, destination: PlanLabe
       properties: { type: "destination" }
     },
     ...lines.flatMap<GeoJSON.Feature<GeoJSON.LineString | GeoJSON.Point>>((e, i) => {
-      const edge = data.edges![i]
+      const edge = edges[i]
       const selected = i == selectedRoute
       return e.flatMap((l, j) => {
-        const leg = edge?.node.legs![j]
+        const leg = edge.legs![j]
         const stopLabels = []
-        //if (selected && leg && (j == legs?.findIndex(l => l?.transitLeg) || leg?.trip?.route.type == 702)) stopLabels.push(leg.from)
+        //if (selected && leg && (j == legs?.findIndex(l => l?.transitLeg) || leg.route?.type == 702)) stopLabels.push(leg.from)
         if (selected && leg && leg.transitLeg) {
           stopLabels.push(leg.to)
           stopLabels.push(leg.from)
@@ -251,11 +253,11 @@ function generateGeoJSON(origin: PlanLabeledLocationInput, destination: PlanLabe
         return [
           ...stopLabels.map<GeoJSON.Feature<GeoJSON.Point>>(l => ({
             type: "Feature",
-            geometry: { type: "Point", coordinates: [l.lon, l.lat] },
+            geometry: { type: "Point", coordinates: [l.lng, l.lat] },
             properties: {
               type: "itinerary-stop",
               index: i,
-              color: getColor(leg?.trip?.route.type || -1, leg?.trip?.route.mode || ""),
+              color: getColor(leg.route?.type || -1, leg.route?.mode || ""),
               selected: selected
             }
           })),
@@ -265,7 +267,7 @@ function generateGeoJSON(origin: PlanLabeledLocationInput, destination: PlanLabe
             properties: {
               type: "itinerary",
               index: i,
-              color: selected ? getColor(leg?.trip?.route.type || -1, leg?.trip?.route.mode || "") : "#777",
+              color: selected ? getColor(leg.route?.type || -1, leg.route?.mode || "") : "#777",
               selected: selected,
               walking: !(leg?.transitLeg)
             }

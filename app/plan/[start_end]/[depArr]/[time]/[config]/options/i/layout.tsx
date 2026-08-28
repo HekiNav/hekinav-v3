@@ -16,7 +16,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     <>
       <div className="">
         <DotNavigationThingy
-          amount={stuff?.data.edges?.length || 1}
+          amount={stuff?.data.length || 1}
           selected={selectedRoute}
           onSet={(i) => router.replace(`../i${i}/${isHsl ? "?hsl" : ""}`)}
         />

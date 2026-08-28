@@ -33,10 +33,7 @@ export async function getPlan(origin: PlanLabeledLocationInput, destination: Pla
   }),
   plan({
     throwOnError: true,
-    baseUrl: 'https://api.transitous.org',
-    headers: {
-      'User-Agent': 'hekinav-routing:v1 developer.hekinav@gmail.com'
-    },
+    baseUrl: 'https://motis.hekinav.dev',
     query: {
       fromPlace: `${origin.location.coordinate?.latitude},${origin.location.coordinate?.longitude}`,
       toPlace: `${destination.location.coordinate?.latitude},${destination.location.coordinate?.longitude}`
