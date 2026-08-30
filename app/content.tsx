@@ -78,7 +78,7 @@ function Favourites({ isHsl, config, setConfig }: { isHsl: boolean; config: Heki
   }, [config, isHsl]);
 
   if (isPending || !data) return "Loading favourites";
-  return <div className="w-full rounded-xl flex flex-col gap-1 p-2 border-3 overflow-hidden">{data.map(({ content, id, type }) =>
+  return data.length ? (<div className="w-full rounded-xl flex flex-col gap-1 p-2 border-3 overflow-hidden">{data.map(({ content, id, type }) =>
     <div key={id} className="w-full flex flex-row flex-nowrap overflow-hidden items-start">
       {content}
       <Icon onClick={() => {
@@ -88,7 +88,7 @@ function Favourites({ isHsl, config, setConfig }: { isHsl: boolean; config: Heki
         if (type == "station") setConfig(config.favourites.stations.filter(r => r != id), ["favourites", "stations"])
       }} className="ml-auto cursor-pointer"><StarFillW700 className="text-yellow hover:text-black"></StarFillW700></Icon>
     </div>
-  )}</div>;
+  )}</div>) : "No favourites yet"
 }
 
 export type SearchSuggestion = Suggestion<{ type: "stop" | "station" | "route", gtfsId: string }>
@@ -119,7 +119,7 @@ async function searchStopStation(text: string, isHsl: boolean, focusPoint: LngLa
           e.preventDefault();
           if (s.properties.layer == "stop") setConfig(config.favourites.stops.every(f => id != f) ? [...config.favourites.stops, id] : config.favourites.stops.filter(f => id != f), ["favourites", "stops"])
           if (s.properties.layer == "station") setConfig(config.favourites.stations.every(f => id != f) ? [...config.favourites.stations, id] : config.favourites.stations.filter(f => id != f), ["favourites", "stations"])
-        }} className="ml-auto cursor-pointer">{[...config.favourites.stops, ...config.favourites.stations].every(f => (regex.exec(s.properties.source_id) || [0, ""])[1] != f) ? <StarW700 className="hover:text-yellow"></StarW700> : <StarFillW700 className="text-yellow hover:text-black"></StarFillW700>}</Icon>
+        }} className="ml-auto cursor-pointer">{[...config.favourites.stops, ...config.favourites.stations].every(f => (regex.exec(s.properties.source_id) || [0, ""])[1] != f) ? <StarW700 className="hover:text-yellow"></StarW700> : <StarFillW700 className="text-yellow"></StarFillW700>}</Icon>
       </span>,
       properties: {
         gtfsId: (regex.exec(s.properties.source_id) || [0, ""])[1],

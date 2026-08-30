@@ -1,17 +1,12 @@
 "use server"
 
 import { redirect } from "next/navigation";
-import { getRouteColor, gtfsIdRegex } from "@/app/lib/digitransit";
+import { gtfsIdRegex } from "@/app/lib/digitransit";
 import { ApolloClient, gql, HttpLink, InMemoryCache, TypedDocumentNode } from "@apollo/client";
 import Toast from "@/app/components/toast";
 import Link from "next/link";
 import { Sidebar } from "@/app/mapcontext";
 import { PatternMetadataQueryQuery, PatternQueryQuery, PatternQueryQueryVariables } from "./page.generated";
-import Label from "@/app/components/label";
-import Icon from "@/app/components/icon";
-import { ArrowRightAltW700 as ArrowRightAlt } from '@material-symbols-svg/react/icons/arrow-right-alt';
-import Dropdown, { DropdownItem } from "@/app/components/dropdown";
-import { SyncAltW700 as SyncAlt } from '@material-symbols-svg/react/icons/sync-alt';
 import { Map } from "./Map";
 import { Metadata } from "next";
 import Content from "./content";
@@ -236,33 +231,11 @@ export default async function Route({
     </Sidebar>
   )
 
-  const patternOptions: DropdownItem<string>[] = (result.data.pattern?.route.patterns || []).filter(p => p?.code != data.code).map(p => ({
-    content: (p && <Link className="decoration-none" href={`/route/${id}/${p.directionId}-${p.code.split(":")[3]}/${isHsl ? "?hsl" : ""}`}><Pattern data={p as never}></Pattern></Link>), id: p?.code || ""
-  }))
-
-  const firstPattern = data.route.patterns && data.route.patterns.find(p => p?.code != data.code)
-
 
   return (
     <Sidebar>
-        <span className="flex justify-start items-center gap-2 mb-2 ml-14 mt-1">
-          <Label className={`text-2xl w-min ${getRouteColor("bg", data.route.type || -1, data.route.mode || "")} text-white font-bold`}>{data.route.shortName || data.route.longName}</Label>
-          <Pattern data={data}></Pattern> {(patternOptions.length == 1 && firstPattern) && <Link className="decoration-none ml-auto" href={`/route/${id}/${firstPattern.directionId}-${firstPattern.code.split(":")[3]}/${isHsl ? "?hsl" : ""}`}><Icon boxed><SyncAlt></SyncAlt></Icon></Link>}
-        </span>
-        {patternOptions.length > 1 && <Dropdown initial={<span className="text-xl font-medium text-green">Other patterns</span>} items={patternOptions}></Dropdown>}
         <Content directionId={Number(direction)} data={data} isHsl={isHsl}></Content>
         <Map data={data} routeId={id} direction={Number(direction)} />
     </Sidebar>
-  )
-}
-
-function Pattern({ data }: { data: Omit<NonNullable<PatternQueryQuery["pattern"]>, "route" | "name"> }) {
-  if (!data.stops) return data.code
-  return (
-    <div className="flex justify-start items-center gap-1">
-      <span className="font-medium text-xl">{data.stops[0].name}</span>
-      <Icon><ArrowRightAlt height={24}></ArrowRightAlt></Icon>
-      <span className="font-medium text-xl">{data.stops[data.stops.length - 1].name}</span>
-    </div>
   )
 }
