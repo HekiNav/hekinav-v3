@@ -81,6 +81,11 @@ export type AnyRoutingOption = IconToggleRoutingOption | ToggleRoutingOption | D
 export interface HekinavConfig {
   advancedDepartures: boolean;
   advancedRoutingOptionsEnabled: boolean;
+  favourites: {
+    stops: string[],
+    routes: string[],
+    stations: string[],
+  },
   routingOptions: {
     modes: { [key in TransitMode | MotisTransitType]: number }
     transferCost: number
@@ -546,6 +551,11 @@ export const AdvancedRoutingOptions: RoutingNode[] = [
 export const defaultConfig: Readonly<HekinavConfig> = {
   advancedDepartures: false,
   advancedRoutingOptionsEnabled: false,
+  favourites: {
+    routes: [],
+    stops: [],
+    stations: [],
+  },
   routingOptions: {
     modes: {
       AIRPLANE: 1,

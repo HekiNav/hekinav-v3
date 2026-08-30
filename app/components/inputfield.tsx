@@ -1,7 +1,8 @@
 "use client"
 import IconItem from "./iconitem";
-import { ChangeEvent, HTMLAttributes, ReactElement, ReactNode, useEffect, useState } from "react"
+import { ChangeEvent, HTMLAttributes, ReactElement, ReactNode, useContext, useEffect, useState } from "react"
 import Skeleton from "react-loading-skeleton";
+import { ConfigContext } from "../HekinavConfig";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface Suggestion<T = any> {
@@ -23,15 +24,26 @@ export interface InputFieldProps extends HTMLAttributes<HTMLDivElement> {
     initialValue?: string,
     focusClear?: boolean
 }
-export default function InputField({ icon, focusClear, suggestionFunction, onFocus , onValueSet, name, onlySuggestions = false, placeholder, initialValue = "", className, ...props }: InputFieldProps) {
+export default function InputField({ icon, focusClear, suggestionFunction, onFocus, onValueSet, name, onlySuggestions = false, placeholder, initialValue = "", className, ...props }: InputFieldProps) {
     const [focus, setFocus] = useState(false)
     const [value, setValue] = useState<string>(initialValue)
+
+    const { config } = useContext(ConfigContext)
+
     useEffect(() => {
         // eslint-disable-next-line react-hooks/set-state-in-effect
         if (initialValue != value) setValue(initialValue)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [initialValue])
     const [suggestions, setSuggestions] = useState(new Array<Suggestion | "skeleton">())
+
+    useEffect(() => {
+        if (suggestionFunction && focus) suggestionFunction(value).then(suggestions => {
+            setTimeout(() => {
+                setSuggestions(suggestions)
+            }, 1)
+        })
+    }, [config])
 
     useEffect(() => {
         if (focusClear && focus) {
@@ -72,7 +84,7 @@ export default function InputField({ icon, focusClear, suggestionFunction, onFoc
                         e.preventDefault()
                         setFocus(true)
                         e.target.select()
-                        setTimeout(() => onChange(e),10)
+                        setTimeout(() => onChange(e), 10)
                     }}
                     onClick={(e) => {
                         e.preventDefault()
@@ -91,9 +103,9 @@ export default function InputField({ icon, focusClear, suggestionFunction, onFoc
                 {suggestions.map((s: Suggestion | "skeleton", i) => {
                     const sk = s == "skeleton"
                     return (
-                        <div key={`search-suggestion-${i}`} onMouseDown={() => !sk && suggestionSelected(s)}>
+                        <div key={`search-suggestion-${i}`} className="w-full" onMouseDown={() => !sk && suggestionSelected(s)}>
                             <IconItem icon={{ children: sk ? <Skeleton inline width={16} /> : s.icon }} >
-                                <div className="flex flex-col">
+                                <div className="flex flex-col w-full truncate">
                                     {/* eslint-disable-next-line react-hooks/purity */}
                                     {sk ? <Skeleton inline width={Math.floor(Math.random() * 200) + 20} /> : s.name || s.text}
                                     {/* eslint-disable-next-line react-hooks/purity */}
