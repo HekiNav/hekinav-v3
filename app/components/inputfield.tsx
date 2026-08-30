@@ -38,7 +38,7 @@ export default function InputField({ icon, focusClear, suggestionFunction, onFoc
             // eslint-disable-next-line react-hooks/set-state-in-effect
             setValue("")
         }
-    }, [focus])
+    }, [focus, focusClear])
 
     function onChange(e: ChangeEvent<HTMLInputElement>) {
         if (value == "Loading...") return
@@ -68,7 +68,7 @@ export default function InputField({ icon, focusClear, suggestionFunction, onFoc
                     value={value || ""}
                     onChange={onChange}
                     onFocus={(e) => {
-                        onFocus && onFocus(e)
+                        if (onFocus) onFocus(e)
                         e.preventDefault()
                         setFocus(true)
                         e.target.select()
@@ -94,7 +94,9 @@ export default function InputField({ icon, focusClear, suggestionFunction, onFoc
                         <div key={`search-suggestion-${i}`} onMouseDown={() => !sk && suggestionSelected(s)}>
                             <IconItem icon={{ children: sk ? <Skeleton inline width={16} /> : s.icon }} >
                                 <div className="flex flex-col">
+                                    {/* eslint-disable-next-line react-hooks/purity */}
                                     {sk ? <Skeleton inline width={Math.floor(Math.random() * 200) + 20} /> : s.name || s.text}
+                                    {/* eslint-disable-next-line react-hooks/purity */}
                                     <div hidden={!sk && !s.desc} className="text-xs text text-gray-500">{sk ? <Skeleton inline width={Math.floor(Math.random() * 200) + 20} /> : s.desc}</div>
                                 </div>
                             </IconItem>

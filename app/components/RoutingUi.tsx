@@ -34,40 +34,13 @@ import MiniSearch from 'minisearch';
 import { searchRoutesAgencies } from '../lib/route_agency';
 import Label from './label';
 import { CorporateFareW700 } from '@material-symbols-svg/react/icons/corporate-fare';
-import { PlanModesInput, PlanPreferencesInput, PlanVisitViaLocationInput } from '../lib/__generated__/graphql';
-import { typedEntries } from '../lib/typedEntries';
+import { PlanVisitViaLocationInput } from '../lib/__generated__/graphql';
 import { AddLocationAltW700 } from '@material-symbols-svg/react/icons/add-location-alt';
 import { DeleteW700 } from '@material-symbols-svg/react/icons/delete';
 
 export type SearchSuggestion = Suggestion<IncludeExclude>
 
 const miniSearch = new MiniSearch<SearchSuggestion>({ fields: ["text", "gtfsId"], storeFields: ["icon", "id", "name", "desc", "properties"] })
-
-const timeOptions: Suggestion<object>[] = []
-
-const startOfToday = new Date()
-
-const currentTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone
-
-
-for (let i = 0; i < 96; i++) {
-    const date = new TZDate(startOfToday.getUTCFullYear(), startOfToday.getUTCMonth(), startOfToday.getUTCDate(), 0, i * 15, "UTC")
-    timeOptions.push({
-        icon: <></>,
-        text: formatInTimeZone(date, currentTimeZone, "H:mm"),
-        id: date.toISOString()
-    })
-}
-
-const dateOptions: Suggestion<object>[] = []
-for (let i = 0; i < 28; i++) {
-    const date = new TZDate(startOfToday.getFullYear(), startOfToday.getMonth(), startOfToday.getDate() + i, "UTC")
-    dateOptions.push({
-        icon: <></>,
-        text: isToday(date.withTimeZone(currentTimeZone)) ? "Today" : isTomorrow(date.withTimeZone(currentTimeZone)) ? "Tomorrow" : formatInTimeZone(date, currentTimeZone, "ccc d.M."),
-        id: date.toISOString()
-    })
-}
 
 export type PlaceSuggestion = Suggestion<{ lat: number, lng: number }>
 
@@ -78,7 +51,7 @@ export default function RoutingUi({ iDateTime = new Date(), iDestination = null,
     const [viaPoints, setViaPoints] = useState<(PlaceSuggestion | null)[]>([])
     const [destination, setDestination] = useState<PlaceSuggestion | null>(iDestination)
     const [depArr, setDepArr] = useState<"dep" | "arr" | "loading">(iDepArr)
-    const [date, setDate] = useState<TZDate>(new TZDate(iDateTime.getUTCFullYear(), iDateTime.getUTCMonth(), iDateTime.getUTCDate() - 1, "UTC"))
+    const [date, setDate] = useState<TZDate>(new TZDate(iDateTime.getUTCFullYear(), iDateTime.getUTCMonth(), iDateTime.getUTCDate(), "UTC"))
     const [time, setTime] = useState<TZDate>(new TZDate(iDateTime.getUTCFullYear(), iDateTime.getUTCMonth(), iDateTime.getUTCDate(), iDateTime.getUTCHours(), iDateTime.getUTCMinutes(), "UTC"))
     const [pickedLocation, setPickedLocation] = useState<LngLat | null | boolean>(null)
     const [pickedLocationTarget, setPickedLocationTarget] = useState<number | null>(null)
@@ -90,6 +63,40 @@ export default function RoutingUi({ iDateTime = new Date(), iDestination = null,
     const { setSidebarHidden } = useContext(FocusContext)
 
     const fileInputRef = useRef<HTMLInputElement>(null)
+
+    const startOfToday = new Date()
+
+
+    const timeOptions: Suggestion<object>[] = [{
+        icon: <></>,
+        id: new TZDate(startOfToday.getUTCFullYear(), startOfToday.getUTCMonth(), startOfToday.getUTCDate(), startOfToday.getUTCHours(), startOfToday.getUTCMinutes(), "UTC").toISOString(),
+        text: "now",
+
+    }]
+
+
+    const currentTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone
+
+
+    for (let i = 0; i < 96; i++) {
+        const date = new TZDate(startOfToday.getUTCFullYear(), startOfToday.getUTCMonth(), startOfToday.getUTCDate(), 0, i * 15, "UTC")
+        timeOptions.push({
+            icon: <></>,
+            text: formatInTimeZone(date, currentTimeZone, "H:mm"),
+            id: date.toISOString()
+        })
+    }
+
+    const dateOptions: Suggestion<object>[] = []
+    for (let i = 0; i < 28; i++) {
+        const date = new TZDate(startOfToday.getFullYear(), startOfToday.getMonth(), startOfToday.getDate() + i, "UTC")
+        dateOptions.push({
+            icon: <></>,
+            text: isToday(date.withTimeZone(currentTimeZone)) ? "Today" : isTomorrow(date.withTimeZone(currentTimeZone)) ? "Tomorrow" : formatInTimeZone(date, currentTimeZone, "ccc d.M."),
+            id: date.toISOString()
+        })
+    }
+
 
 
     const { default: map } = useMap()
@@ -184,44 +191,14 @@ export default function RoutingUi({ iDateTime = new Date(), iDestination = null,
         if (!destination || !destination.properties) return toast("Select a valid destination")
         if (viaPoints.some(v => !v || !v.properties)) return toast("Select a valid location foll all via points")
 
-        const dateTime = new TZDate(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate() + 1, time.getUTCHours(), time.getUTCMinutes(), "UTC")
+        const dateTime = new TZDate(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), time.getUTCHours(), time.getUTCMinutes(), "UTC")
         const start = { label: origin.text, location: { coordinate: { latitude: origin.properties?.lat, longitude: origin.properties?.lng } } }
         const end = { label: destination.text, location: { coordinate: { latitude: destination.properties?.lat, longitude: destination.properties?.lng } } }
         const via: PlanVisitViaLocationInput[] = viaPoints.map(e => ({ label: e?.text, coordinate: { latitude: e?.properties?.lat, longitude: e?.properties?.lng } }))
 
 
-        const filter = config.routingOptions.includeExclude.reduce((p, c) => { const k = c.type == "agency" ? "agencies" : "routes"; return { ...p, [k]: [...(p[k] || []), c.id] } }, { agencies: null, routes: null } as { agencies: string[] | null, routes: string[] | null });
-        const routingConfig: { preferences: PlanPreferencesInput, modes: PlanModesInput } = {
-            preferences: {
-                transit: {
-                    filters: filter.agencies && filter.routes ? [
-                        {
-                            include: config.routingOptions.include ? (filter.agencies && filter.routes ? [filter] : null) : null,
-                            exclude: config.routingOptions.include ? null : (filter.agencies && filter.routes ? [filter] : null)
-                        }
-                    ] : null,
-                    board: {
-                        waitReluctance: config.routingOptions.waitReluctance
-                    },
-                    transfer: {
-                        cost: config.routingOptions.transferCost
-                    }
-                },
-                street: {
-                    walk: {
-                        reluctance: config.routingOptions.walkReluctance,
-                        speed: config.routingOptions.walkSpeed / 3.6
-                    }
-                }
-            },
-            modes: {
-                transit: {
-                    transit: typedEntries(config.routingOptions.modes).map(([k, v]) => ({ mode: k, cost: { reluctance: v } })).filter(e => e.cost.reluctance != 0)
-                }
-            }
-        }
 
-        const url = `/plan/${JSON.stringify([start,end, ...via])}/${depArr}/${dateTime.getTime()}/${/* this is to minify the json */JSON.stringify(JSON.parse(JSON.stringify(routingConfig)))}/options/${isHsl ? "?hsl" : ""}`;
+        const url = `/plan/${JSON.stringify([start, end, ...via])}/${depArr}/${dateTime.getTime()}/${/* this is to minify the json */JSON.stringify(JSON.parse(JSON.stringify(config.routingOptions)))}/options/${isHsl ? "?hsl" : ""}`;
 
         router.push(url)
     }
@@ -349,9 +326,10 @@ export default function RoutingUi({ iDateTime = new Date(), iDestination = null,
                                             // eslint-disable-next-line @typescript-eslint/no-explicit-any
                                         }}><Icon>{{ ...option.icon, props: { ...(option.icon.props as object), height: 28, width: 28, className: `${(option.icon.props as any).className} ${getConfig(...option.value).every(v => v) ? "" : "text-gray!"}` } }}</Icon></Button>
                                     case "dropdown":
+                                    case "dropdown_number":
                                         return <div>
                                             <div className="text-lg font-medium">{option.name}</div>
-                                            <Dropdown<number | string> key={i} initial={`${Math.max(...getConfig(...option.value))} km/h`} onSet={(i) => typeof i.id == "number" && setConfig(i.id, ...option.value)} items={option.options}></Dropdown>
+                                            <Dropdown<number | string> key={i} initial={option.type == "dropdown_number" ? `${Math.max(...getConfig(...option.value))} km/h` : option.options.find(o => o.id == getConfig(...option.value)[0])?.content} onSet={(i) => option.type == "dropdown_number" ? (typeof i.id == "number" && setConfig(i.id, ...option.value)) : (typeof i.id == "string" && setConfig(i.id, ...option.value))} items={option.options}></Dropdown>
                                         </div>
                                     default:
                                         return <div key={i}></div>

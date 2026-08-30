@@ -253,7 +253,7 @@ export function Map({ data, direction, routeId }: { data: NonNullable<PatternQue
       if (isHsl) {
         const data: { VP?: { lat: number, long: number, oper: number, desi: string, veh: number } } | undefined = JSON.parse(message?.message?.toString() as string)
         if (!data || !data.VP) return
-        const veh = { id: `${data.VP.oper}${data.VP.veh}`, lat: data.VP.lat, lng: data.VP.long, name: data.VP.desi }
+        const veh = { id: `${data.VP.oper}${data.VP.veh}`, lat: data.VP.lat, lng: data.VP.long, name: data.VP.desi, color: "" }
         const newVPos: VPos[] = [...vPosCache.filter(v => v.id != veh.id), veh]
         vPos = newVPos.map<GeoJSON.Feature<GeoJSON.Point, { type: "vehicle", text_size: number } & VPos>>(v => ({ geometry: { type: "Point", coordinates: [v.lng, v.lat] }, properties: { ...v, type: "vehicle", text_size: textSize(v.name.length) }, type: "Feature" })).sort((a, b) => Number(a.properties.id) - Number(b.properties.id))
         // eslint-disable-next-line react-hooks/set-state-in-effect

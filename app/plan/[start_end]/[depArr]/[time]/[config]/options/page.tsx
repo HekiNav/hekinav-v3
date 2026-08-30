@@ -1,12 +1,10 @@
 "use client"
-import { useContext, useEffect, useState } from "react";
-import { PlanQueryQuery } from "./layout.generated";
+import { useContext, useState } from "react";
 import RoutingUi from "@/app/components/RoutingUi";
 import { TZDate } from "@date-fns/tz";
 import { format } from "date-fns-tz";
 import IconItem from "@/app/components/iconitem";
 import { DirectionsWalkW700 as DirectionsWalk } from "@material-symbols-svg/react/directions-walk";
-import { HourglassW700 as Hourglass } from "@material-symbols-svg/react/hourglass";
 import { getRouteColor } from "@/app/lib/digitransit";
 import Icon from "@/app/components/icon";
 import { MapOverlay, Sidebar } from "@/app/mapcontext";

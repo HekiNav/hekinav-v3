@@ -7,12 +7,13 @@ import { InfoW700 } from "@material-symbols-svg/react/icons/info"
 import { WarningW700 } from "@material-symbols-svg/react/icons/warning"
 import Label from "@/app/components/label"
 
-export default function StopAlerts({ data, isHsl }: ContentProps) {
+export default function StopAlerts({ data }: ContentProps) {
     console.log(data.alerts)
     return (
         <>
             {data.alerts?.length == 0 && "No alerts"}
-            {data.alerts?.map((e, i, a) => {
+            {/* eslint-disable-next-line @typescript-eslint/no-unused-vars */}
+            {data.alerts?.map((e, i, _a) => {
                 return <IconItem className="border-3 p-2 rounded-xl gap-2 items-start" key={i} icon={{ children: getAlertIcon(e?.alertSeverityLevel || "INFO") }}>
                     <div>
                         <h3 className="text-xl">{e?.alertHeaderText}</h3>

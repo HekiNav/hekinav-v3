@@ -14,7 +14,8 @@ import { MonorailW700 as Monorail } from '@material-symbols-svg/react/icons/mono
 import { QuestionMarkW700 as QuestionMark } from '@material-symbols-svg/react/icons/question-mark';
 import { ScooterW700 as Scooter } from '@material-symbols-svg/react/icons/scooter';
 import { SnowflakeW700 as Snowflake } from '@material-symbols-svg/react/icons/snowflake';
-import { PlanModesInput, PlanPreferencesInput, TransitMode } from './__generated__/graphql';
+import { TransitMode } from './__generated__/graphql';
+import { HekinavConfig, MotisTransitType } from '../HekinavConfig';
 
 export type Mode = "BUS" | "RAIL" | "BUS-EXPRESS" | "SUBWAY" | "SPEEDTRAM" | "TRAM" | "FERRY" | "AIRPLANE"
 
@@ -266,4 +267,9 @@ export function getColor(mode: number, stringMode?: string) {
     }
 }
 
-export interface RoutingConfig { preferences: PlanPreferencesInput, modes: PlanModesInput }
+export type RoutingConfig = HekinavConfig["routingOptions"]
+
+
+export const MotisTransitModes: MotisTransitType[] = ["TRAM", "SUBWAY", "FERRY", "AIRPLANE", "BUS", "COACH", "RAIL", "HIGHSPEED_RAIL", "LONG_DISTANCE", "NIGHT_RAIL", "REGIONAL_FAST_RAIL", "REGIONAL_RAIL", "SUBURBAN", "ODM", "RIDE_SHARING", "FUNICULAR", "AERIAL_LIFT"]
+
+export const DTTransitModes: TransitMode[] = ["TRAM", "SUBWAY", "FERRY", "AIRPLANE", "BUS", "COACH", "RAIL", "FUNICULAR", "CABLE_CAR", "CARPOOL", "GONDOLA", "MONORAIL", "SNOW_AND_ICE", "TAXI", "TROLLEYBUS"]

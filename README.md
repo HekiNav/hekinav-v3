@@ -16,7 +16,8 @@ Hekinav routing utilises multiple routing engines for optimal results
 - Faster than OTP
 
 2. Digitransit
-- Uses OpenTripPlanner
+- Uses OpenTripPlanner 
+- More configuration options
 - Better realtime data integration
 
 ### Settings

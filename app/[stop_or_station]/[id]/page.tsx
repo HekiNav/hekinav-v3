@@ -4,18 +4,18 @@ import { redirect } from "next/navigation";
 import { MapOverlay, Sidebar } from "../../mapcontext";
 import { gtfsIdRegex } from "@/app/lib/digitransit";
 import { ApolloClient, HttpLink, InMemoryCache, TypedDocumentNode, gql } from "@apollo/client";
-import { StationMetadataQueryQuery, StationQueryQuery, StationQueryQueryVariables, StopMatadataQueryQuery, StopMatadataQueryQueryVariables, StopQueryQuery, StopQueryQueryVariables } from "./page.generated";
+import { StationMetadataQueryQuery, StationMetadataQueryQueryVariables, StationQueryQuery, StationQueryQueryVariables, StopMetadataQueryQuery, StopMetadataQueryQueryVariables, StopQueryQuery, StopQueryQueryVariables } from "./page.generated";
 import Toast from "@/app/components/toast";
 import Link from "next/link";
 import Content from "./content";
 import { Map } from "./Map";
-import { Metadata, ResolvingMetadata } from "next";
+import { Metadata } from "next";
 
 
 const GET_STOP_METADATA:
-  TypedDocumentNode<StopQueryQuery, StopQueryQueryVariables> =
+  TypedDocumentNode<StopMetadataQueryQuery, StopMetadataQueryQueryVariables> =
   gql`
-    query StopMatadataQuery($stopId: String!) {
+    query StopMetadataQuery($stopId: String!) {
         stop(id: $stopId) {
           name
           platformCode
@@ -24,7 +24,7 @@ const GET_STOP_METADATA:
     }
     `
 const GET_STATION_METADATA:
-  TypedDocumentNode<StopQueryQuery, StopQueryQueryVariables> =
+  TypedDocumentNode<StationMetadataQueryQuery, StationMetadataQueryQueryVariables> =
   gql`
     query StationMetadataQuery($stopId: String!) {
         station(id: $stopId) {
@@ -209,7 +209,49 @@ query StationQuery($stopId: String!) {
 
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 
+export async function generateMetadata({
+  params,
+  searchParams
+}: {
+  params: Promise<{
+    stop_or_station: string
+    id: string
+  }>,
+  searchParams: SearchParams;
+}): Promise<Metadata> {
+  const { id, stop_or_station } = await params
 
+  const isHsl = (await searchParams).hsl != undefined
+
+  if (!gtfsIdRegex.test(decodeURIComponent(id))) {
+    return { title: `Unknown ${stop_or_station == "stop" ? "Stop" : "Station"} - Hekinav Routing` }
+  }
+
+  const client = new ApolloClient({
+    link: new HttpLink({ uri: `https://api.digitransit.fi/routing/v2/${isHsl ? "hsl" : "finland"}/gtfs/v1/`, headers: { "digitransit-subscription-key": process.env.DIGITRANSIT_KEY || "" } }),
+    cache: new InMemoryCache(),
+  });
+
+  const query = stop_or_station == "stop" ? GET_STOP_METADATA : GET_STATION_METADATA
+  const result = await client.query({
+    query: query,
+    variables: {
+      stopId: decodeURIComponent(id)
+    }
+  })
+
+  if (result.error || !result.data) {
+    return { title: `Unknown ${stop_or_station == "stop" ? "Stop" : "Station"} - Hekinav Routing` }
+  }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const data = result.data.stop || (result.data as any).station
+  if (!data) return { title: `Unknown ${stop_or_station == "stop" ? "Stop" : "Station"} - Hekinav Routing` }
+
+  return {
+    title: `${data.name} ${data.platformCode ? `pl. ${data.platformCode}` : " "}${data.code ? `[${data.code}]` : ""} - Hekinav Routing`,
+    description: `View stops and trips of ${data.name} ${data.platformCode ? `pl. ${data.platformCode}` : " "} in Hekinav Routing`
+  }
+}
 
 export default async function StopOrStation({
   params,

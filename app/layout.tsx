@@ -50,6 +50,7 @@ export default function RootLayout({
     localStorage.setItem("hekinav:global-config", JSON.stringify(config))
   }, [config])
 
+  // @ts-expect-error uh lwk dont know
   const setConfigKey: SetHekinavConfigKey = function (...args: (readonly PropertyKey[])[]) {
     const [value, ...keys] = args
     const newObj = { ...config }

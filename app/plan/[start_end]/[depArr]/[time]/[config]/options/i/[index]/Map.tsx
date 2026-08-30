@@ -3,9 +3,8 @@ import { useMap } from "@vis.gl/react-maplibre"
 import { useEffect, useState } from "react"
 import { GeoJSONSource, LngLatBounds } from "maplibre-gl"
 import { getColor, VPos } from "@/app/lib/digitransit"
-import { LocationType, Mode, PlanLabeledLocationInput, PlanVisitViaLocationInput, RealtimeState, TransitMode, ViaLocationType } from "@/app/lib/__generated__/graphql"
+import { PlanLabeledLocationInput, PlanVisitViaLocationInput } from "@/app/lib/__generated__/graphql"
 import polyline from "@mapbox/polyline"
-import { PlanQueryQuery } from "../../layout.generated"
 import { useSubscription } from "mqtt-react-hooks"
 import { useIsHsl } from "@/app/hooks/useHsl"
 import { textSize } from "@/app/route/[id]/[direction_pattern]/Map"
@@ -22,8 +21,8 @@ export function Map({ data, selectedRoute, destination, origin, via }: { data: E
 
 
   const { message } = useSubscription(isHsl ?
-    data[selectedRoute]?.legs.reduce<string[]>((p, c) => !c?.transitLeg ? p : [...p, `/hfp/v2/journey/ongoing/vp/+/+/+/${(c.route?.gtfsId || "").split(":")[1]}/${typeof c.pattern?.directionId == "number" ? c.pattern.directionId + 1 : "+"}/+/${format(new TZDate((c.start.scheduled || ""), "UTC"), "HH:mm")}/#`], []) || [] :
-    data[selectedRoute]?.legs.reduce<string[]>((p, c) => !c?.transitLeg ? p : [...p, `/gtfsrt/vp/${(c.tripId || "").split(":")[0]}/+/+/+/+/+/+/${(c.tripId || "").split(":")[1]}/#`], []) || []
+    data[selectedRoute]?.legs.reduce<string[]>((p, c) => !c.transitLeg ? p : [...p, `/hfp/v2/journey/ongoing/vp/+/+/+/${(c.route?.gtfsId || "").split(":")[1]}/${typeof c.pattern?.directionId == "number" ? c.pattern.directionId + 1 : "+"}/+/${format(new TZDate((c.tripStartTime || 0), "UTC"), "HH:mm")}/#`], []) || [] :
+    data[selectedRoute]?.legs.reduce<string[]>((p, c) => !c.transitLeg ? p : [...p, `/gtfsrt/vp/${(c.tripId || "").split(":")[0]}/+/+/+/+/+/+/${(c.tripId || "").split(":")[1]}/#`], []) || []
   )
   useEffect(() => {
     if (!map) return

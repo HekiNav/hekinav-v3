@@ -163,7 +163,8 @@ export async function generateMetadata({
 
   return {
     title: `Routes from ${origin.label} to ${destination.label}`,
-    description: `View routes and directions from ${origin.label} to ${destination.label} in Hekinav Routing`
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    description: `View routes and directions from ${origin.label} to ${destination.label} ${via.length ? via.map((e: any) => e.label) : ""} in Hekinav Routing`
   }
 }
 

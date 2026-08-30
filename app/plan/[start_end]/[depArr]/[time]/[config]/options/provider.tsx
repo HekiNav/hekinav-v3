@@ -1,7 +1,6 @@
 "use client"
 
 import { PropsWithChildren, Suspense, createContext, use, useEffect, useMemo, useState } from "react";
-import { PlanQueryQuery } from "./layout.generated";
 import { getPlan, GetPlanResponse } from "./getPlan";
 import Loading from "./loading";
 import { useIsHsl } from "@/app/hooks/useHsl";
@@ -52,9 +51,9 @@ export default function Context({ children, start_end, config, depArr, time }: P
 
     console.log("data:\n", origin, "\n", destination, "\n", via, "\n", isHsl, "\n", options, "\n", dateTime, "\n", depArr, "\n")
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    const planPromise = useMemo(() => getPlan(origin, destination, via, isHsl, options, dateTime, depArr), [a])
+    const planPromise = useMemo(() => getPlan(origin, destination, via, isHsl, options, dateTime.toISOString(), depArr), [a])
 
-    
+
     return (<Suspense fallback={<Loading></Loading>}><PlanData via={via} config={options} dateTime={dateTime} depArr={depArr} destination={destination} origin={origin} promise={planPromise}>{children}</PlanData></Suspense>)
 }
 
@@ -90,6 +89,7 @@ export interface Time {
 
 export interface Leg {
     tripId: string | null,
+    tripStartTime: number | null,
     headsign: string,
     start: Time
     end: Time
@@ -121,8 +121,9 @@ export function PlanData({ children, via, promise, destination, origin, config, 
     const data = use(promise)
 
 
-    const { dt, motis } = data || {motis: {itineraries: []}, dt: {edges: [], routingErrors: []}}
+    const { dt, motis } = data || { motis: { itineraries: [] }, dt: { edges: [], routingErrors: [] } }
 
+    console.log(dt.edges?.length, motis.itineraries.length, motis)
 
     const edges: Edge[] = [
         ...motis.itineraries.map<Edge>(e => {
@@ -136,9 +137,10 @@ export function PlanData({ children, via, promise, destination, origin, config, 
                 legs: e.legs.map((l) => {
                     return {
                         headsign: l.headsign || "",
+                        tripStartTime: null,
                         tripId: l.tripId || null,
                         pattern: {
-                            code: "",
+                            code: `${l.routeId}:0:01`,
                             directionId: -1
                         },
                         duration: l.duration,
@@ -155,7 +157,7 @@ export function PlanData({ children, via, promise, destination, origin, config, 
                                 code: l.from.stopCode || null,
                                 name: l.from.name,
                                 gtfsId: l.from.stopId,
-                                desc: String(l.from.description) || null,
+                                desc: l.from.description || null,
                                 platformCode: null
                             } : null
                         },
@@ -168,16 +170,16 @@ export function PlanData({ children, via, promise, destination, origin, config, 
                                 code: l.to.stopCode || null,
                                 name: l.to.name,
                                 gtfsId: l.to.stopId,
-                                desc: String(l.to.description) || null,
+                                desc: l.to.description || null,
                                 platformCode: null
                             } : null
                         },
                         end: {
-                            estimated: l.startTime,
-                            scheduled: l.scheduledStartTime
+                            estimated: l.realTime ? l.endTime : null,
+                            scheduled: l.scheduledEndTime
                         },
                         start: {
-                            estimated: l.startTime,
+                            estimated: l.realTime ? l.startTime : null,
                             scheduled: l.scheduledStartTime
                         },
                         route: l.routeId ? {
@@ -191,6 +193,73 @@ export function PlanData({ children, via, promise, destination, origin, config, 
                 })
             }
         }),
+        ...(motis.direct?.map<Edge>(e => {
+
+            return {
+                duration: e.duration,
+                walkDistance: e.legs.reduce((p, c) => c.mode == "WALK" ? p + (c.distance || 0) : p, 0),
+                source: "HEKINAV",
+                start: e.startTime,
+                end: e.endTime,
+                legs: e.legs.map((l) => {
+                    return {
+                        headsign: l.headsign || "",
+                        tripStartTime: null,
+                        tripId: l.tripId || null,
+                        pattern: {
+                            code: `${l.routeId}:0:01`,
+                            directionId: -1
+                        },
+                        duration: l.duration,
+                        legGeometry: l.legGeometry,
+                        mode: l.mode,
+                        transitLeg: !!l.routeId,
+                        distance: l?.distance || 0,
+                        from: {
+                            lat: l.from.lat,
+                            lng: l.from.lon,
+                            name: l.from.name,
+                            viaType: l.from.stopId ? null : "VISIT",
+                            stop: l.from.stopId ? {
+                                code: l.from.stopCode || null,
+                                name: l.from.name,
+                                gtfsId: l.from.stopId,
+                                desc: l.from.description || null,
+                                platformCode: null
+                            } : null
+                        },
+                        to: {
+                            lat: l.to.lat,
+                            lng: l.to.lon,
+                            name: l.to.name,
+                            viaType: l.to.stopId ? null : "VISIT",
+                            stop: l.to.stopId ? {
+                                code: l.to.stopCode || null,
+                                name: l.to.name,
+                                gtfsId: l.to.stopId,
+                                desc: l.to.description || null,
+                                platformCode: null
+                            } : null
+                        },
+                        end: {
+                            estimated: l.realTime ? l.endTime : null,
+                            scheduled: l.scheduledEndTime
+                        },
+                        start: {
+                            estimated: l.realTime ? l.startTime : null,
+                            scheduled: l.scheduledStartTime
+                        },
+                        route: l.routeId ? {
+                            gtfsId: l.routeId,
+                            longName: l.routeLongName || null,
+                            shortName: l.routeShortName || null,
+                            mode: l.mode || "",
+                            type: l.routeType || -1
+                        } : null
+                    }
+                })
+            }
+        }) || []),
         ...(dt.edges?.map<Edge>((e) => {
 
             return {
@@ -201,6 +270,7 @@ export function PlanData({ children, via, promise, destination, origin, config, 
                 walkDistance: e?.node.walkDistance as number || 0,
                 legs: e?.node.legs.map<Leg>((l) => {
                     return {
+                        tripStartTime: (l?.trip?.departureStoptime?.scheduledDeparture || 0) * 1000,
                         end: {
                             estimated: l?.end.estimated?.time as string || "",
                             scheduled: l?.end.scheduledTime as string || ""
@@ -217,15 +287,15 @@ export function PlanData({ children, via, promise, destination, origin, config, 
                             stop: l?.from.stop || null
                         },
                         to: {
-                            name: l?.from.name || "",
-                            lat: l?.from.lat || 0,
-                            lng: l?.from.lon || 0,
-                            viaType: l?.from.viaLocationType || null,
-                            stop: l?.from.stop || null
+                            name: l?.to.name || "",
+                            lat: l?.to.lat || 0,
+                            lng: l?.to.lon || 0,
+                            viaType: l?.to.viaLocationType || null,
+                            stop: l?.to.stop || null
                         },
                         headsign: l?.headsign || "",
                         pattern: {
-                            code: l?.trip?.pattern?.code || "::::",
+                            code: l?.trip?.pattern?.code || `${l?.trip?.route.gtfsId}:0:01`,
                             directionId: l?.trip?.pattern?.directionId || -1
                         },
                         tripId: l?.trip?.gtfsId || null,
@@ -239,7 +309,12 @@ export function PlanData({ children, via, promise, destination, origin, config, 
                 }) || []
             }
         }) || [])
-    ]
+    ].sort((a, b) =>
+        (new Date(depArr == "arr" ? a.end : a.start).getTime()) -
+        (new Date(depArr == "arr" ? b.end : b.start).getTime())
+    )
+
+    console.log(edges.map(e => new Date(e.start)))
 
     return (
         <PlanContext value={{ data: edges, destination, origin, depArr, dateTime, config, via }}>

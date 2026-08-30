@@ -12,7 +12,6 @@ import Icon from "@/app/components/icon";
 import { ArrowRightAltW700 as ArrowRightAlt } from '@material-symbols-svg/react/icons/arrow-right-alt';
 import Dropdown, { DropdownItem } from "@/app/components/dropdown";
 import { SyncAltW700 as SyncAlt } from '@material-symbols-svg/react/icons/sync-alt';
-import DateEl from "@/app/components/Date";
 import { Map } from "./Map";
 import { Metadata } from "next";
 import Content from "./content";

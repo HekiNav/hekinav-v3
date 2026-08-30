@@ -9,6 +9,24 @@ export type RoutingOption<T extends string, V> = {
   type: T
   value: readonly [HekinavConfigPathTo<V>, ...HekinavConfigPathTo<V>[]]
 }
+export type MotisTransitType =
+  "TRAM" |
+  "SUBWAY" |
+  "FERRY" |
+  "AIRPLANE" |
+  "BUS" |
+  "COACH" |
+  "RAIL" |
+  "HIGHSPEED_RAIL" |
+  "LONG_DISTANCE" |
+  "NIGHT_RAIL" |
+  "REGIONAL_FAST_RAIL" |
+  "REGIONAL_RAIL" |
+  "SUBURBAN" |
+  "ODM" |
+  "RIDE_SHARING" |
+  "FUNICULAR" |
+  "AERIAL_LIFT"
 
 export type IconToggleRoutingOption = RoutingOption<"icon_toggle", boolean> & {
   icon: ReactElement
@@ -45,7 +63,7 @@ export type NumberToggleRoutingOption = RoutingOption<"toggle_number", number> &
   off: number
 }
 
-export type DropdownRoutingOption<K extends string | number> = RoutingOption<"dropdown", K> & {
+export type DropdownRoutingOption<K extends string | number, T extends string> = RoutingOption<T, K> & {
   options: { id: K, content: string }[]
 }
 
@@ -58,19 +76,21 @@ export type RoutingNode<T = AnyRoutingOption> = RoutingOptionGroup<T> | T
 
 
 
-export type AnyRoutingOption = IconToggleRoutingOption | ToggleRoutingOption | DropdownRoutingOption<number> | NumberIconToggleRoutingOption | NumberToggleRoutingOption | RangeRoutingOption | ImportExportRoutingOption | ExcludeRoutes | ExcludeIncludeRoutes
+export type AnyRoutingOption = IconToggleRoutingOption | ToggleRoutingOption | DropdownRoutingOption<number, "dropdown_number"> | DropdownRoutingOption<string, "dropdown"> | NumberIconToggleRoutingOption | NumberToggleRoutingOption | RangeRoutingOption | ImportExportRoutingOption | ExcludeRoutes | ExcludeIncludeRoutes
 
 export interface HekinavConfig {
   advancedDepartures: boolean;
   advancedRoutingOptionsEnabled: boolean;
   routingOptions: {
-    modes: { [key in TransitMode]: number }
+    modes: { [key in TransitMode | MotisTransitType]: number }
     transferCost: number
     waitReluctance: number
     walkReluctance: number
     walkSpeed: number
     includeExclude: IncludeExclude[]
     include: boolean
+    routingEngines: { digitransit: boolean, hekinav: boolean }
+    motisAlgorithm: "PONG" | "RAPTOR" | "TB"
   }
 }
 export interface IncludeExclude {
@@ -128,7 +148,7 @@ export const RoutingOptionsUiConfig: RoutingNode[] = [
         name: "Use rail in routing",
         desc: "",
         icon: IconTable.RAIL,
-        value: [["routingOptions", "modes", "RAIL"]],
+        value: [["routingOptions", "modes", "RAIL"], ["routingOptions", "modes", "HIGHSPEED_RAIL"], ["routingOptions", "modes", "LONG_DISTANCE"], ["routingOptions", "modes", "NIGHT_RAIL"], ["routingOptions", "modes", "REGIONAL_FAST_RAIL"], ["routingOptions", "modes", "REGIONAL_RAIL"], ["routingOptions", "modes", "SUBURBAN"]],
         id: "rail"
       },
       {
@@ -154,14 +174,36 @@ export const RoutingOptionsUiConfig: RoutingNode[] = [
     ]
   },
   {
+    type: "group",
+    direction: "vertical",
+    name: "Routing engines",
+    desc: "",
+    items: [
+      {
+        type: "toggle",
+        desc: "",
+        id: "digitransit",
+        name: "Digitransit",
+        value: [["routingOptions", "routingEngines", "digitransit"]]
+      },
+      {
+        type: "toggle",
+        desc: "",
+        id: "hekinav",
+        name: "Hekinav",
+        value: [["routingOptions", "routingEngines", "hekinav"]]
+      }
+    ]
+  },
+  {
     type: "exclude_routes",
     desc: "",
-    name: "Exclude routes and agencies",
+    name: "Exclude routes and agencies (Digitransit only)",
     value: [["routingOptions", "includeExclude"]],
     secondaryValue: [["routingOptions", "include"]]
   },
   {
-    type: "dropdown",
+    type: "dropdown_number",
     desc: "",
     name: "Walking speed",
     options: [
@@ -202,7 +244,7 @@ export const RoutingOptionsUiConfig: RoutingNode[] = [
     off: 1.5,
     on: 5,
     desc: "",
-    name: "Avoid walking",
+    name: "Avoid walking (Digitransit only)",
   },
   {
     value: [["routingOptions", "waitReluctance"]],
@@ -210,7 +252,7 @@ export const RoutingOptionsUiConfig: RoutingNode[] = [
     off: 1,
     on: 3,
     desc: "",
-    name: "Avoid waiting",
+    name: "Avoid waiting (Digitransit only)",
   }
 ]
 
@@ -224,8 +266,50 @@ export const AdvancedRoutingOptions: RoutingNode[] = [
   {
     type: "group",
     direction: "vertical",
+    name: "Routing engines",
+    desc: "",
+    items: [
+      {
+        type: "toggle",
+        desc: "",
+        id: "digitransit",
+        name: "Digitransit",
+        value: [["routingOptions", "routingEngines", "digitransit"]]
+      },
+      {
+        type: "toggle",
+        desc: "",
+        id: "hekinav",
+        name: "Hekinav",
+        value: [["routingOptions", "routingEngines", "hekinav"]]
+      }
+    ]
+  },
+  {
+    type: "dropdown",
+    name: "MOTIS Routing algorithm",
+    desc: "",
+    value: [["routingOptions", "motisAlgorithm"]],
+    options: [
+      {
+        content: "RAPTOR",
+        id: "RAPTOR",
+      },
+      {
+        content: "PONG (Optimized RAPTOR) (Recommended)",
+        id: "PONG",
+      },
+      {
+        content: "Trip-based",
+        id: "TB",
+      }
+    ]
+  },
+  {
+    type: "group",
+    direction: "vertical",
     name: "Modes",
-    desc: "0 = disabled, 1 = baseline, 2 = 2 times less preferred than baseline",
+    desc: "0: disabled, 1: baseline, 2: 2 times less preferred than baseline. * = only affects Hekinav Router. Hekinav Router does not use reluctance, so all 0 :disabled, >0: enabled",
     items: [
       {
         value: [["routingOptions", "modes", "BUS"]],
@@ -256,6 +340,51 @@ export const AdvancedRoutingOptions: RoutingNode[] = [
         min: 0,
         step: 0.2,
         id: "RAIL"
+      },
+      {
+        value: [["routingOptions", "modes", "HIGHSPEED_RAIL"]],
+        name: "High-speed rail *",
+        desc: "",
+        type: "toggle_number",
+        off: 0,
+        on: 1,
+        id: "HIGHSPEED_RAIL"
+      },
+      {
+        value: [["routingOptions", "modes", "LONG_DISTANCE"]],
+        name: "Long-distance rail *",
+        desc: "",
+        type: "toggle_number",
+        off: 0,
+        on: 1,
+        id: "LONG_DISTANCE"
+      },
+      {
+        value: [["routingOptions", "modes", "NIGHT_RAIL"]],
+        name: "Night rail *",
+        desc: "",
+        type: "toggle_number",
+        off: 0,
+        on: 1,
+        id: "NIGHT_RAIL"
+      },
+      {
+        value: [["routingOptions", "modes", "REGIONAL_FAST_RAIL"], ["routingOptions", "modes", "REGIONAL_RAIL"]],
+        name: "Regional rail *",
+        desc: "",
+        type: "toggle_number",
+        off: 0,
+        on: 1,
+        id: "REGIONAL_RAIL"
+      },
+      {
+        value: [["routingOptions", "modes", "SUBURBAN"]],
+        name: "Suburban rail *",
+        desc: "",
+        type: "toggle_number",
+        off: 0,
+        on: 1,
+        id: "SUBURBAN"
       },
       {
         value: [["routingOptions", "modes", "SUBWAY"]],
@@ -308,7 +437,7 @@ export const AdvancedRoutingOptions: RoutingNode[] = [
         id: "MONORAIL"
       },
       {
-        value: [["routingOptions", "modes", "CABLE_CAR"]],
+        value: [["routingOptions", "modes", "CABLE_CAR"], ["routingOptions", "modes", "GONDOLA"], ["routingOptions", "modes", "AERIAL_LIFT"]],
         name: "Cable car",
         desc: "",
         type: "range",
@@ -316,16 +445,6 @@ export const AdvancedRoutingOptions: RoutingNode[] = [
         min: 0,
         step: 0.2,
         id: "CABLE_CAR"
-      },
-      {
-        value: [["routingOptions", "modes", "GONDOLA"]],
-        name: "Gondola",
-        desc: "",
-        type: "range",
-        max: 10,
-        min: 0,
-        step: 0.2,
-        id: "GONDOLA"
       },
       {
         value: [["routingOptions", "modes", "FUNICULAR"]],
@@ -338,7 +457,7 @@ export const AdvancedRoutingOptions: RoutingNode[] = [
         id: "FUNICULAR"
       },
       {
-        value: [["routingOptions", "modes", "CARPOOL"]],
+        value: [["routingOptions", "modes", "CARPOOL"], ["routingOptions", "modes", "RIDE_SHARING"]],
         name: "Carpool",
         desc: "",
         type: "range",
@@ -382,7 +501,7 @@ export const AdvancedRoutingOptions: RoutingNode[] = [
   {
     type: "exclude_include_routes",
     desc: "",
-    name: "Exclude routes and agencies",
+    name: "Exclude routes and agencies (Digitransit only)",
     value: [["routingOptions", "includeExclude"]],
     secondaryValue: [["routingOptions", "include"]]
   },
@@ -397,7 +516,7 @@ export const AdvancedRoutingOptions: RoutingNode[] = [
   },
   {
     type: "range",
-    desc: "A multiplier for how bad waiting at a stop is compared to being in transit for equal lengths of time. (default 1)",
+    desc: "A multiplier for how bad waiting at a stop is compared to being in transit for equal lengths of time. (default 1) (Digitransit only)",
     name: "Wait Reluctance",
     max: 5,
     min: 0,
@@ -406,7 +525,7 @@ export const AdvancedRoutingOptions: RoutingNode[] = [
   },
   {
     type: "range",
-    desc: "A multiplier for how bad walking is compared to being in transit for equal lengths of time. (default 1.5)",
+    desc: "A multiplier for how bad walking is compared to being in transit for equal lengths of time. (default 1.5) (Digitransit only)",
     name: "Walk Reluctance",
     max: 5,
     min: 0,
@@ -415,7 +534,7 @@ export const AdvancedRoutingOptions: RoutingNode[] = [
   },
   {
     type: "range",
-    desc: "A penalty for the routing, 0 = no penalty for transfer, 2000 = very large penalty for transfers",
+    desc: "A penalty for the routing, 0 = no penalty for transfer, 2000 = very large penalty for transfers (Digitransit only)",
     name: "Transfer cost",
     max: 2000,
     min: 0,
@@ -443,14 +562,29 @@ export const defaultConfig: Readonly<HekinavConfig> = {
       SUBWAY: 1,
       TAXI: 0,
       TRAM: 1,
-      TROLLEYBUS: 1
+      TROLLEYBUS: 1,
+
+      AERIAL_LIFT: 1,
+      HIGHSPEED_RAIL: 1,
+      LONG_DISTANCE: 1,
+      NIGHT_RAIL: 1,
+      REGIONAL_FAST_RAIL: 1,
+      REGIONAL_RAIL: 1,
+      ODM: 1,
+      RIDE_SHARING: 0,
+      SUBURBAN: 1
     },
+    motisAlgorithm: "PONG",
     includeExclude: [],
     include: false,
     transferCost: 0,
     walkReluctance: 1.5,
     waitReluctance: 1,
-    walkSpeed: 4.5
+    walkSpeed: 4.5,
+    routingEngines: {
+      digitransit: true,
+      hekinav: true
+    }
   }
 
 };

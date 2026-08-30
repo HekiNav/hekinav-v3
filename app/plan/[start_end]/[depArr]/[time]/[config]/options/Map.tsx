@@ -1,10 +1,9 @@
 "use client"
 import { useMap } from "@vis.gl/react-maplibre"
-import { PlanQueryQuery } from "./layout.generated"
 import { useEffect } from "react"
 import { GeoJSONSource, LngLatBounds } from "maplibre-gl"
 import { getColor } from "@/app/lib/digitransit"
-import { LocationType, Mode, PlanLabeledLocationInput, RealtimeState, TransitMode, ViaLocationType } from "@/app/lib/__generated__/graphql"
+import { PlanLabeledLocationInput } from "@/app/lib/__generated__/graphql"
 import polyline from "@mapbox/polyline"
 import { Edge } from "./provider"
 
@@ -205,7 +204,6 @@ export function Map({ data, selectedRoute = null, destination, origin }: { data:
       ) || []
     )
 
-    console.log(lines[0][0])
     const bounds = lines.length > 0 && lines.flat(2).reduce((bounds, coord) => bounds.extend(coord), new LngLatBounds(lines[0][0][0], lines[0][0][1]))
     if (bounds) m.fitBounds(bounds, { padding: 100 })
 

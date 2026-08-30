@@ -43,15 +43,3 @@ export default function RouteStops({ data, isHsl }: ContentProps) {
         </>
     )
 }
-
-function getColorFromDelay(delay: number) {
-    if (delay > 900) {
-        return "text-red"
-    } else if (delay > 120) {
-        return "text-orange"
-    } else if (delay < -120) {
-        return "text-cyan"
-    } else {
-        return "text-green"
-    }
-}
