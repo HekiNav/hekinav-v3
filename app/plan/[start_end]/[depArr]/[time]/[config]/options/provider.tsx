@@ -9,7 +9,6 @@ import { RoutingConfig } from "@/app/lib/digitransit";
 import { PlanLabeledLocationInput, PlanVisitViaLocationInput } from "@/app/lib/__generated__/graphql";
 import { Mode } from "@/app/lib/__generated__/graphql";
 import { Mode as MotisMode } from "@motis-project/motis-client"
-import { parse } from "date-fns";
 import { formatInTimeZone } from "date-fns-tz";
 
 

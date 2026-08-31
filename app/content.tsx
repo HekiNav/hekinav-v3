@@ -3,7 +3,7 @@
 import { LngLat } from "maplibre-gl"
 
 import InputField, { Suggestion } from './components/inputfield';
-import { ReactNode, Suspense, useContext, useEffect, useState, useTransition } from 'react';
+import { ReactNode, useContext, useEffect, useState, useTransition } from 'react';
 import { useMap } from "@vis.gl/react-maplibre";
 import { Sidebar } from "./mapcontext";
 import { useIsHsl } from './hooks/useHsl';
