@@ -5,12 +5,11 @@ import { GeoJSONSource, LngLatBounds } from "maplibre-gl"
 import { getColor, VPos } from "@/app/lib/digitransit"
 import { PlanLabeledLocationInput, PlanVisitViaLocationInput } from "@/app/lib/__generated__/graphql"
 import polyline from "@mapbox/polyline"
-import { useSubscription } from "mqtt-react-hooks"
 import { useIsHsl } from "@/app/hooks/useHsl"
 import { textSize } from "@/app/route/[id]/[direction_pattern]/Map"
-import { format } from "date-fns-tz"
-import { TZDate } from "@date-fns/tz"
 import { Edge } from "../../provider"
+import { useSubscription } from "@/app/hooks/useMQTT"
+import GtfsRealtimeBindings from "gtfs-realtime-bindings"
 
 export function Map({ data, selectedRoute, destination, origin, via }: { data: Edge[], selectedRoute: number, destination: PlanLabeledLocationInput, origin: PlanLabeledLocationInput, via: PlanVisitViaLocationInput[] }) {
   const { default: map } = useMap()
@@ -18,8 +17,6 @@ export function Map({ data, selectedRoute, destination, origin, via }: { data: E
   const isHsl = useIsHsl()
 
   const [vPosCache, setVposCache] = useState<VPos[]>([])
-
-  console.log(data[selectedRoute].legs)
 
   const { message } = useSubscription(isHsl ?
     data[selectedRoute]?.legs.reduce<string[]>((p, c) => !c.transitLeg ? p : [...p, `/hfp/v2/journey/ongoing/vp/+/+/+/${(c.route?.gtfsId || "").split(":")[1]}/${typeof c.pattern?.directionId == "number" ? c.pattern.directionId + 1 : "+"}/+/${c.tripStartTime}/#`], []) || [] :
@@ -305,19 +302,21 @@ export function Map({ data, selectedRoute, destination, origin, via }: { data: E
 
         const veh = { id: `${msg.VP.oper}${msg.VP.veh}`, lat: msg.VP.lat, lng: msg.VP.long, name: msg.VP.desi, color: getColor(route?.type || -1, route?.mode || "") }
         const newVPos: VPos[] = [...vPosCache.filter(v => v.id != veh.id), veh]
-        vPos = newVPos.map<GeoJSON.Feature<GeoJSON.Point, { type: "vehicle", text_size: number, color: string } & VPos>>(v => ({ geometry: { type: "Point", coordinates: [v.lng, v.lat] }, properties: { ...v, type: "vehicle", text_size: textSize(v.name.length) }, type: "Feature" })).sort((a, b) => Number(a.properties.id) - Number(b.properties.id))
+        vPos = newVPos.map<GeoJSON.Feature<GeoJSON.Point, { type: "vehicle", text_size: number, color: string } & VPos>>(v => ({ geometry: { type: "Point", coordinates: [v.lng, v.lat] }, properties: { ...v, type: "vehicle", text_size: textSize(Math.max(...v.name.split("\n").map(e => e.length))) * (v.name.split("\n").length ? 0.75 : 1) }, type: "Feature" })).sort((a, b) => Number(a.properties.id) - Number(b.properties.id))
         // eslint-disable-next-line react-hooks/set-state-in-effect
         setVposCache(newVPos)
       } else {
-        console.log(message)
-        /* const feed = GtfsRealtimeBindings.transit_realtime.FeedMessage.decode(
-          new Uint8Array(buffer)
-        );
+        if (!message?.payload) return
+        const feed = GtfsRealtimeBindings.transit_realtime.FeedMessage.decode(message?.payload);
         feed.entity.forEach((entity) => {
-          if (entity.tripUpdate) {
-            console.log(entity.tripUpdate);
-          }
-        }); */
+          if (!entity.vehicle) return
+          const route = data[selectedRoute].legs.find(l => l.route?.gtfsId.split(":")[1] == entity.vehicle?.trip?.routeId)?.route
+
+          const veh = { id: `${entity.vehicle.vehicle?.id}${entity.vehicle.trip?.tripId}`, lat: entity.vehicle.position?.latitude || 0, lng: entity.vehicle.position?.longitude || 0, name: (route?.shortName || route?.longName || "").replaceAll(" ","\n"), color: getColor(route?.type || -1, route?.mode || "") }
+          const newVPos: VPos[] = [...vPosCache.filter(v => v.id != veh.id), veh]
+          vPos = newVPos.map<GeoJSON.Feature<GeoJSON.Point, { type: "vehicle", text_size: number, color: string } & VPos>>(v => ({ geometry: { type: "Point", coordinates: [v.lng, v.lat] }, properties: { ...v, type: "vehicle", text_size: textSize(Math.max(...v.name.split("\n").map(e => e.length))) * (v.name.split("\n").length ? 0.75 : 1) }, type: "Feature" })).sort((a, b) => Number(a.properties.id) - Number(b.properties.id))
+          setVposCache(newVPos)
+        });
       }
     } catch {
       return

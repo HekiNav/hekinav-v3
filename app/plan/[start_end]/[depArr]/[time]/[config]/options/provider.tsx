@@ -114,7 +114,7 @@ export interface Route {
 }
 
 export interface Pattern {
-    code: string
+    code: string | null
     directionId: string
 }
 
@@ -140,7 +140,7 @@ export function PlanData({ children, via, promise, destination, origin, config, 
                         tripStartTime: l.tripId?.slice(9,14) || null,
                         tripId: fixMotisId(l.tripId?.slice(15)) || null,
                         pattern: {
-                            code: `${fixMotisId(l.routeId)}:${l.directionId || "-1"}:01`,
+                            code: null,
                             directionId: l.directionId || "-1"
                         },
                         duration: l.duration,

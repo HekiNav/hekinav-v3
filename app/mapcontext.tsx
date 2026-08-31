@@ -20,8 +20,8 @@ import Link from 'next/link';
 import { useIsHsl } from './hooks/useHsl';
 import Button from './components/button';
 import { ArrowBackIosW700 } from '@material-symbols-svg/react/icons/arrow-back-ios';
-import { Connector } from "mqtt-react-hooks";
 import Status from './mqttstatus';
+import { MqttProvider } from './hooks/useMQTT';
 
 type Slots = {
     overlay: HTMLDivElement | null
@@ -70,7 +70,7 @@ export function MapLayoutProvider({ children }: { children: React.ReactNode }) {
 
     return (
         <MapProvider>
-            <Connector brokerUrl={isHsl ? "wss://mqtt.hsl.fi:443/" : `wss://mqtt.digitransit.fi/?digitransit-subscription-key=bbc7a56df1674c59822889b1bc84e7ad`}>
+            <MqttProvider brokerUrl={isHsl ? "wss://mqtt.hsl.fi:443/" : `wss://mqtt.digitransit.fi/?digitransit-subscription-key=bbc7a56df1674c59822889b1bc84e7ad`}>
                 <Status />
                 <SlotContext.Provider value={{ overlay, sidebar }}>
                     <FocusContext.Provider value={{ setSidebarHidden }}>
@@ -97,7 +97,7 @@ export function MapLayoutProvider({ children }: { children: React.ReactNode }) {
                         {children}
                     </FocusContext.Provider>
                 </SlotContext.Provider>
-            </Connector>
+            </MqttProvider>
         </MapProvider>
     )
 }

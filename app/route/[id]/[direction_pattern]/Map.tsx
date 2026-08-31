@@ -6,8 +6,10 @@ import { GeoJSONSource, LngLatBounds } from "maplibre-gl"
 import polyline from "@mapbox/polyline"
 import { getColor, VPos } from "@/app/lib/digitransit"
 import { useRouter } from "next/navigation"
-import { useSubscription } from "mqtt-react-hooks"
 import { useIsHsl } from "@/app/hooks/useHsl"
+import { useSubscription } from "@/app/hooks/useMQTT"
+import GtfsRealtimeBindings from "gtfs-realtime-bindings"
+
 
 export function Map({ data, direction, routeId }: { data: NonNullable<PatternQueryQuery["pattern"]>, direction?: number, routeId: string }) {
   const { default: map } = useMap()
@@ -17,8 +19,8 @@ export function Map({ data, direction, routeId }: { data: NonNullable<PatternQue
 
   const [vPosCache, setVposCache] = useState<VPos[]>([])
 
-  const { message } = useSubscription(isHsl ? 
-    `/hfp/v2/journey/ongoing/vp/+/+/+/${decodeURIComponent(routeId).split(":")[1]}/${typeof direction == "number" ? direction + 1 : "+"}/#` : 
+  const { message } = useSubscription(isHsl ?
+    `/hfp/v2/journey/ongoing/vp/+/+/+/${decodeURIComponent(routeId).split(":")[1]}/${typeof direction == "number" ? direction + 1 : "+"}/#` :
     `/gtfsrt/vp/${decodeURIComponent(routeId).split(":")[0]}/+/+/+/${decodeURIComponent(routeId).split(":")[1]}/${direction || "+"}/#`)
   useEffect(() => {
     if (!map) return
@@ -255,19 +257,21 @@ export function Map({ data, direction, routeId }: { data: NonNullable<PatternQue
         if (!data || !data.VP) return
         const veh = { id: `${data.VP.oper}${data.VP.veh}`, lat: data.VP.lat, lng: data.VP.long, name: data.VP.desi, color: "" }
         const newVPos: VPos[] = [...vPosCache.filter(v => v.id != veh.id), veh]
-        vPos = newVPos.map<GeoJSON.Feature<GeoJSON.Point, { type: "vehicle", text_size: number } & VPos>>(v => ({ geometry: { type: "Point", coordinates: [v.lng, v.lat] }, properties: { ...v, type: "vehicle", text_size: textSize(v.name.length) }, type: "Feature" })).sort((a, b) => Number(a.properties.id) - Number(b.properties.id))
+        vPos = newVPos.map<GeoJSON.Feature<GeoJSON.Point, { type: "vehicle", text_size: number } & VPos>>(v => ({ geometry: { type: "Point", coordinates: [v.lng, v.lat] }, properties: { ...v, type: "vehicle", text_size: textSize(Math.max(...v.name.split("\n").map(e => e.length))) * (v.name.split("\n").length ? 0.75 : 1) }, type: "Feature" })).sort((a, b) => Number(a.properties.id) - Number(b.properties.id))
         // eslint-disable-next-line react-hooks/set-state-in-effect
         setVposCache(newVPos)
       } else {
-        console.log(message)
-        /* const feed = GtfsRealtimeBindings.transit_realtime.FeedMessage.decode(
-          new Uint8Array(buffer)
-        );
+        if (!message?.payload) return
+        const feed = GtfsRealtimeBindings.transit_realtime.FeedMessage.decode(message?.payload);
         feed.entity.forEach((entity) => {
-          if (entity.tripUpdate) {
-            console.log(entity.tripUpdate);
-          }
-        }); */
+          if (!entity.vehicle) return
+          const route = data.route
+
+          const veh = { id: `${entity.vehicle.vehicle?.id}${entity.vehicle.trip?.tripId}`, lat: entity.vehicle.position?.latitude || 0, lng: entity.vehicle.position?.longitude || 0, name: (route?.shortName || route?.longName || "").replaceAll(" ","\n"), color: getColor(route?.type || -1, route?.mode || "") }
+          const newVPos: VPos[] = [...vPosCache.filter(v => v.id != veh.id), veh]
+          vPos = newVPos.map<GeoJSON.Feature<GeoJSON.Point, { type: "vehicle", text_size: number, color: string } & VPos>>(v => ({ geometry: { type: "Point", coordinates: [v.lng, v.lat] }, properties: { ...v, type: "vehicle", text_size: textSize(Math.max(...v.name.split("\n").map(e => e.length))) * (v.name.split("\n").length ? 0.75 : 1) }, type: "Feature" })).sort((a, b) => Number(a.properties.id) - Number(b.properties.id))
+          setVposCache(newVPos)
+        });
       }
     } catch {
       return
@@ -327,6 +331,10 @@ export function textSize(length: number) {
       return 10
     case 5:
       return 8
+    case 6:
+      return 7
+    case 7:
+      return 6
     default:
       return 20
   }

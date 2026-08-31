@@ -120,8 +120,6 @@ export default async function getFavourites(config: HekinavConfig["favourites"],
     const { routes, stations, stops } = result.data
     if (routes === null || stations === null || stops === null) return []
 
-    console.log("EEEE")
-
     return [
         ...routes.filter(r => config.routes.some(e => r?.gtfsId == e)).map((r) => {
             const pattern = r?.patterns![0] || { code: `${r?.gtfsId}:0:01` }

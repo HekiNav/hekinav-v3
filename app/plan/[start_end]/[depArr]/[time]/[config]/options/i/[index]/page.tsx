@@ -100,7 +100,7 @@ export default function Content() {
                                 </div>
                                 <div className="p-2 flex flex-row gap-2 font-medium items-center h-full">
                                     {l?.transitLeg ? <>
-                                        <Link className="decoration-none" href={`/route/${l.route?.gtfsId}/${l.pattern?.code.split(":")[2] || ""}-${l.pattern?.code.split(":")[3] || ""}/${isHsl ? "?hsl" : ""}`}><Label className={`font-bold text-white ${getRouteColor("bg", route?.type || -1, route?.mode || "")}`}>{route?.shortName || route?.longName || ""}</Label> {l.headsign}</Link>
+                                        <Link className="decoration-none" href={`/route/${l.route?.gtfsId}/${l.pattern?.code ? `${l.pattern?.code.split(":")[2] || ""}-${l.pattern?.code.split(":")[3] || ""}/` : ""}${isHsl ? "?hsl" : ""}`}><Label className={`font-bold text-white ${getRouteColor("bg", route?.type || -1, route?.mode || "")}`}>{route?.shortName || route?.longName || ""}</Label> {l.headsign}</Link>
                                     </> : <>
                                         Walk {walkDistance >= 1100 ? Math.round(walkDistance / 100) / 10 + " km " : Math.round(walkDistance) + " m "}({duration >= 3600 && `${Math.ceil(duration / 3600)} h `}{Math.ceil(duration / 60 % 60)} min)
                                     </>}
