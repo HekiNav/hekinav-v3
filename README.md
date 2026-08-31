@@ -49,8 +49,8 @@ The routing has two different modes: HSL and Finland.
 | Feature                                        | HSL             | Finland                  |
 |------------------------------------------------|-----------------|--------------------------|
 | Region                                         | Helsinki Region | All of Finland & Estonia |
-| Real-time position                             | ✅              | ❌                       |
-| A more consistent and polished user experience | ✅              | ❌                       |
+| Real-time position                             | Yes             | Mostly works             |
+| A more consistent and polished user experience | Yes             | No                       |
 
 The reason for these differences is that as a single coordinated organization, HSL's data has a standardized fromat, unlike the combined Finland dataset. For any trips in the HSL region, it is recommended to use the HSL mode. HSL also produces good quality real-time vehicle position data.
 
