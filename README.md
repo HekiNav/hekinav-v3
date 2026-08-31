@@ -66,7 +66,23 @@ The reason for these differences is that as a single coordinated organization, H
 
 When running, it is recommended to update /public/map_style.json and /public/map_style_hsl.json to use your own API keys for tiles and your own object storage for sprites. My keys will not work on sites other than mine.
 
+
+The following examples use vinext, but all npm commands exist for the normal Next.js. To use them, remove the `:vinext` suffix from commands.
+
+### Memory requirements and performance
+
+The vinext dev server uses quite a lot of system resources especially when this project has a very heavy dependecy list.
+
+#### Memory specs
+
+- Minimum: 8gb (runs a browser (~1-2Gb) and the dev server (~3Gb))
+- Recommended: 12+ gb (for running VSCode with type-checking)
+
+Some things, like server functions (for example search boxes and geolocation) take a while to initialize in the dev environment after starting or after a server side reload. After theyre initialized, they should be fast, but the first query usually takes 10 seconds.
+
 ### Development
+
+Production is handled with Vite runtime on the local device.
 
 1. Create a `.dev.vars` file based on `.dev.vars.template` (Instructions in file)
 
@@ -74,16 +90,22 @@ When running, it is recommended to update /public/map_style.json and /public/map
 
 3. Start dev server: `npm run dev:vinext`
 
-4. Open http://localhost:3001
+4. Open [http://localhost:3001](http://localhost:3001)
 
 ### Production
+
+Production is handled with the cloudflare Wrangler runtime, either on the local machine or on Cloudflare workers. This may handle some things like cryptography differently that the Vite dev runtime.
 
 1. Update secrets (if changed):
 
 For each secret in .dev.vars: `npx wrangler secret put <SECRET_NAME>`, then paste the value
 
-2. Build: `npm run build:vinext`
+2. Install dependencies (if not installed already): `npm install`
 
-3. Preview: `npm run start:vinext`
+3. Build: `npm run build:vinext`
 
-4. Deploy to Cloudflare Workers: `npm run deploy:vinext`
+4. Preview: `npm run start:vinext`
+
+5. Open preview [http://localhost:8787](http://localhost:8787)
+
+6. Deploy to Cloudflare Workers: `npm run deploy:vinext`
