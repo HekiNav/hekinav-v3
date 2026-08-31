@@ -36,7 +36,7 @@ export function Map({ data, selectedRoute = null, destination, origin }: { data:
       m.addLayer({
         id: "itinerary",
         source: "itinerary",
-        filter: ["all", ["==", ["get", "type"], "itinerary"], ["!", ["get", "selected"]]],
+        filter: ["all", ["==", ["get", "type"], "itinerary"], ["!", ["get", "selected"]], ["!", ["get", "walking"]]],
         type: "line",
         paint: {
           "line-width": ["interpolate", ["exponential", 1.15], ["zoom"], 10, 4, 22, 12],
@@ -49,6 +49,21 @@ export function Map({ data, selectedRoute = null, destination, origin }: { data:
       })
       m.addLayer({
         id: "itinerary-walking",
+        source: "itinerary",
+        filter: ["all", ["==", ["get", "type"], "itinerary"], ["get", "walking"], ["!", ["get", "selected"]]],
+        type: "line",
+        paint: {
+          "line-width": ["interpolate", ["exponential", 1.15], ["zoom"], 10, 2, 22, 6],
+          "line-color": "#555",
+          "line-dasharray": [0, 1.5]
+        },
+        layout: {
+          "line-cap": "round",
+          "line-join": "round",
+        }
+      })
+      m.addLayer({
+        id: "itinerary-selected-walking",
         source: "itinerary",
         filter: ["all", ["==", ["get", "type"], "itinerary"], ["get", "walking"], ["get", "selected"]],
         type: "line",
@@ -188,6 +203,7 @@ export function Map({ data, selectedRoute = null, destination, origin }: { data:
       if (m.getLayer("itinerary")) m.removeLayer("itinerary")
       if (m.getLayer("itinerary-selected")) m.removeLayer("itinerary-selected")
       if (m.getLayer("itinerary-walking")) m.removeLayer("itinerary-walking")
+      if (m.getLayer("itinerary-selected-walking")) m.removeLayer("itinerary-selected-walking")
       if (m.getSource("itinerary")) m.removeSource("itinerary")
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
