@@ -4,7 +4,7 @@ The third generation of the HekiNav routing UI. This version has a new look, mor
 
 View the production version at [routing.hekinav.dev](https://routing.hekinav.dev/)
 
-![Image](/images/routing.png)
+<img src="images/routing.png" height="400">
 
 ## Quick links
 - [Features](#features)
@@ -59,6 +59,7 @@ The reason for these differences is that as a single coordinated organization, H
 <img src="images/routing.png" height="200">
 <img src="images/routing_details_via.png" height="200">
 <img src="images/mobile_stop.png" height="200">
+<img src="images/veh_pos.png" height="200">
 
 
 ## Usage
