@@ -9,6 +9,8 @@ import { RoutingConfig } from "@/app/lib/digitransit";
 import { PlanLabeledLocationInput, PlanVisitViaLocationInput } from "@/app/lib/__generated__/graphql";
 import { Mode } from "@/app/lib/__generated__/graphql";
 import { Mode as MotisMode } from "@motis-project/motis-client"
+import { parse } from "date-fns";
+import { formatInTimeZone } from "date-fns-tz";
 
 
 export const PlanContext = createContext<ContextType>(null)
@@ -89,7 +91,7 @@ export interface Time {
 
 export interface Leg {
     tripId: string | null,
-    tripStartTime: number | null,
+    tripStartTime: string | null,
     headsign: string,
     start: Time
     end: Time
@@ -114,7 +116,7 @@ export interface Route {
 
 export interface Pattern {
     code: string
-    directionId: number
+    directionId: string
 }
 
 export function PlanData({ children, via, promise, destination, origin, config, dateTime, depArr }: PropsWithChildren & { promise: Promise<GetPlanResponse | null>, depArr: "dep" | "arr", dateTime: TZDate, config: RoutingConfig, origin: PlanLabeledLocationInput, via: PlanLabeledLocationInput[], destination: PlanLabeledLocationInput }) {
@@ -136,11 +138,11 @@ export function PlanData({ children, via, promise, destination, origin, config, 
                 legs: e.legs.map((l) => {
                     return {
                         headsign: l.headsign || "",
-                        tripStartTime: null,
-                        tripId: l.tripId || null,
+                        tripStartTime: l.tripId?.slice(9,14) || null,
+                        tripId: fixMotisId(l.tripId?.slice(15)) || null,
                         pattern: {
-                            code: `${l.routeId}:0:01`,
-                            directionId: -1
+                            code: `${fixMotisId(l.routeId)}:${l.directionId || "-1"}:01`,
+                            directionId: l.directionId || "-1"
                         },
                         duration: l.duration,
                         legGeometry: l.legGeometry,
@@ -155,7 +157,7 @@ export function PlanData({ children, via, promise, destination, origin, config, 
                             stop: l.from.stopId ? {
                                 code: l.from.stopCode || null,
                                 name: l.from.name,
-                                gtfsId: l.from.stopId,
+                                gtfsId: fixMotisId(l.from.stopId) || "",
                                 desc: l.from.description || null,
                                 platformCode: null
                             } : null
@@ -168,7 +170,7 @@ export function PlanData({ children, via, promise, destination, origin, config, 
                             stop: l.to.stopId ? {
                                 code: l.to.stopCode || null,
                                 name: l.to.name,
-                                gtfsId: l.to.stopId,
+                                gtfsId: fixMotisId(l.to.stopId) || "",
                                 desc: l.to.description || null,
                                 platformCode: null
                             } : null
@@ -182,7 +184,7 @@ export function PlanData({ children, via, promise, destination, origin, config, 
                             scheduled: l.scheduledStartTime
                         },
                         route: l.routeId ? {
-                            gtfsId: l.routeId,
+                            gtfsId: fixMotisId(l.routeId) || "",
                             longName: l.routeLongName || null,
                             shortName: l.routeShortName || null,
                             mode: l.mode || "",
@@ -202,11 +204,11 @@ export function PlanData({ children, via, promise, destination, origin, config, 
                 legs: e.legs.map((l) => {
                     return {
                         headsign: l.headsign || "",
-                        tripStartTime: null,
-                        tripId: l.tripId || null,
+                        tripStartTime: l.tripId?.slice(9,14) || null,
+                        tripId: fixMotisId(l.tripId?.slice(15)) || null,
                         pattern: {
-                            code: `${l.routeId}:0:01`,
-                            directionId: -1
+                            code: `${fixMotisId(l.routeId)}:${l.directionId || "-1"}:01`,
+                            directionId: l.directionId || "-1"
                         },
                         duration: l.duration,
                         legGeometry: l.legGeometry,
@@ -221,7 +223,7 @@ export function PlanData({ children, via, promise, destination, origin, config, 
                             stop: l.from.stopId ? {
                                 code: l.from.stopCode || null,
                                 name: l.from.name,
-                                gtfsId: l.from.stopId,
+                                gtfsId: fixMotisId(l.from.stopId) || "",
                                 desc: l.from.description || null,
                                 platformCode: null
                             } : null
@@ -234,7 +236,7 @@ export function PlanData({ children, via, promise, destination, origin, config, 
                             stop: l.to.stopId ? {
                                 code: l.to.stopCode || null,
                                 name: l.to.name,
-                                gtfsId: l.to.stopId,
+                                gtfsId: fixMotisId(l.to.stopId) || "",
                                 desc: l.to.description || null,
                                 platformCode: null
                             } : null
@@ -248,7 +250,7 @@ export function PlanData({ children, via, promise, destination, origin, config, 
                             scheduled: l.scheduledStartTime
                         },
                         route: l.routeId ? {
-                            gtfsId: l.routeId,
+                            gtfsId: fixMotisId(l.routeId) || "",
                             longName: l.routeLongName || null,
                             shortName: l.routeShortName || null,
                             mode: l.mode || "",
@@ -267,7 +269,7 @@ export function PlanData({ children, via, promise, destination, origin, config, 
                 walkDistance: e?.node.walkDistance as number || 0,
                 legs: e?.node.legs.map<Leg>((l) => {
                     return {
-                        tripStartTime: (l?.trip?.departureStoptime?.scheduledDeparture || 0) * 1000,
+                        tripStartTime: formatInTimeZone((l?.trip?.departureStoptime?.scheduledDeparture || 0) * 1000, "UTC","HH:mm"),
                         end: {
                             estimated: l?.end.estimated?.time as string || "",
                             scheduled: l?.end.scheduledTime as string || ""
@@ -293,7 +295,7 @@ export function PlanData({ children, via, promise, destination, origin, config, 
                         headsign: l?.headsign || "",
                         pattern: {
                             code: l?.trip?.pattern?.code || `${l?.trip?.route.gtfsId}:0:01`,
-                            directionId: l?.trip?.pattern?.directionId || -1
+                            directionId: l?.trip?.pattern?.directionId?.toString() || "-1"
                         },
                         tripId: l?.trip?.gtfsId || null,
                         distance: l?.distance || 0,
@@ -318,4 +320,10 @@ export function PlanData({ children, via, promise, destination, origin, config, 
             {children}
         </PlanContext>
     )
+}
+
+function fixMotisId(motisId: string | null | undefined) {
+    if (!motisId) return null
+    const [feed, ...rest] = motisId.split("_")
+    return `${feed}:${rest.join("_")}`
 }

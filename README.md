@@ -50,9 +50,9 @@ The reason for these differences is that as a single coordinated organization, H
 
 ## Images
 
-![Image](/images/routing.png)
-![Image](/images/routing_details_via.png)
-![Image](/images/mobile_stop.png)
+<img src="images/routing.png" height="200">
+<img src="images/routing_details_via.png" height="200">
+<img src="images/mobile_stop.png" height="200">
 
 
 ## Usage

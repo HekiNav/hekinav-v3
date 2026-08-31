@@ -60,6 +60,9 @@ export default function Content() {
                         const duration = l?.duration || 0
 
 
+                        console.log(l.pattern?.directionId)
+
+
                         const timeBetweenPrevLeg = ((new Date(l.start.estimated || l.start.scheduled)).getTime() - (new Date(prev?.end.estimated || prev?.end.scheduled)).getTime()) / 1000
                         return [<div key={i} className="w-full h-full flex-col flex">
                             {(l?.transitLeg || i == 0) && <div className="flex flex-row w-full" key={i + "a"}>
