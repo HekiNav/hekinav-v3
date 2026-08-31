@@ -19,7 +19,6 @@ export function Map({ data, selectedRoute, destination, origin, via }: { data: E
 
   const [vPosCache, setVposCache] = useState<VPos[]>([])
 
-
   const { message } = useSubscription(isHsl ?
     data[selectedRoute]?.legs.reduce<string[]>((p, c) => !c.transitLeg ? p : [...p, `/hfp/v2/journey/ongoing/vp/+/+/+/${(c.route?.gtfsId || "").split(":")[1]}/${typeof c.pattern?.directionId == "number" ? c.pattern.directionId + 1 : "+"}/+/${format(new TZDate((c.tripStartTime || 0), "UTC"), "HH:mm")}/#`], []) || [] :
     data[selectedRoute]?.legs.reduce<string[]>((p, c) => !c.transitLeg ? p : [...p, `/gtfsrt/vp/${(c.tripId || "").split(":")[0]}/+/+/+/+/+/+/${(c.tripId || "").split(":")[1]}/#`], []) || []

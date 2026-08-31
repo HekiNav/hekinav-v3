@@ -4,6 +4,13 @@ The third generation of the HekiNav routing UI. This version has a new look, mor
 
 View the production version at [routing.hekinav.dev](https://routing.hekinav.dev/)
 
+![Image](/images/routing.png)
+
+## Quick links
+- [Features](#features)
+- [Images](#images)
+- [Usage](#usage)
+
 ## Features
 
 ### Routing engines
@@ -40,6 +47,13 @@ The routing has two different modes: HSL and Finland.
 | A more consistent and polished user experience | ✅              | ❌                       |
 
 The reason for these differences is that as a single coordinated organization, HSL's data has a standardized fromat, unlike the combined Finland dataset. For any trips in the HSL region, it is recommended to use the HSL mode. HSL also produces good quality real-time vehicle position data.
+
+## Images
+
+![Image](/images/routing.png)
+![Image](/images/routing_details_via.png)
+![Image](/images/mobile_stop.png)
+
 
 ## Usage
 

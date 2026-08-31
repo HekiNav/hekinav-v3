@@ -123,11 +123,10 @@ export function PlanData({ children, via, promise, destination, origin, config, 
 
     const { dt, motis } = data || { motis: { itineraries: [] }, dt: { edges: [], routingErrors: [] } }
 
-    console.log(dt.edges?.length, motis.itineraries.length, motis)
+    console.log(dt.edges?.length, motis?.itineraries.length, motis, dt, data)
 
     const edges: Edge[] = [
-        ...motis.itineraries.map<Edge>(e => {
-
+        ...(motis?.itineraries || []).map<Edge>(e => {
             return {
                 duration: e.duration,
                 walkDistance: e.legs.reduce((p, c) => c.mode == "WALK" ? p + (c.distance || 0) : p, 0),
@@ -193,8 +192,7 @@ export function PlanData({ children, via, promise, destination, origin, config, 
                 })
             }
         }),
-        ...(motis.direct?.map<Edge>(e => {
-
+        ...(motis?.direct?.map<Edge>(e => {
             return {
                 duration: e.duration,
                 walkDistance: e.legs.reduce((p, c) => c.mode == "WALK" ? p + (c.distance || 0) : p, 0),
@@ -261,7 +259,6 @@ export function PlanData({ children, via, promise, destination, origin, config, 
             }
         }) || []),
         ...(dt.edges?.map<Edge>((e) => {
-
             return {
                 source: "DIGITRANSIT",
                 duration: e?.node.duration as number || 0,

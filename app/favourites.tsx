@@ -155,9 +155,9 @@ export default async function getFavourites(config: HekinavConfig["favourites"],
                                 </div>
                                 <div className={`${e?.realtime ? "text-green" : ""}`}>
                                     <DateEl approx={!e?.realtime} scheduledTime={e?.scheduledDeparture || e?.scheduledArrival || 0} time={e?.realtimeDeparture || e?.scheduledDeparture || e?.realtimeArrival || e?.scheduledArrival || 0} day={e?.serviceDay as number || 0}></DateEl>
-                                    {s.locationType == "STATION" && <span className={`text-black rounded-r-lg items-center justify-end pl-2 pr-1 text-center`}>
+                                    {s.locationType == "STATION" && <span className={`text-black`}>
                                         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                                        {(e as any).stop.platformCode ? <Label>pl. {(e as any).stop.platformCode}</Label> : "-"}
+                                        {(e as any).stop.platformCode ? <Label>pl. {(e as any).stop.platformCode}</Label> : ""}
                                     </span>}
                                 </div>
                             </Link>

@@ -78,8 +78,8 @@ function Favourites({ isHsl, config, setConfig }: { isHsl: boolean; config: Heki
   }, [config, isHsl]);
 
   if (isPending || !data) return "Loading favourites";
-  return data.length ? (<div className="w-full rounded-xl flex flex-col gap-1 p-2 border-3 overflow-hidden">{data.map(({ content, id, type }) =>
-    <div key={id} className="w-full flex flex-row flex-nowrap overflow-hidden items-start">
+  return data.length ? (<div className="w-full rounded-xl p-2 border-3 mb-2">{data.map(({ content, id, type }) =>
+    <div key={id} className="flex flex-row mb-1 flex-nowrap overflow-x-hidden h-max items-start">
       {content}
       <Icon onClick={() => {
         console.log(config.favourites.routes.filter(r => r != id), config.favourites.routes)

@@ -37,6 +37,7 @@ export function MapLayoutProvider({ children }: { children: React.ReactNode }) {
 
     const [overlay, setOverlay] = useState<HTMLDivElement | null>(null)
     const [sidebar, setSidebar] = useState<HTMLDivElement | null>(null)
+    const [sidebarWrapper, setSidebarWrapper] = useState<HTMLDivElement | null>(null)
 
     const [popup, setPopup] = useState<PopupProps | null>(null);
 
@@ -50,16 +51,16 @@ export function MapLayoutProvider({ children }: { children: React.ReactNode }) {
 
     // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     const focusSidebar = (e: MouseEvent) => {e.stopPropagation(); !map.current?.isMoving() && setFocus(true)}
-    //const blurSidebar = (e: MouseEvent) => {e.stopPropagation(); setFocus(false)}
+    const blurSidebar = (e: MouseEvent) => {e.stopPropagation(); setFocus(false)}
 
 
     useEffect(() => {
-        if (!sidebar) return
-        sidebar.addEventListener("click", focusSidebar)
-        /* sidebar.addEventListener("mouseenter", focusSidebar)
-        sidebar.addEventListener("mouseleave", blurSidebar) */
-        return () => { sidebar.removeEventListener("click", focusSidebar); /* sidebar.removeEventListener("mouseenter", focusSidebar); sidebar.removeEventListener("mouseleave", blurSidebar) */ }
-    }, [sidebar])
+        if (!sidebarWrapper) return
+        sidebarWrapper.addEventListener("click", focusSidebar)
+        sidebarWrapper.addEventListener("mouseenter", focusSidebar)
+        sidebarWrapper.addEventListener("mouseleave", blurSidebar)
+        return () => { sidebarWrapper.removeEventListener("click", focusSidebar); sidebarWrapper.removeEventListener("mouseenter", focusSidebar); sidebarWrapper.removeEventListener("mouseleave", blurSidebar) }
+    }, [sidebarWrapper])
 
     useEffect(() => {
         // eslint-disable-next-line @typescript-eslint/no-unused-expressions, react-hooks/set-state-in-effect
@@ -74,7 +75,7 @@ export function MapLayoutProvider({ children }: { children: React.ReactNode }) {
                 <SlotContext.Provider value={{ overlay, sidebar }}>
                     <FocusContext.Provider value={{ setSidebarHidden }}>
                         <main className="w-full md:flex md:flex-row relative grow" style={{ height: "calc(100vh - 5em)" }}>
-                            <div className={`absolute ${focus ? "top-2/10" : "top-7/10"} ${focus ? "overflow-scroll" : "overflow-hidden!"} md:overflow-scroll! ${sidebarHidden && "top-10/10"} left-5 right-5 
+                            <div ref={setSidebarWrapper} className={`absolute ${focus ? "top-2/10" : "top-7/10"} ${focus ? "overflow-scroll" : "overflow-hidden!"} md:overflow-scroll! ${sidebarHidden && "top-10/10"} left-5 right-5 
        z-100 bg-white rounded-t-2xl shadow-[0_0_10px_#0008] md:shadow-none p-4 flex flex-col
        md:static md:h-full! md:w-120 transition-all ease-in-out duration-1000 md:rounded-none overflow-scroll bottom-0 md:pb-4! pb-200`}>
                                 {path != "/" && <Button onClick={() => router.back()} className='w-10 h-10 overlay-hidden absolute z-2000 flex items-center justify-center mb-2 rounded-full!'><ArrowBackIosW700 className='-mr-[8px]'></ArrowBackIosW700></Button>}

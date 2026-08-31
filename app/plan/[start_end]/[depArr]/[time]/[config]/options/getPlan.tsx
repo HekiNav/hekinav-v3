@@ -78,7 +78,7 @@ export async function getPlan(origin: PlanLabeledLocationInput, destination: Pla
         time: dateTime,
         arriveBy: depArr == "arr"
       }
-    }) : null])
+    }) : {data: null}])
 
 
   if (result?.error || !result?.data) {
@@ -86,13 +86,13 @@ export async function getPlan(origin: PlanLabeledLocationInput, destination: Pla
     return null;
   }
   const data = result.data.planConnection;
-  if (!data || !motisResponse || !motisResponse.data) {
+  if (!data || !motisResponse) {
     console.log("NO DATA");
     return null;
   }
-  return { dt: data, motis: motisResponse.data };
+  return { dt: data, motis: motisResponse.data || null };
 }
 export interface GetPlanResponse {
   dt: NonNullable<PlanQueryQuery["planConnection"]>,
-  motis: PlanResponse
+  motis: PlanResponse | null
 }
