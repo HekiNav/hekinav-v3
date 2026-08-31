@@ -75,7 +75,7 @@ The vinext dev server uses quite a lot of system resources especially when this 
 
 #### Memory specs
 
-- Minimum: 8gb (runs a browser (~1-2Gb) and the dev server (~3Gb))
+- Minimum: 8gb (runs a browser (~1-2Gb) and the dev server (~4Gb))
 - Recommended: 12+ gb (for running VSCode with type-checking)
 
 Some things, like server functions (for example search boxes and geolocation) take a while to initialize in the dev environment after starting or after a server side reload. After theyre initialized, they should be fast, but the first query usually takes 10 seconds.
