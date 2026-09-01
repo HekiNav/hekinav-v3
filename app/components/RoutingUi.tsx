@@ -196,6 +196,12 @@ export default function RoutingUi({ iDateTime = new Date(), iDestination = null,
         const end = { label: destination.text, location: { coordinate: { latitude: destination.properties?.lat, longitude: destination.properties?.lng } } }
         const via: PlanVisitViaLocationInput[] = viaPoints.map(e => ({ label: e?.text, coordinate: { latitude: e?.properties?.lat, longitude: e?.properties?.lng } }))
 
+        const locs = [start.location.coordinate, end.location.coordinate, ...via.map(v => v.coordinate)].map(l => String(l?.latitude) + String(l?.longitude))
+
+        if (new Set(locs).size !== locs.length) {
+            toast.error("One or more locations are not unique. Please only use unique locations")
+            return
+        }
 
 
         const url = `/plan/${JSON.stringify([start, end, ...via])}/${depArr}/${dateTime.getTime()}/${/* this is to minify the json */JSON.stringify(JSON.parse(JSON.stringify(config.routingOptions)))}/options/${isHsl ? "?hsl" : ""}`;
