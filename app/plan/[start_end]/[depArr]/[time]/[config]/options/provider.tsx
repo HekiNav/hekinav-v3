@@ -308,11 +308,9 @@ export function PlanData({ children, via, promise, destination, origin, config, 
             }
         }) || [])
     ].sort((a, b) =>
-        (new Date(depArr == "arr" ? a.end : a.start).getTime()) -
-        (new Date(depArr == "arr" ? b.end : b.start).getTime())
+        (new Date(depArr == "arr" ? b.end : a.start).getTime()) -
+        (new Date(depArr == "arr" ? a.end : b.start).getTime())
     )
-
-    console.log(edges.map(e => new Date(e.start)))
 
     return (
         <PlanContext value={{ data: edges, destination, origin, depArr, dateTime, config, via }}>

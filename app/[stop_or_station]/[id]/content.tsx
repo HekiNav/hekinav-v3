@@ -31,11 +31,6 @@ export default function Content({ data,
 
     const [activePage, setActivePage] = useState<number>(0)
 
-    useEffect(() => {
-        console.log(config.favourites, data.gtfsId)
-
-    })
-
 
     useEffect(() => {
         map?.flyTo({

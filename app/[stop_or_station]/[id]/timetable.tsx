@@ -64,7 +64,6 @@ export function Timetable({ timetable }: { timetable: Promise<StopTimetableQuery
         p.set(c.hours, [...(p.get(c.hours) || []), c])
         return p
     }, new Map<number, StopTime[]>()) || []
-    console.log(stopTimes)
     return (
         <>
             {Array.from(stopTimes.entries()).sort((a, b) => (a[0] <= 4 ? 23 + a[0] : a[0]) - (b[0] <= 4 ? 23 + b[0] : b[0])).map(([k, v],i) => (

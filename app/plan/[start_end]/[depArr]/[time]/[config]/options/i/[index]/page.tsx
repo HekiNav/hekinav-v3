@@ -34,8 +34,6 @@ export default function Content() {
 
     const node = data[selectedRoute]
 
-    console.log(node.legs)
-
     if (!node) return <>
         failed to load
     </>
@@ -59,8 +57,6 @@ export default function Content() {
                         const walkDistance = l?.distance || 0
                         const duration = l?.duration || 0
 
-
-                        console.log(l.pattern?.directionId)
 
 
                         const timeBetweenPrevLeg = ((new Date(l.start.estimated || l.start.scheduled)).getTime() - (new Date(prev?.end.estimated || prev?.end.scheduled)).getTime()) / 1000

@@ -44,12 +44,6 @@ export default function HomeContent() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search])
 
-
-  useEffect(() => {
-    console.log(config)
-  }, [config])
-
-
   return (
     <>
 
@@ -70,7 +64,6 @@ function Favourites({ isHsl, config, setConfig }: { isHsl: boolean; config: Heki
   const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
-    console.log(config)
     startTransition(async () => {
       const result = await getFavourites(config.favourites, isHsl);
       setData(result);
@@ -82,7 +75,6 @@ function Favourites({ isHsl, config, setConfig }: { isHsl: boolean; config: Heki
     <div key={id} className="flex flex-row mb-1 flex-nowrap overflow-x-hidden h-max items-start">
       {content}
       <Icon onClick={() => {
-        console.log(config.favourites.routes.filter(r => r != id), config.favourites.routes)
         if (type == "route") setConfig(config.favourites.routes.filter(r => r != id), ["favourites", "routes"])
         if (type == "stop") setConfig(config.favourites.stops.filter(r => r != id), ["favourites", "stops"])
         if (type == "station") setConfig(config.favourites.stations.filter(r => r != id), ["favourites", "stations"])
