@@ -121,7 +121,7 @@ export interface Pattern {
 export function PlanData({ children, via, promise, destination, origin, config, dateTime, depArr }: PropsWithChildren & { promise: Promise<GetPlanResponse | null>, depArr: "dep" | "arr", dateTime: TZDate, config: RoutingConfig, origin: PlanLabeledLocationInput, via: PlanLabeledLocationInput[], destination: PlanLabeledLocationInput }) {
     const data = use(promise)
 
-
+//
     const { dt, motis } = data || { motis: { itineraries: [] }, dt: { edges: [], routingErrors: [] } }
 
     console.log(dt.edges?.length, motis?.itineraries.length, motis, dt, data)
