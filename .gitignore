@@ -44,5 +44,6 @@ next-env.d.ts
 /dist/
 .vinext/
 .wrangler/
+
 scripts
 icons/spreet

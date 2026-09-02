@@ -92,6 +92,14 @@ The vinext dev server uses quite a lot of system resources especially when this 
 
 Some things, like server functions (for example search boxes and geolocation) take a while to initialize in the dev environment after starting or after a server side reload. After theyre initialized, they should be fast, but the first query usually takes 10 seconds.
 
+### Sprites
+
+Sprites for the maplibre map should be served from a CDN. They can be generated with the svg files in `/icons/` using [spreet](https://github.com/flother/spreet). This generates sprite PNG files and JSON maps. Pre-generated files can be found in the repo root.
+
+### GraphQL
+
+The digitransit API uses graphQL. If you change any of the GraphQL queries in various files, run `npm run codegen` to generate types for the queries.
+
 ### Development
 
 Production is handled with Vite runtime on the local device.
