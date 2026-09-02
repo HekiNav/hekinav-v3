@@ -302,7 +302,7 @@ export function Map({ data, selectedRoute, destination, origin, via }: { data: E
 
         const veh = { id: `${msg.VP.oper}${msg.VP.veh}`, lat: msg.VP.lat, lng: msg.VP.long, name: msg.VP.desi, color: getColor(route?.type || -1, route?.mode || "") }
         const newVPos: VPos[] = [...vPosCache.filter(v => v.id != veh.id), veh]
-        vPos = newVPos.map<GeoJSON.Feature<GeoJSON.Point, { type: "vehicle", text_size: number, color: string } & VPos>>(v => ({ geometry: { type: "Point", coordinates: [v.lng, v.lat] }, properties: { ...v, type: "vehicle", text_size: textSize(Math.max(...v.name.split("\n").map(e => e.length))) * (v.name.split("\n").length ? 0.75 : 1) }, type: "Feature" })).sort((a, b) => Number(a.properties.id) - Number(b.properties.id))
+        vPos = newVPos.map<GeoJSON.Feature<GeoJSON.Point, { type: "vehicle", text_size: number, color: string } & VPos>>(v => ({ geometry: { type: "Point", coordinates: [v.lng, v.lat] }, properties: { ...v, type: "vehicle", text_size: textSize(Math.max(...v.name.split("\n").map(e => e.length))) * ((v.name.split("\n").length - 1) ? 0.75 : 1) }, type: "Feature" })).sort((a, b) => Number(a.properties.id) - Number(b.properties.id))
         // eslint-disable-next-line react-hooks/set-state-in-effect
         setVposCache(newVPos)
       } else {
@@ -314,7 +314,7 @@ export function Map({ data, selectedRoute, destination, origin, via }: { data: E
 
           const veh = { id: `${entity.vehicle.vehicle?.id}${entity.vehicle.trip?.tripId}`, lat: entity.vehicle.position?.latitude || 0, lng: entity.vehicle.position?.longitude || 0, name: (route?.shortName || route?.longName || "").replaceAll(" ","\n"), color: getColor(route?.type || -1, route?.mode || "") }
           const newVPos: VPos[] = [...vPosCache.filter(v => v.id != veh.id), veh]
-          vPos = newVPos.map<GeoJSON.Feature<GeoJSON.Point, { type: "vehicle", text_size: number, color: string } & VPos>>(v => ({ geometry: { type: "Point", coordinates: [v.lng, v.lat] }, properties: { ...v, type: "vehicle", text_size: textSize(Math.max(...v.name.split("\n").map(e => e.length))) * (v.name.split("\n").length ? 0.75 : 1) }, type: "Feature" })).sort((a, b) => Number(a.properties.id) - Number(b.properties.id))
+          vPos = newVPos.map<GeoJSON.Feature<GeoJSON.Point, { type: "vehicle", text_size: number, color: string } & VPos>>(v => ({ geometry: { type: "Point", coordinates: [v.lng, v.lat] }, properties: { ...v, type: "vehicle", text_size: textSize(Math.max(...v.name.split("\n").map(e => e.length))) * ((v.name.split("\n").length - 1) ? 0.75 : 1) }, type: "Feature" })).sort((a, b) => Number(a.properties.id) - Number(b.properties.id))
           setVposCache(newVPos)
         });
       }
